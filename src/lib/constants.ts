@@ -24,10 +24,10 @@ export const STAGE_COLORS: Record<string, string> = {
   lost: 'bg-red-100 text-red-800',
 };
 
-export const SEGMENTS = ['luxury', 'lifestyle', 'upper_upscale', 'midscale'] as const;
+export const SEGMENTS = ['luxury', 'luxury_lifestyle', 'upper_upscale', 'midscale'] as const;
 export const SEGMENT_LABELS: Record<string, string> = {
   luxury: 'Luxury',
-  lifestyle: 'Lifestyle',
+  luxury_lifestyle: 'Luxury Lifestyle',
   upper_upscale: 'Upper Upscale',
   midscale: 'Midscale',
 };

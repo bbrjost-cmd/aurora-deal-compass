@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -26,17 +26,17 @@ export function DealCreateDialog({ open, onOpenChange, onCreated, defaultLat, de
     address: "",
     lat: defaultLat?.toString() || "",
     lon: defaultLon?.toString() || "",
-    segment: "midscale",
-    opening_type: "new_build",
+    segment: "luxury",
+    opening_type: "conversion",
     rooms_min: "",
     rooms_max: "",
   });
 
   // Update lat/lon when defaults change
-  useState(() => {
+  useEffect(() => {
     if (defaultLat !== undefined) setForm(f => ({ ...f, lat: defaultLat.toString() }));
     if (defaultLon !== undefined) setForm(f => ({ ...f, lon: defaultLon.toString() }));
-  });
+  }, [defaultLat, defaultLon]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
