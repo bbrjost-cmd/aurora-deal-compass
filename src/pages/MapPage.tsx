@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import { MapContainer, TileLayer, Marker, Popup, Circle, useMapEvents } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from "react-leaflet";
 import L from "leaflet";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,10 +8,20 @@ import { MEXICO_CENTER } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Card } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import { Plus, Hotel, Plane, MapPin } from "lucide-react";
+import { Hotel, Plane, MapPin } from "lucide-react";
 import { DealCreateDialog } from "@/components/DealCreateDialog";
+import { DealDetailDrawer } from "@/components/DealDetailDrawer";
+
+const DESTINATIONS = [
+  { label: "Mexico Overview", lat: 23.6345, lon: -102.5528, zoom: 5 },
+  { label: "Riviera Maya", lat: 20.6296, lon: -87.0739, zoom: 11 },
+  { label: "Tulum", lat: 20.2114, lon: -87.4654, zoom: 12 },
+  { label: "Los Cabos", lat: 22.89, lon: -109.92, zoom: 11 },
+  { label: "Mexico City", lat: 19.4326, lon: -99.1680, zoom: 12 },
+  { label: "Puerto Vallarta / Nayarit", lat: 20.6976, lon: -105.2970, zoom: 11 },
+  { label: "Cancún", lat: 21.1619, lon: -86.8515, zoom: 11 },
+];
 
 const dealIcon = new L.Icon({
   iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
@@ -40,6 +50,14 @@ function MapClickHandler({ onMapClick }: { onMapClick: (lat: number, lon: number
   return null;
 }
 
+function FlyToHandler({ center, zoom }: { center: [number, number]; zoom: number }) {
+  const map = useMap();
+  useEffect(() => {
+    map.flyTo(center, zoom, { duration: 1.5 });
+  }, [center, zoom, map]);
+  return null;
+}
+
 export default function MapPage() {
   const { orgId } = useAuth();
   const [deals, setDeals] = useState<any[]>([]);
@@ -49,10 +67,11 @@ export default function MapPage() {
   const [showAirports, setShowAirports] = useState(true);
   const [radius, setRadius] = useState(5000);
   const [center, setCenter] = useState<[number, number]>([MEXICO_CENTER.lat, MEXICO_CENTER.lon]);
+  const [zoom, setZoom] = useState(6);
   const [loading, setLoading] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [createLatLon, setCreateLatLon] = useState<{ lat: number; lon: number } | null>(null);
-  const debounceRef = useRef<number>();
+  const [selectedDeal, setSelectedDeal] = useState<any>(null);
 
   useEffect(() => {
     if (!orgId) return;
@@ -73,6 +92,9 @@ export default function MapPage() {
       if (hotelsRes.stale || airportsRes.stale) {
         toast({ title: "Using cached data", description: "Live data unavailable. Showing older results.", variant: "destructive" });
       }
+      if (hotelsRes.fromCache && !hotelsRes.stale) {
+        toast({ title: "Loaded from cache", description: `${hotelsRes.results.length} hotels, ${airportsRes.results.length} airports` });
+      }
     } catch {
       toast({ title: "Overpass error", description: "Could not fetch map data. Try again later.", variant: "destructive" });
     }
@@ -81,6 +103,14 @@ export default function MapPage() {
 
   const handleSearch = () => {
     loadOverpass(center[0], center[1], radius);
+  };
+
+  const handleDestination = (idx: string) => {
+    const dest = DESTINATIONS[parseInt(idx)];
+    if (dest) {
+      setCenter([dest.lat, dest.lon]);
+      setZoom(dest.zoom);
+    }
   };
 
   const handleMapClick = (lat: number, lon: number) => {
@@ -99,8 +129,19 @@ export default function MapPage() {
     <div className="h-full flex flex-col">
       {/* Controls */}
       <div className="p-3 border-b border-border flex flex-wrap items-center gap-3 bg-background shrink-0">
+        <Select onValueChange={handleDestination}>
+          <SelectTrigger className="w-44 h-8 text-xs">
+            <SelectValue placeholder="Go to destination..." />
+          </SelectTrigger>
+          <SelectContent>
+            {DESTINATIONS.map((d, i) => (
+              <SelectItem key={d.label} value={i.toString()}>{d.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
         <Select value={radius.toString()} onValueChange={(v) => setRadius(Number(v))}>
-          <SelectTrigger className="w-28 h-8 text-xs">
+          <SelectTrigger className="w-24 h-8 text-xs">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -111,11 +152,11 @@ export default function MapPage() {
           </SelectContent>
         </Select>
 
-        <div className="flex items-center gap-2 text-xs">
+        <div className="flex items-center gap-1.5 text-xs">
           <Hotel className="h-3.5 w-3.5" />
           <Switch checked={showHotels} onCheckedChange={setShowHotels} />
         </div>
-        <div className="flex items-center gap-2 text-xs">
+        <div className="flex items-center gap-1.5 text-xs">
           <Plane className="h-3.5 w-3.5" />
           <Switch checked={showAirports} onCheckedChange={setShowAirports} />
         </div>
@@ -133,22 +174,25 @@ export default function MapPage() {
       <div className="flex-1 relative">
         <MapContainer
           center={center}
-          zoom={6}
+          zoom={zoom}
           className="h-full w-full"
         >
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="https://openstreetmap.org">OpenStreetMap</a>'
           />
+          <FlyToHandler center={center} zoom={zoom} />
           <MapClickHandler onMapClick={handleMapClick} />
 
           {/* Deal pins */}
           {deals.filter(d => d.lat && d.lon).map((deal) => (
-            <Marker key={deal.id} position={[deal.lat, deal.lon]} icon={dealIcon}>
+            <Marker key={deal.id} position={[deal.lat, deal.lon]} icon={dealIcon}
+              eventHandlers={{ click: () => setSelectedDeal(deal) }}
+            >
               <Popup>
                 <div className="text-sm">
                   <p className="font-semibold">{deal.name}</p>
-                  <p className="text-xs text-muted-foreground">{deal.city}, {deal.state}</p>
+                  <p className="text-xs text-gray-500">{deal.city}, {deal.state}</p>
                   <p className="text-xs">Stage: {deal.stage} • Score: {deal.score_total}</p>
                 </div>
               </Popup>
@@ -188,6 +232,14 @@ export default function MapPage() {
         onCreated={handleDealCreated}
         defaultLat={createLatLon?.lat}
         defaultLon={createLatLon?.lon}
+      />
+
+      <DealDetailDrawer
+        deal={selectedDeal}
+        onClose={() => setSelectedDeal(null)}
+        onUpdate={() => {
+          if (orgId) supabase.from("deals").select("*").eq("org_id", orgId).then(({ data }) => setDeals(data || []));
+        }}
       />
     </div>
   );

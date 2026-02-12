@@ -2,19 +2,21 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { STAGE_LABELS, SEGMENT_LABELS, OPENING_TYPE_LABELS } from "@/lib/constants";
 import { formatMXN } from "@/lib/feasibility";
+import { BRAND_STRATEGY_NOTES } from "@/lib/accor-brands";
 
 declare module "jspdf" {
   interface jsPDF {
     autoTable: (options: any) => jsPDF;
+    lastAutoTable: { finalY: number };
   }
 }
 
-export function generateDealPDF(deal: any, tasks: any[]) {
+export function generateDealPDF(deal: any, tasks: any[], feasibilityOutputs?: any, brands?: string[]) {
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
 
-  // Header
+  // Header bar
   doc.setFillColor(17, 17, 17);
-  doc.rect(0, 0, 210, 28, "F");
+  doc.rect(0, 0, 210, 30, "F");
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(16);
   doc.setFont("helvetica", "bold");
@@ -22,29 +24,41 @@ export function generateDealPDF(deal: any, tasks: any[]) {
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
   doc.text(new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }), 14, 22);
+  // Gold accent line
+  doc.setFillColor(201, 162, 39);
+  doc.rect(0, 30, 210, 1.5, "F");
+
+  let currentY = 40;
 
   // Deal name + stage
   doc.setTextColor(17, 17, 17);
-  doc.setFontSize(14);
+  doc.setFontSize(16);
   doc.setFont("helvetica", "bold");
-  doc.text(deal.name, 14, 40);
+  doc.text(deal.name || "Untitled Deal", 14, currentY);
+  currentY += 7;
 
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(100, 100, 100);
-  doc.text(`${deal.city || ""}, ${deal.state || ""} • Stage: ${STAGE_LABELS[deal.stage] || deal.stage} • Score: ${deal.score_total || 0}/100`, 14, 47);
+  const subtitle = [
+    deal.city, deal.state,
+    `Stage: ${STAGE_LABELS[deal.stage] || deal.stage}`,
+    `Score: ${deal.score_total || 0}/100`,
+  ].filter(Boolean).join(" • ");
+  doc.text(subtitle, 14, currentY);
+  currentY += 8;
 
   // Key details table
   const details = [
     ["Segment", SEGMENT_LABELS[deal.segment] || deal.segment || "-"],
     ["Opening Type", OPENING_TYPE_LABELS[deal.opening_type] || deal.opening_type || "-"],
-    ["Rooms", `${deal.rooms_min || "?"} - ${deal.rooms_max || "?"}`],
-    ["Coordinates", deal.lat && deal.lon ? `${deal.lat.toFixed(4)}, ${deal.lon.toFixed(4)}` : "-"],
+    ["Rooms", `${deal.rooms_min || "?"} – ${deal.rooms_max || "?"}`],
+    ["Coordinates", deal.lat && deal.lon ? `${Number(deal.lat).toFixed(4)}, ${Number(deal.lon).toFixed(4)}` : "-"],
     ["Address", deal.address || "-"],
   ];
 
   doc.autoTable({
-    startY: 52,
+    startY: currentY,
     head: [["Field", "Value"]],
     body: details,
     theme: "plain",
@@ -52,18 +66,79 @@ export function generateDealPDF(deal: any, tasks: any[]) {
     headStyles: { fillColor: [245, 245, 245], textColor: [50, 50, 50], fontStyle: "bold" },
     margin: { left: 14, right: 14 },
   });
+  currentY = doc.lastAutoTable.finalY + 6;
 
-  // Tasks
-  const pendingTasks = tasks.filter(t => t.status !== "done").slice(0, 3);
-  if (pendingTasks.length > 0) {
-    const lastY = (doc as any).lastAutoTable?.finalY || 90;
-    doc.setFontSize(10);
+  // Accor Brand Recommendations
+  if (brands && brands.length > 0) {
+    doc.setFontSize(11);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(17, 17, 17);
-    doc.text("Next Steps", 14, lastY + 10);
+    doc.text("Accor Brand Recommendations", 14, currentY);
+    currentY += 5;
+
+    const brandRows = brands.map(b => [
+      b,
+      BRAND_STRATEGY_NOTES[b] || "-",
+    ]);
 
     doc.autoTable({
-      startY: lastY + 14,
+      startY: currentY,
+      head: [["Brand", "Strategy"]],
+      body: brandRows,
+      theme: "plain",
+      styles: { fontSize: 8, cellPadding: 2 },
+      headStyles: { fillColor: [245, 245, 245], textColor: [50, 50, 50], fontStyle: "bold" },
+      margin: { left: 14, right: 14 },
+    });
+    currentY = doc.lastAutoTable.finalY + 6;
+  }
+
+  // Feasibility summary
+  if (feasibilityOutputs?.years?.length > 0) {
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(17, 17, 17);
+    doc.text("5-Year Financial Projection", 14, currentY);
+    currentY += 5;
+
+    const feasRows = feasibilityOutputs.years.map((y: any) => [
+      `Y${y.year}`,
+      `${(y.occupancy * 100).toFixed(0)}%`,
+      formatMXN(y.totalRevenue),
+      formatMXN(y.gop),
+      formatMXN(y.noi),
+    ]);
+
+    doc.autoTable({
+      startY: currentY,
+      head: [["Year", "Occ%", "Revenue", "GOP", "NOI"]],
+      body: feasRows,
+      theme: "plain",
+      styles: { fontSize: 7.5, cellPadding: 1.5 },
+      headStyles: { fillColor: [245, 245, 245], textColor: [50, 50, 50], fontStyle: "bold" },
+      margin: { left: 14, right: 14 },
+    });
+    currentY = doc.lastAutoTable.finalY + 4;
+
+    // CAPEX + Payback
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(80, 80, 80);
+    doc.text(`Total CAPEX: ${formatMXN(feasibilityOutputs.totalCapex)}  |  Simple Payback: ${feasibilityOutputs.simplePayback} years`, 14, currentY);
+    currentY += 8;
+  }
+
+  // Tasks / Next Steps
+  const pendingTasks = tasks.filter(t => t.status !== "done").slice(0, 4);
+  if (pendingTasks.length > 0) {
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(17, 17, 17);
+    doc.text("Next Steps", 14, currentY);
+    currentY += 5;
+
+    doc.autoTable({
+      startY: currentY,
       head: [["Task", "Due Date"]],
       body: pendingTasks.map(t => [t.title, t.due_date || "-"]),
       theme: "plain",
@@ -76,7 +151,8 @@ export function generateDealPDF(deal: any, tasks: any[]) {
   // Footer
   doc.setFontSize(7);
   doc.setTextColor(150, 150, 150);
-  doc.text("Generated by AURORA DevOS MX • Confidential", 14, 287);
+  doc.text("Generated by AURORA DevOS MX • Confidential • Accor Development", 14, 287);
 
-  doc.save(`${deal.name.replace(/\s+/g, "_")}_Memo.pdf`);
+  const safeName = (deal.name || "Deal").replace(/[^a-zA-Z0-9]/g, "_");
+  doc.save(`${safeName}_Memo.pdf`);
 }

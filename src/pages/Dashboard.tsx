@@ -5,8 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { STAGE_LABELS, STAGE_COLORS } from "@/lib/constants";
-import { Plus, TrendingUp, Target, Clock, BarChart3 } from "lucide-react";
+import { Plus, TrendingUp, Target, Clock, BarChart3, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { LUXURY_PROSPECTS } from "@/lib/accor-brands";
+import { toast } from "@/hooks/use-toast";
 
 export default function Dashboard() {
   const { orgId } = useAuth();
@@ -14,8 +16,9 @@ export default function Dashboard() {
   const [deals, setDeals] = useState<any[]>([]);
   const [tasks, setTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [seeding, setSeeding] = useState(false);
 
-  useEffect(() => {
+  const loadData = () => {
     if (!orgId) return;
     Promise.all([
       supabase.from("deals").select("*").eq("org_id", orgId).order("updated_at", { ascending: false }),
@@ -25,7 +28,53 @@ export default function Dashboard() {
       setTasks(tasksRes.data || []);
       setLoading(false);
     });
-  }, [orgId]);
+  };
+
+  useEffect(loadData, [orgId]);
+
+  const seedProspects = async () => {
+    if (!orgId) return;
+    setSeeding(true);
+    try {
+      const inserts = LUXURY_PROSPECTS.map(p => ({
+        org_id: orgId,
+        name: p.name,
+        city: p.city,
+        state: p.state,
+        lat: p.lat,
+        lon: p.lon,
+        segment: p.segment,
+        opening_type: p.opening_type,
+        rooms_min: p.rooms_min,
+        rooms_max: p.rooms_max,
+        stage: "lead" as const,
+      }));
+      const { error } = await supabase.from("deals").insert(inserts);
+      if (error) throw error;
+
+      // Add notes for each prospect
+      const { data: newDeals } = await supabase.from("deals").select("id, name").eq("org_id", orgId).order("created_at", { ascending: false }).limit(10);
+      if (newDeals) {
+        const noteInserts = newDeals.map(d => {
+          const prospect = LUXURY_PROSPECTS.find(p => p.name === d.name);
+          return prospect ? {
+            org_id: orgId,
+            deal_id: d.id,
+            content: `${prospect.notes}\n\nOwner: ${prospect.owner}\nDestination: ${prospect.destination}\nRecommended brands: ${prospect.brands.join(", ")}`,
+          } : null;
+        }).filter(Boolean);
+        if (noteInserts.length > 0) {
+          await supabase.from("deal_notes").insert(noteInserts as any);
+        }
+      }
+
+      toast({ title: "10 luxury prospects seeded", description: "Riviera Maya, Tulum, Los Cabos, CDMX, Nayarit" });
+      loadData();
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    }
+    setSeeding(false);
+  };
 
   const totalDeals = deals.length;
   const dealsByStage = deals.reduce((acc, d) => {
@@ -56,11 +105,19 @@ export default function Dashboard() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-          <p className="text-sm text-muted-foreground">Hotel development pipeline overview</p>
+          <p className="text-sm text-muted-foreground">Accor Luxury & Lifestyle — Mexico Pipeline</p>
         </div>
-        <Button onClick={() => navigate("/pipeline")} className="gap-2">
-          <Plus className="h-4 w-4" /> Quick Add Deal
-        </Button>
+        <div className="flex gap-2">
+          {totalDeals === 0 && (
+            <Button variant="outline" onClick={seedProspects} disabled={seeding} className="gap-2">
+              <Sparkles className="h-4 w-4" />
+              {seeding ? "Seeding..." : "Load Luxury Prospects"}
+            </Button>
+          )}
+          <Button onClick={() => navigate("/pipeline")} className="gap-2">
+            <Plus className="h-4 w-4" /> Quick Add Deal
+          </Button>
+        </div>
       </div>
 
       {/* KPIs */}
@@ -93,7 +150,7 @@ export default function Dashboard() {
               </Badge>
             ))}
             {totalDeals === 0 && (
-              <p className="text-sm text-muted-foreground">No deals yet. Add your first deal to get started.</p>
+              <p className="text-sm text-muted-foreground">No deals yet. Click "Load Luxury Prospects" to seed 10 high-priority targets.</p>
             )}
           </div>
         </CardContent>
