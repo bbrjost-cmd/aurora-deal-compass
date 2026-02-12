@@ -1,15 +1,8 @@
 import jsPDF from "jspdf";
-import "jspdf-autotable";
+import autoTable from "jspdf-autotable";
 import { STAGE_LABELS, SEGMENT_LABELS, OPENING_TYPE_LABELS } from "@/lib/constants";
 import { formatMXN } from "@/lib/feasibility";
 import { BRAND_STRATEGY_NOTES } from "@/lib/accor-brands";
-
-declare module "jspdf" {
-  interface jsPDF {
-    autoTable: (options: any) => jsPDF;
-    lastAutoTable: { finalY: number };
-  }
-}
 
 export function generateDealPDF(deal: any, tasks: any[], feasibilityOutputs?: any, brands?: string[]) {
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
@@ -57,7 +50,7 @@ export function generateDealPDF(deal: any, tasks: any[], feasibilityOutputs?: an
     ["Address", deal.address || "-"],
   ];
 
-  doc.autoTable({
+  autoTable(doc, {
     startY: currentY,
     head: [["Field", "Value"]],
     body: details,
@@ -66,7 +59,7 @@ export function generateDealPDF(deal: any, tasks: any[], feasibilityOutputs?: an
     headStyles: { fillColor: [245, 245, 245], textColor: [50, 50, 50], fontStyle: "bold" },
     margin: { left: 14, right: 14 },
   });
-  currentY = doc.lastAutoTable.finalY + 6;
+  currentY = (doc as any).lastAutoTable.finalY + 6;
 
   // Accor Brand Recommendations
   if (brands && brands.length > 0) {
@@ -81,7 +74,7 @@ export function generateDealPDF(deal: any, tasks: any[], feasibilityOutputs?: an
       BRAND_STRATEGY_NOTES[b] || "-",
     ]);
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: currentY,
       head: [["Brand", "Strategy"]],
       body: brandRows,
@@ -90,7 +83,7 @@ export function generateDealPDF(deal: any, tasks: any[], feasibilityOutputs?: an
       headStyles: { fillColor: [245, 245, 245], textColor: [50, 50, 50], fontStyle: "bold" },
       margin: { left: 14, right: 14 },
     });
-    currentY = doc.lastAutoTable.finalY + 6;
+    currentY = (doc as any).lastAutoTable.finalY + 6;
   }
 
   // Feasibility summary
@@ -109,7 +102,7 @@ export function generateDealPDF(deal: any, tasks: any[], feasibilityOutputs?: an
       formatMXN(y.noi),
     ]);
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: currentY,
       head: [["Year", "Occ%", "Revenue", "GOP", "NOI"]],
       body: feasRows,
@@ -118,7 +111,7 @@ export function generateDealPDF(deal: any, tasks: any[], feasibilityOutputs?: an
       headStyles: { fillColor: [245, 245, 245], textColor: [50, 50, 50], fontStyle: "bold" },
       margin: { left: 14, right: 14 },
     });
-    currentY = doc.lastAutoTable.finalY + 4;
+    currentY = (doc as any).lastAutoTable.finalY + 4;
 
     // CAPEX + Payback
     doc.setFontSize(8);
@@ -137,7 +130,7 @@ export function generateDealPDF(deal: any, tasks: any[], feasibilityOutputs?: an
     doc.text("Next Steps", 14, currentY);
     currentY += 5;
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: currentY,
       head: [["Task", "Due Date"]],
       body: pendingTasks.map(t => [t.title, t.due_date || "-"]),

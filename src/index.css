@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@import "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -112,7 +110,7 @@
 
 /* Leaflet overrides */
 .leaflet-container {
-  width: 100%;
-  height: 100%;
+  width: 100% !important;
+  height: 100% !important;
   z-index: 0;
 }

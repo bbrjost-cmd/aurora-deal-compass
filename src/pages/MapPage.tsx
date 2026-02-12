@@ -58,6 +58,28 @@ function FlyToHandler({ center, zoom }: { center: [number, number]; zoom: number
   return null;
 }
 
+function InvalidateSizeHandler() {
+  const map = useMap();
+  useEffect(() => {
+    // Leaflet needs invalidateSize after the container is fully rendered
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+    }, 100);
+    const resizeObserver = new ResizeObserver(() => {
+      map.invalidateSize();
+    });
+    const container = map.getContainer();
+    if (container.parentElement) {
+      resizeObserver.observe(container.parentElement);
+    }
+    return () => {
+      clearTimeout(timer);
+      resizeObserver.disconnect();
+    };
+  }, [map]);
+  return null;
+}
+
 export default function MapPage() {
   const { orgId } = useAuth();
   const [deals, setDeals] = useState<any[]>([]);
@@ -126,7 +148,7 @@ export default function MapPage() {
   };
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="flex flex-col" style={{ height: "calc(100vh - 3.5rem)" }}>
       {/* Controls */}
       <div className="p-3 border-b border-border flex flex-wrap items-center gap-3 bg-background shrink-0">
         <Select onValueChange={handleDestination}>
@@ -171,17 +193,19 @@ export default function MapPage() {
       </div>
 
       {/* Map */}
-      <div className="flex-1 relative">
+      <div className="flex-1 relative" style={{ minHeight: 0 }}>
+        <div className="absolute inset-0">
         <MapContainer
           center={center}
           zoom={zoom}
-          className="h-full w-full"
+          style={{ height: "100%", width: "100%" }}
         >
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="https://openstreetmap.org">OpenStreetMap</a>'
           />
           <FlyToHandler center={center} zoom={zoom} />
+          <InvalidateSizeHandler />
           <MapClickHandler onMapClick={handleMapClick} />
 
           {/* Deal pins */}
@@ -224,6 +248,7 @@ export default function MapPage() {
             </Marker>
           ))}
         </MapContainer>
+        </div>
       </div>
 
       <DealCreateDialog
