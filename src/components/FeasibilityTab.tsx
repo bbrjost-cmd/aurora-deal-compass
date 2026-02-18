@@ -172,20 +172,39 @@ export function FeasibilityTab({ dealId, deal, onInputsChange }: Props) {
 
         {/* ── INPUTS TAB ── */}
         <TabsContent value="inputs" className="space-y-3 mt-3">
-          {/* Preset selector */}
-          <div className="flex items-center gap-2">
-            <Layers className="h-4 w-4 text-muted-foreground shrink-0" />
-            <Select value={inputs.segment} onValueChange={(v) => { updateInput("segment", v); applyPreset(v); }}>
-              <SelectTrigger className="h-8 text-xs flex-1">
-                <SelectValue placeholder="Segment preset..." />
-              </SelectTrigger>
-              <SelectContent>
-                {SEGMENTS.map(s => <SelectItem key={s} value={s}>{SEGMENT_LABELS[s]} — preset</SelectItem>)}
-              </SelectContent>
-            </Select>
-            <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setShowUSD(!showUSD)}>
-              {showUSD ? "USD" : "MXN"}
-            </Button>
+          {/* Segment + Brand + Contract */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Layers className="h-4 w-4 text-muted-foreground shrink-0" />
+              <Select value={inputs.segment} onValueChange={(v) => { updateInput("segment", v); applyPreset(v); }}>
+                <SelectTrigger className="h-8 text-xs flex-1">
+                  <SelectValue placeholder="Segment..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {SEGMENTS.map(s => <SelectItem key={s} value={s}>{SEGMENT_LABELS[s]}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              <Button variant="outline" size="sm" className="h-8 text-xs shrink-0" onClick={() => setShowUSD(!showUSD)}>
+                {showUSD ? "USD" : "MXN"}
+              </Button>
+            </div>
+            {/* Contract type toggle */}
+            <div className="grid grid-cols-2 gap-1.5">
+              {(['franchise', 'management'] as const).map(ct => (
+                <button
+                  key={ct}
+                  onClick={() => updateInput("contractType" as any, ct)}
+                  className={cn(
+                    "h-7 text-[11px] rounded border font-medium transition-colors",
+                    (inputs as any).contractType === ct
+                      ? "bg-foreground text-background border-foreground"
+                      : "bg-background text-muted-foreground border-border hover:border-foreground/50"
+                  )}
+                >
+                  {ct === 'franchise' ? 'Franchise (default)' : 'Management'}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Warnings */}
@@ -200,25 +219,29 @@ export function FeasibilityTab({ dealId, deal, onInputsChange }: Props) {
             {[
               { label: "Rooms", key: "rooms", type: "int" },
               { label: "ADR (MXN)", key: "adr", type: "int" },
-              { label: "Occupancy (0-1)", key: "occupancy", type: "float2" },
-              { label: "GOP Margin (0-1)", key: "gopMargin", type: "float2" },
+              { label: "Occupancy (0–1)", key: "occupancy", type: "float2" },
+              { label: "GOP Margin (0–1)", key: "gopMargin", type: "float2" },
               { label: "F&B Rev %", key: "fnbRevenuePct", type: "float2" },
               { label: "Other Rev %", key: "otherRevenuePct", type: "float2" },
               { label: "CAPEX/Key (MXN)", key: "capexPerKey", type: "int" },
               { label: "FF&E/Key (MXN)", key: "ffePerKey", type: "int" },
-              { label: "Base Fee %", key: "baseFee", type: "float2" },
-              { label: "Incentive Fee %", key: "incentiveFee", type: "float2" },
+              ...((inputs as any).contractType === 'franchise' ? [
+                { label: "Royalty %", key: "royaltyPct", type: "float2" },
+                { label: "Marketing %", key: "marketingPct", type: "float2" },
+                { label: "Distribution %", key: "distributionPct", type: "float2" },
+              ] : [
+                { label: "Base Fee %", key: "baseFee", type: "float2" },
+                { label: "Incentive Fee %", key: "incentiveFee", type: "float2" },
+              ]),
               { label: "Ramp-up Years", key: "rampUpYears", type: "int" },
               { label: "FX Rate MXN/USD", key: "fxRate", type: "float1" },
-              { label: "Key Money (MXN)", key: "keyMoney", type: "int" },
-              { label: "Cap Rate", key: "capRate", type: "float2" },
             ].map(f => (
               <div key={f.key}>
                 <label className="text-[10px] text-muted-foreground">{f.label}</label>
                 <Input
                   type="number"
                   step={f.type === "float2" ? "0.01" : f.type === "float1" ? "0.1" : "1"}
-                  value={(inputs as any)[f.key]}
+                  value={(inputs as any)[f.key] ?? 0}
                   onChange={(e) => {
                     const v = f.type === "int" ? parseInt(e.target.value) || 0 : parseFloat(e.target.value) || 0;
                     updateInput(f.key as keyof FeasibilityInputs, v);

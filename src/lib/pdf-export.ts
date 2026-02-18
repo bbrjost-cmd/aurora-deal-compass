@@ -2,7 +2,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { STAGE_LABELS, SEGMENT_LABELS, OPENING_TYPE_LABELS } from "@/lib/constants";
 import { formatMXN, formatUSD, type FeasibilityInputs, type FeasibilityOutputs } from "@/lib/feasibility";
-import { BRAND_STRATEGY_NOTES, LUXURY_PITCH_POINTS } from "@/lib/accor-brands";
+import { BRAND_STRATEGY_NOTES, DEVELOPMENT_PITCH_POINTS } from "@/lib/accor-brands";
 
 // ─── Palette ────────────────────────────────────────────────────────────────
 const C = {
@@ -251,7 +251,7 @@ export function generateFeasibilityPDF(
     setFont(doc, 7.5, "bold", C.grey700);
     doc.text("Key Value Propositions for Owner Conversation:", 14, y);
     y += 6;
-    LUXURY_PITCH_POINTS.forEach((pt, i) => {
+    DEVELOPMENT_PITCH_POINTS.forEach((pt, i) => {
       setFont(doc, 7.5, "normal", C.black);
       doc.text(`${i + 1}.  ${pt}`, 18, y);
       y += 5;

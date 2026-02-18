@@ -154,10 +154,11 @@ export function ICDecisionPanel({ deal, feasInputs, contactCount = 0, onSave }: 
         </CardHeader>
         <CardContent className="space-y-2.5">
           {[
-            { label: "Brand Economics", score: decision.brandScore, max: 35 },
-            { label: "Owner Economics", score: decision.ownerScore, max: 25 },
-            { label: "Location / Market", score: decision.locationScore, max: 20 },
-            { label: "Execution Risk", score: decision.executionScore, max: 20 },
+            { label: "Location / Market", score: decision.locationScore, max: 25 },
+            { label: "Demand Strength", score: decision.demandScore, max: 25 },
+            { label: "Conversion Ease", score: decision.conversionScore, max: 20 },
+            { label: "Owner / Asset Quality", score: decision.ownerScore, max: 15 },
+            { label: "Execution Risk", score: decision.executionScore, max: 15 },
           ].map((s, i) => (
             <div key={s.label}>
               <div className="flex justify-between text-xs mb-1">

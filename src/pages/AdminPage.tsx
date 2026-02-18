@@ -8,20 +8,17 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
 import { Upload, FileJson, Database, Building2, Plus, Trash2, Users, Search, X } from "lucide-react";
-import { LUXURY_PROSPECTS } from "@/lib/accor-brands";
+import { DESTINATION_BRANDS } from "@/lib/accor-brands";
 
-// Demo owner library seeded from accor-brands prospects
-const DEMO_OWNERS = LUXURY_PROSPECTS.map((p, i) => ({
-  id: `demo-${i}`,
-  company: p.owner,
-  knownAssets: [p.name],
-  city: p.city,
-  state: p.state,
-  segment: p.segment,
-  notes: p.notes,
-  destination: p.destination,
-  brands: p.brands,
-}));
+// Demo owner library for PMS&E development pipeline
+const DEMO_OWNERS: OwnerEntity[] = [
+  { id: 'demo-0', company: 'Grupo Husa / Camino Real', knownAssets: ['Camino Real Polanco', 'Camino Real Aeropuerto'], city: 'Ciudad de México', state: 'Ciudad de México', segment: 'premium', notes: 'Strong conversion candidate — Pullman/Swissôtel repositioning. Existing management infrastructure.', destination: 'Mexico City' },
+  { id: 'demo-1', company: 'Hoteles Misión', knownAssets: ['Misión Monterrey', 'Misión Guadalajara'], city: 'Monterrey', state: 'Nuevo León', segment: 'midscale', notes: 'National chain, 40+ hotels. ibis/Mercure franchise conversion priority. High-volume target.', destination: 'Monterrey' },
+  { id: 'demo-2', company: 'City Express (MARRIOTT-acquired)', knownAssets: ['City Express Plus CDMX', 'City Express Cancún'], city: 'Ciudad de México', state: 'Ciudad de México', segment: 'economy', notes: 'Post-acquisition rebranding opportunity. ibis Styles or greet conversion feasible.', destination: 'Mexico City' },
+  { id: 'demo-3', company: 'Grupo Posadas (One2One)', knownAssets: ['One2One Guadalajara', 'One2One León'], city: 'Guadalajara', state: 'Jalisco', segment: 'midscale', notes: 'Economy/midscale brand in transition. Novotel or Mercure franchise takeover viable.', destination: 'Guadalajara' },
+  { id: 'demo-4', company: 'Inversiones Hoteleras del Bajío', knownAssets: ['Hotel Galería Querétaro'], city: 'Querétaro', state: 'Querétaro', segment: 'midscale', notes: 'Independent hotel, Mercure conversion candidate. Business demand corridor.', destination: 'Querétaro' },
+  { id: 'demo-5', company: 'Real Turismo (Fiesta Inn)', knownAssets: ['Fiesta Inn Monterrey', 'Fiesta Inn Puebla'], city: 'Monterrey', state: 'Nuevo León', segment: 'midscale', notes: 'Business midscale segment. Novotel or Mercure rebranding opportunity.', destination: 'Monterrey' },
+];
 
 interface OwnerEntity {
   id: string;

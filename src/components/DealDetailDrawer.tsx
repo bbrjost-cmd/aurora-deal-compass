@@ -16,7 +16,7 @@ import { LOITab } from "@/components/LOITab";
 import { generateICMemo } from "@/lib/pdf-export";
 import { computeFeasibility, DEFAULT_INPUTS, type FeasibilityInputs } from "@/lib/feasibility";
 import { computeCompleteness } from "@/lib/ic-engine";
-import { recommendBrands, LUXURY_PITCH_POINTS, type BrandRecommendation } from "@/lib/accor-brands";
+import { recommendBrands, DEVELOPMENT_PITCH_POINTS, type BrandRecommendation } from "@/lib/accor-brands";
 import { FileDown, Star, CheckSquare, Gauge, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -247,7 +247,7 @@ export function DealDetailDrawer({ deal, onClose, onUpdate, initialTab }: Props)
                   </div>
                   <div className="pt-2 border-t border-border">
                     <h4 className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">Key Pitch Points</h4>
-                    {LUXURY_PITCH_POINTS.map(p => (
+                    {DEVELOPMENT_PITCH_POINTS.map(p => (
                       <div key={p} className="flex items-center gap-2 text-xs py-0.5">
                         <span className="text-aurora-gold font-bold shrink-0">✓</span><span>{p}</span>
                       </div>

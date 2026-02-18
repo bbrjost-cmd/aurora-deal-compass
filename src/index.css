@@ -34,13 +34,13 @@
     --input: 0 0% 90%;
     --ring: 0 0% 8%;
 
-    /* Radius — Apple-style gentle curves */
-    --radius: 0.75rem;
+    /* Radius — clean corporate curves */
+    --radius: 0.5rem;
 
-    /* ── Accor brand accent ── */
-    --aurora-red: 1 82% 44%;
+    /* ── Accor brand accent (Red only, no gold) ── */
+    --aurora-red: 1 82% 40%;
     --aurora-red-foreground: 0 0% 100%;
-    --aurora-gold: 38 65% 42%;
+    --aurora-gold: 0 0% 30%;
     --aurora-gold-foreground: 0 0% 100%;
 
     /* ── IC Decision tokens ── */
@@ -113,7 +113,7 @@
     --ring: 0 0% 80%;
 
     --aurora-red: 0 75% 58%;
-    --aurora-gold: 38 65% 52%;
+    --aurora-gold: 0 0% 60%;
 
     --ic-go: 150 55% 45%;
     --ic-go-muted: 150 35% 12%;
@@ -153,9 +153,10 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   }
 }
 

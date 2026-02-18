@@ -357,10 +357,11 @@ function ICDetailPanel({ decision }: { decision: any }) {
   const redFlags = Array.isArray(decision.red_flags_json) ? decision.red_flags_json as string[] : [];
 
   const scoreSegments = [
-    { label: "Brand Econ.", value: Math.round((decision.ic_score || 0) * 0.35), max: 35, color: "bg-primary" },
-    { label: "Owner Econ.", value: Math.round((decision.ic_score || 0) * 0.25), max: 25, color: "bg-chart-2" },
-    { label: "Location", value: Math.round((decision.ic_score || 0) * 0.20), max: 20, color: "bg-chart-3" },
-    { label: "Execution", value: Math.round((decision.ic_score || 0) * 0.20), max: 20, color: "bg-chart-4" },
+    { label: "Location / Market", value: Math.round((decision.ic_score || 0) * 0.25), max: 25, color: "bg-primary" },
+    { label: "Demand Strength", value: Math.round((decision.ic_score || 0) * 0.25), max: 25, color: "bg-chart-2" },
+    { label: "Conversion Ease", value: Math.round((decision.ic_score || 0) * 0.20), max: 20, color: "bg-chart-3" },
+    { label: "Owner / Asset", value: Math.round((decision.ic_score || 0) * 0.15), max: 15, color: "bg-chart-4" },
+    { label: "Execution Risk", value: Math.round((decision.ic_score || 0) * 0.15), max: 15, color: "bg-muted-foreground" },
   ];
 
   const handleExport = async () => {

@@ -24,21 +24,49 @@ export const STAGE_COLORS: Record<string, string> = {
   lost: 'bg-red-100 text-red-800',
 };
 
-export const SEGMENTS = ['luxury', 'luxury_lifestyle', 'upper_upscale', 'midscale'] as const;
+// ─── Segments (Economy / Midscale / Premium only) ────────────────────────────
+export const SEGMENTS = ['economy', 'midscale', 'premium'] as const;
+
 export const SEGMENT_LABELS: Record<string, string> = {
-  luxury: 'Luxury',
-  luxury_lifestyle: 'Luxury Lifestyle',
-  upper_upscale: 'Upper Upscale',
+  economy: 'Economy',
   midscale: 'Midscale',
+  premium: 'Premium',
 };
 
-export const OPENING_TYPES = ['new_build', 'conversion', 'franchise'] as const;
+// ─── Brands by segment ───────────────────────────────────────────────────────
+export const BRANDS_BY_SEGMENT: Record<string, string[]> = {
+  economy: ['ibis', 'ibis Styles', 'ibis Budget', 'greet'],
+  midscale: ['Mercure', 'Novotel', 'Adagio'],
+  premium: ['Pullman', 'Swissôtel', 'Mövenpick'],
+};
+
+export const ALL_BRANDS = [
+  'ibis', 'ibis Styles', 'ibis Budget', 'greet',
+  'Mercure', 'Novotel', 'Adagio',
+  'Pullman', 'Swissôtel', 'Mövenpick',
+] as const;
+
+export type AccorBrand = typeof ALL_BRANDS[number];
+
+// ─── Opening Types (Conversion as default/primary) ───────────────────────────
+export const OPENING_TYPES = ['conversion', 'new_build', 'franchise_takeover', 'rebranding'] as const;
+
 export const OPENING_TYPE_LABELS: Record<string, string> = {
-  new_build: 'New Build',
   conversion: 'Conversion',
-  franchise: 'Franchise',
+  new_build: 'New Build',
+  franchise_takeover: 'Franchise Takeover',
+  rebranding: 'Rebranding Opportunity',
 };
 
+// ─── Contract Types ───────────────────────────────────────────────────────────
+export const CONTRACT_TYPES = ['franchise', 'management'] as const;
+
+export const CONTRACT_TYPE_LABELS: Record<string, string> = {
+  franchise: 'Franchise (Default)',
+  management: 'Management',
+};
+
+// ─── Geography ───────────────────────────────────────────────────────────────
 export const MEXICO_CENTER = { lat: 23.6345, lon: -102.5528 };
 export const CDMX_CENTER = { lat: 19.4326, lon: -99.1332 };
 export const CANCUN_CENTER = { lat: 21.1619, lon: -86.8515 };
