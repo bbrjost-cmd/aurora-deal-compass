@@ -1,7 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { STAGE_LABELS, STAGE_COLORS } from "@/lib/constants";
@@ -12,10 +11,10 @@ import { cn } from "@/lib/utils";
 
 const STAGE_ORDER = ['lead', 'qualified', 'underwriting', 'loi', 'negotiation', 'signed'];
 
-const IC_DECISION_STYLES: Record<string, { label: string; color: string; icon: any }> = {
-  go: { label: "GO", color: "text-ic-go", icon: CheckCircle2 },
-  go_with_conditions: { label: "CONDITIONS", color: "text-ic-conditions", icon: AlertTriangle },
-  no_go: { label: "NO-GO", color: "text-ic-nogo", icon: XCircle },
+const IC_DECISION_STYLES: Record<string, { label: string; color: string; bg: string; icon: any }> = {
+  go: { label: "GO", color: "text-ic-go", bg: "bg-ic-go-muted", icon: CheckCircle2 },
+  go_with_conditions: { label: "Conditions", color: "text-ic-conditions", bg: "bg-ic-conditions-muted", icon: AlertTriangle },
+  no_go: { label: "NO-GO", color: "text-ic-nogo", bg: "bg-ic-nogo-muted", icon: XCircle },
 };
 
 export default function Dashboard() {
@@ -52,7 +51,7 @@ export default function Dashboard() {
       if (data?.message) {
         toast({ title: "Pipeline déjà chargé", description: `${data.count} deals existants.` });
       } else {
-        toast({ title: `✅ ${data.inserted} deals Mexico créés`, description: "Pipeline de test complet avec tâches et benchmarks" });
+        toast({ title: `${data.inserted} deals créés`, description: "Pipeline Mexico complet." });
         loadData();
       }
     } catch (err: any) {
@@ -91,246 +90,221 @@ export default function Dashboard() {
     [deals]
   );
 
-  const kpis = [
-    { label: "Total Deals", value: totalDeals, icon: Target, sub: `${recentDeals.length} this week` },
-    { label: "Avg IC Score", value: avgScore, icon: BarChart3, sub: "Qualification" },
-    { label: "Tasks", value: tasks.length, icon: Clock, sub: "Pending" },
-    { label: "IC Decisions", value: decisions.length, icon: TrendingUp, sub: `${icSummary.go} GO` },
-  ];
-
   if (loading) {
     return (
-      <div className="p-4 space-y-4 animate-pulse">
-        <div className="h-8 w-48 bg-muted rounded" />
-        <div className="grid grid-cols-2 gap-3">
-          {[...Array(4)].map((_, i) => <div key={i} className="h-20 bg-muted rounded-lg" />)}
+      <div className="px-6 py-8 space-y-6 animate-pulse">
+        <div className="h-10 w-56 bg-muted rounded-xl" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => <div key={i} className="h-24 bg-muted rounded-2xl" />)}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-4 lg:p-6 space-y-4 lg:space-y-6">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-2">
+    <div className="px-5 lg:px-8 py-7 lg:py-10 space-y-8 max-w-5xl mx-auto">
+
+      {/* ── Header ── */}
+      <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-xl lg:text-2xl font-semibold tracking-tight">Deal Engine</h1>
-          <p className="text-xs lg:text-sm text-muted-foreground">Accor Luxury &amp; Lifestyle — Mexico</p>
+          <h1 className="text-2xl lg:text-3xl font-semibold tracking-tight">Deal Engine</h1>
+          <p className="text-sm text-muted-foreground mt-1">Accor Luxury & Lifestyle — Mexico</p>
         </div>
         <div className="flex gap-2 shrink-0">
           {totalDeals < 10 && (
-            <Button variant="outline" size="sm" onClick={seedDeals} disabled={seeding} className="gap-1 text-xs h-8">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={seedDeals}
+              disabled={seeding}
+              className="gap-1.5 text-xs rounded-xl border-border h-9"
+            >
               <Sparkles className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">{seeding ? "Génération..." : "Charger 50 deals"}</span>
-              <span className="sm:hidden">{seeding ? "..." : "Seed"}</span>
+              {seeding ? "Loading..." : "Load deals"}
             </Button>
           )}
-          <Button size="sm" onClick={() => navigate("/pipeline")} className="gap-1 text-xs h-8">
+          <Button
+            size="sm"
+            onClick={() => navigate("/pipeline")}
+            className="gap-1.5 text-xs rounded-xl h-9"
+          >
             <Plus className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">New Deal</span>
-            <span className="sm:hidden">New</span>
+            New Deal
           </Button>
         </div>
       </div>
 
-      {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {kpis.map((kpi) => (
-          <Card key={kpi.label} className="border-border/60">
-            <CardContent className="p-3 lg:p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <div className="h-7 w-7 lg:h-9 lg:w-9 rounded-lg bg-secondary flex items-center justify-center shrink-0">
-                  <kpi.icon className="h-3.5 w-3.5 lg:h-4 lg:w-4 text-muted-foreground" />
-                </div>
-                <p className="text-xl lg:text-2xl font-semibold">{kpi.value}</p>
-              </div>
-              <p className="text-xs font-medium text-foreground">{kpi.label}</p>
-              <p className="text-[10px] text-muted-foreground">{kpi.sub}</p>
-            </CardContent>
-          </Card>
+      {/* ── KPI row ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { label: "Total Deals", value: totalDeals, sub: `${recentDeals.length} cette semaine`, icon: Target },
+          { label: "Score IC moyen", value: avgScore, sub: "Sur 100", icon: BarChart3 },
+          { label: "Tâches actives", value: tasks.length, sub: "En attente", icon: Clock },
+          { label: "Décisions IC", value: decisions.length, sub: `${icSummary.go} GO`, icon: TrendingUp },
+        ].map((kpi) => (
+          <div key={kpi.label} className="bg-card border border-border rounded-2xl p-5 space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-muted-foreground font-medium">{kpi.label}</p>
+              <kpi.icon className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <p className="text-3xl font-semibold tracking-tight">{kpi.value}</p>
+            <p className="text-xs text-muted-foreground">{kpi.sub}</p>
+          </div>
         ))}
       </div>
 
-      {/* Pipeline Bar Chart */}
-      <Card className="border-border/60">
-        <CardHeader className="pb-2 px-4 pt-4">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-sm lg:text-base">Pipeline by Stage</CardTitle>
-            <Button variant="ghost" size="sm" className="text-xs gap-1 h-7" onClick={() => navigate("/pipeline")}>
-              View all <ArrowRight className="h-3 w-3" />
+      {/* ── Pipeline funnel ── */}
+      <div className="bg-card border border-border rounded-2xl p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-base font-semibold">Pipeline</h2>
+          <button
+            onClick={() => navigate("/pipeline")}
+            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Voir tout <ArrowRight className="h-3.5 w-3.5" />
+          </button>
+        </div>
+        {totalDeals === 0 ? (
+          <div className="flex flex-col items-center py-10 gap-3">
+            <p className="text-sm text-muted-foreground">Aucun deal pour l'instant.</p>
+            <Button variant="outline" size="sm" onClick={seedDeals} className="gap-2 rounded-xl">
+              <Sparkles className="h-3.5 w-3.5" /> Charger 50 deals test
             </Button>
           </div>
-        </CardHeader>
-        <CardContent className="pt-2 px-4 pb-4">
-          {totalDeals === 0 ? (
-            <div className="flex flex-col items-center justify-center py-6 gap-3">
-              <p className="text-sm text-muted-foreground">No deals yet.</p>
-              <Button variant="outline" size="sm" onClick={seedDeals} className="gap-2">
-                <Sparkles className="h-3.5 w-3.5" /> Charger 50 deals test
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {STAGE_ORDER.map((stage) => {
-                const count = dealsByStage[stage] || 0;
-                const pct = maxStageCount > 0 ? (count / maxStageCount) * 100 : 0;
-                return (
-                  <div key={stage} className="flex items-center gap-2">
-                    <span className="text-[10px] lg:text-xs text-muted-foreground w-20 lg:w-24 shrink-0">{STAGE_LABELS[stage]}</span>
-                    <div className="flex-1 bg-secondary rounded-full h-4 relative overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-primary/80 transition-all duration-500"
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
-                    <span className="text-xs font-medium w-5 text-right">{count}</span>
+        ) : (
+          <div className="space-y-3">
+            {STAGE_ORDER.map((stage) => {
+              const count = dealsByStage[stage] || 0;
+              const pct = maxStageCount > 0 ? (count / maxStageCount) * 100 : 0;
+              return (
+                <div key={stage} className="flex items-center gap-4">
+                  <span className="text-xs text-muted-foreground w-24 shrink-0">{STAGE_LABELS[stage]}</span>
+                  <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-foreground transition-all duration-700"
+                      style={{ width: `${pct}%` }}
+                    />
                   </div>
-                );
-              })}
+                  <span className="text-xs font-medium tabular-nums w-5 text-right text-muted-foreground">{count}</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* ── Bottom row ── */}
+      <div className="grid lg:grid-cols-2 gap-4">
+
+        {/* Top Deals */}
+        <div className="bg-card border border-border rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-base font-semibold">Top Deals</h2>
+            <button
+              onClick={() => navigate("/pipeline")}
+              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Pipeline <ArrowRight className="h-3.5 w-3.5" />
+            </button>
+          </div>
+          {topDeals.length === 0 ? (
+            <p className="text-xs text-muted-foreground py-6 text-center">Aucun deal scoré.</p>
+          ) : (
+            <div className="divide-y divide-border">
+              {topDeals.map((deal, i) => (
+                <div
+                  key={deal.id}
+                  className="flex items-center gap-3 py-3 cursor-pointer hover:opacity-70 transition-opacity"
+                  onClick={() => navigate(`/pipeline?deal=${deal.id}`)}
+                >
+                  <span className="text-xs text-muted-foreground tabular-nums w-4">{i + 1}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{deal.name}</p>
+                    <p className="text-xs text-muted-foreground">{deal.city}</p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-lg font-semibold tabular-nums">{deal.score_total || 0}</span>
+                    <Badge className={cn("text-[9px] px-1.5 rounded-md", STAGE_COLORS[deal.stage])}>
+                      {STAGE_LABELS[deal.stage]}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
 
-      <div className="grid lg:grid-cols-3 gap-3 lg:gap-4">
-        {/* IC Decision Summary */}
-        <Card className="border-border/60">
-          <CardHeader className="pb-2 px-4 pt-4">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm lg:text-base">IC Decisions</CardTitle>
-              <Button variant="ghost" size="sm" className="text-xs gap-1 h-7" onClick={() => navigate("/ic")}>
-                View <ArrowRight className="h-3 w-3" />
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3 pt-2 px-4 pb-4">
-            {decisions.length === 0 ? (
-              <p className="text-xs text-muted-foreground py-4 text-center">No IC decisions yet.<br />Run feasibility to generate.</p>
-            ) : (
-              <>
-                <div className="grid grid-cols-3 gap-2 text-center">
-                  {(["go", "go_with_conditions", "no_go"] as const).map((d) => {
-                    const s = IC_DECISION_STYLES[d];
-                    const Icon = s.icon;
-                    return (
-                      <div key={d} className="bg-secondary/40 rounded-lg p-2">
-                        <Icon className={cn("h-4 w-4 mx-auto mb-1", s.color)} />
-                        <p className="text-lg font-semibold">{icSummary[d]}</p>
-                        <p className={cn("text-[9px] font-bold tracking-wide", s.color)}>{s.label}</p>
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="space-y-1.5 mt-2">
-                  {decisions.slice(0, 4).map((dec) => {
-                    const s = IC_DECISION_STYLES[dec.decision];
-                    const Icon = s.icon;
-                    const deal = deals.find(d => d.id === dec.deal_id);
-                    return (
-                      <div key={dec.id} className="flex items-center gap-2 py-1 border-b border-border/50 last:border-0">
-                        <Icon className={cn("h-3 w-3 shrink-0", s.color)} />
-                        <span className="text-xs flex-1 truncate">{deal?.name || "Deal"}</span>
-                        <span className="text-[10px] text-muted-foreground">{dec.ic_score}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Top Deals by Score */}
-        <Card className="border-border/60">
-          <CardHeader className="pb-2 px-4 pt-4">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm lg:text-base">Top Deals</CardTitle>
-              <Button variant="ghost" size="sm" className="text-xs gap-1 h-7" onClick={() => navigate("/pipeline")}>
-                Pipeline <ArrowRight className="h-3 w-3" />
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-2 px-4 pb-4 space-y-2">
-            {topDeals.length === 0 ? (
-              <p className="text-xs text-muted-foreground py-4 text-center">No scored deals.</p>
-            ) : topDeals.map((deal, i) => (
-              <div key={deal.id} className="flex items-center gap-2 py-1.5 border-b border-border/50 last:border-0">
-                <span className="text-[10px] text-muted-foreground font-mono w-4">{i + 1}</span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium truncate">{deal.name}</p>
-                  <p className="text-[10px] text-muted-foreground">{deal.city}</p>
-                </div>
-                <div className="text-right shrink-0">
-                  <p className="text-sm font-semibold">{deal.score_total || 0}</p>
-                  <Badge variant="secondary" className={cn("text-[9px] py-0", STAGE_COLORS[deal.stage])}>
-                    {STAGE_LABELS[deal.stage]}
-                  </Badge>
-                </div>
+        {/* IC Decisions */}
+        <div className="bg-card border border-border rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-base font-semibold">IC Decisions</h2>
+            <button
+              onClick={() => navigate("/ic")}
+              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              IC Center <ArrowRight className="h-3.5 w-3.5" />
+            </button>
+          </div>
+          {decisions.length === 0 ? (
+            <p className="text-xs text-muted-foreground py-6 text-center">Aucune décision IC.<br />Lancez la faisabilité.</p>
+          ) : (
+            <>
+              {/* Summary chips */}
+              <div className="flex gap-2 mb-5">
+                {(["go", "go_with_conditions", "no_go"] as const).map((d) => {
+                  const s = IC_DECISION_STYLES[d];
+                  const Icon = s.icon;
+                  return (
+                    <div key={d} className={cn("flex-1 flex flex-col items-center gap-1 py-3 rounded-xl", s.bg)}>
+                      <Icon className={cn("h-4 w-4", s.color)} />
+                      <p className={cn("text-xl font-semibold", s.color)}>{icSummary[d]}</p>
+                      <p className={cn("text-[9px] font-semibold tracking-wide uppercase", s.color)}>{s.label}</p>
+                    </div>
+                  );
+                })}
               </div>
-            ))}
-          </CardContent>
-        </Card>
+              {/* Recent decisions */}
+              <div className="divide-y divide-border">
+                {decisions.slice(0, 4).map((dec) => {
+                  const s = IC_DECISION_STYLES[dec.decision];
+                  const Icon = s.icon;
+                  const deal = deals.find(d => d.id === dec.deal_id);
+                  return (
+                    <div key={dec.id} className="flex items-center gap-3 py-2.5">
+                      <Icon className={cn("h-3.5 w-3.5 shrink-0", s.color)} />
+                      <span className="text-sm flex-1 truncate">{deal?.name || "Deal"}</span>
+                      <span className="text-sm font-semibold tabular-nums">{dec.ic_score}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
 
-        {/* Pending Tasks */}
-        <Card className="border-border/60">
-          <CardHeader className="pb-2 px-4 pt-4">
-            <CardTitle className="text-sm lg:text-base">Upcoming Tasks</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-2 px-4 pb-4 space-y-2">
-            {tasks.length === 0 ? (
-              <p className="text-xs text-muted-foreground py-4 text-center">No pending tasks.</p>
-            ) : tasks.map((task) => (
-              <div key={task.id} className="flex items-start gap-2 py-1.5 border-b border-border/50 last:border-0">
-                <Clock className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" />
+      {/* ── Tasks ── */}
+      {tasks.length > 0 && (
+        <div className="bg-card border border-border rounded-2xl p-6">
+          <h2 className="text-base font-semibold mb-5">Tâches à venir</h2>
+          <div className="divide-y divide-border">
+            {tasks.map((task) => (
+              <div key={task.id} className="flex items-center gap-4 py-3">
+                <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium truncate">{task.title}</p>
-                  <p className="text-[10px] text-muted-foreground truncate">{(task as any).deals?.name}</p>
+                  <p className="text-sm font-medium truncate">{task.title}</p>
+                  <p className="text-xs text-muted-foreground truncate">{(task as any).deals?.name}</p>
                 </div>
                 {task.due_date && (
-                  <span className="text-[10px] text-muted-foreground shrink-0">
+                  <span className="text-xs text-muted-foreground shrink-0">
                     {new Date(task.due_date).toLocaleDateString("fr-MX", { day: "numeric", month: "short" })}
                   </span>
                 )}
               </div>
             ))}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Recent Activity */}
-      <Card className="border-border/60">
-        <CardHeader className="pb-2 px-4 pt-4">
-          <CardTitle className="text-sm lg:text-base">Recent Activity</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-2 px-4 pb-4">
-          <div className="divide-y divide-border/50">
-            {recentDeals.slice(0, 6).map((deal) => (
-              <div key={deal.id} className="flex items-center justify-between py-2.5 gap-2">
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className="h-7 w-7 rounded-md bg-secondary flex items-center justify-center shrink-0">
-                    <span className="text-[10px] font-bold text-muted-foreground">{deal.name.slice(0, 2).toUpperCase()}</span>
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs lg:text-sm font-medium truncate">{deal.name}</p>
-                    <p className="text-[10px] text-muted-foreground truncate">{deal.city} · {deal.segment}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1.5 shrink-0">
-                  {deal.score_total > 0 && (
-                    <span className="text-xs font-mono text-muted-foreground hidden sm:block">{deal.score_total}pts</span>
-                  )}
-                  <Badge variant="secondary" className={cn("text-[9px]", STAGE_COLORS[deal.stage])}>
-                    {STAGE_LABELS[deal.stage]}
-                  </Badge>
-                </div>
-              </div>
-            ))}
-            {recentDeals.length === 0 && (
-              <p className="text-xs text-muted-foreground py-4 text-center">No recent activity.</p>
-            )}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      )}
     </div>
   );
 }
