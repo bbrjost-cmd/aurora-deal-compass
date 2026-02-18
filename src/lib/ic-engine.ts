@@ -1,9 +1,9 @@
 /**
- * AURORA DevOS MX — IC Decision Engine
- * Deterministic rule-based + weighted scoring system
+ * AURORA DevOS MX — IC Decision Engine (PMS&E Edition)
+ * Economy / Midscale / Premium scoring: Location, Demand, Conversion Ease, Owner Quality, Execution Risk
  */
 
-import { FeasibilityInputs, FeasibilityOutputs, FeasibilityYear } from "./feasibility";
+import { FeasibilityInputs, FeasibilityOutputs } from "./feasibility";
 
 // ─── Segment Presets ──────────────────────────────────────────────────────────
 export interface SegmentPreset {
@@ -22,122 +22,151 @@ export interface SegmentPreset {
   ffePerKeyHigh: number;
   baseFeeTypical: number;
   incentiveFeeTypical: number;
+  royaltyTypical: number;
   minYoC: number;
+  minRooms: number;
 }
 
 export const SEGMENT_PRESETS: Record<string, SegmentPreset> = {
-  luxury: {
-    label: "Luxury",
-    adrLow: 6000, adrHigh: 20000,
-    occLow: 0.55, occHigh: 0.72,
-    gopLow: 0.35, gopHigh: 0.50,
-    fnbCapture: 0.35, otherRevPct: 0.10,
-    capexPerKeyLow: 4000000, capexPerKeyHigh: 10000000,
-    ffePerKeyLow: 800000, ffePerKeyHigh: 2000000,
-    baseFeeTypical: 0.03, incentiveFeeTypical: 0.08,
-    minYoC: 0.07,
-  },
-  luxury_lifestyle: {
-    label: "Luxury Lifestyle",
-    adrLow: 3500, adrHigh: 8000,
-    occLow: 0.60, occHigh: 0.78,
-    gopLow: 0.32, gopHigh: 0.45,
-    fnbCapture: 0.30, otherRevPct: 0.08,
-    capexPerKeyLow: 3000000, capexPerKeyHigh: 7000000,
-    ffePerKeyLow: 600000, ffePerKeyHigh: 1500000,
-    baseFeeTypical: 0.03, incentiveFeeTypical: 0.08,
-    minYoC: 0.075,
-  },
-  upper_upscale: {
-    label: "Upper Upscale",
-    adrLow: 2000, adrHigh: 5000,
-    occLow: 0.62, occHigh: 0.80,
-    gopLow: 0.30, gopHigh: 0.42,
-    fnbCapture: 0.22, otherRevPct: 0.05,
-    capexPerKeyLow: 1500000, capexPerKeyHigh: 4000000,
-    ffePerKeyLow: 350000, ffePerKeyHigh: 800000,
-    baseFeeTypical: 0.03, incentiveFeeTypical: 0.08,
+  economy: {
+    label: "Economy",
+    adrLow: 600, adrHigh: 1400,
+    occLow: 0.68, occHigh: 0.84,
+    gopLow: 0.36, gopHigh: 0.48,
+    fnbCapture: 0.04, otherRevPct: 0.02,
+    capexPerKeyLow: 500000, capexPerKeyHigh: 1000000,
+    ffePerKeyLow: 80000, ffePerKeyHigh: 180000,
+    baseFeeTypical: 0.035, incentiveFeeTypical: 0.10,
+    royaltyTypical: 0.05,
     minYoC: 0.08,
+    minRooms: 50,
   },
   midscale: {
     label: "Midscale",
-    adrLow: 900, adrHigh: 2200,
-    occLow: 0.65, occHigh: 0.82,
-    gopLow: 0.28, gopHigh: 0.38,
+    adrLow: 1100, adrHigh: 2500,
+    occLow: 0.62, occHigh: 0.80,
+    gopLow: 0.30, gopHigh: 0.42,
     fnbCapture: 0.10, otherRevPct: 0.03,
-    capexPerKeyLow: 700000, capexPerKeyHigh: 2000000,
-    ffePerKeyLow: 150000, ffePerKeyHigh: 350000,
-    baseFeeTypical: 0.04, incentiveFeeTypical: 0.10,
+    capexPerKeyLow: 900000, capexPerKeyHigh: 1800000,
+    ffePerKeyLow: 150000, ffePerKeyHigh: 280000,
+    baseFeeTypical: 0.030, incentiveFeeTypical: 0.09,
+    royaltyTypical: 0.045,
     minYoC: 0.08,
+    minRooms: 60,
+  },
+  premium: {
+    label: "Premium",
+    adrLow: 2000, adrHigh: 5000,
+    occLow: 0.58, occHigh: 0.78,
+    gopLow: 0.28, gopHigh: 0.40,
+    fnbCapture: 0.18, otherRevPct: 0.05,
+    capexPerKeyLow: 1800000, capexPerKeyHigh: 3500000,
+    ffePerKeyLow: 300000, ffePerKeyHigh: 600000,
+    baseFeeTypical: 0.030, incentiveFeeTypical: 0.08,
+    royaltyTypical: 0.04,
+    minYoC: 0.07,
+    minRooms: 100,
+  },
+  // Legacy fallbacks
+  upper_upscale: {
+    label: "Premium",
+    adrLow: 2000, adrHigh: 5000,
+    occLow: 0.58, occHigh: 0.78,
+    gopLow: 0.28, gopHigh: 0.40,
+    fnbCapture: 0.18, otherRevPct: 0.05,
+    capexPerKeyLow: 1800000, capexPerKeyHigh: 3500000,
+    ffePerKeyLow: 300000, ffePerKeyHigh: 600000,
+    baseFeeTypical: 0.030, incentiveFeeTypical: 0.08,
+    royaltyTypical: 0.04,
+    minYoC: 0.07,
+    minRooms: 100,
+  },
+  luxury: {
+    label: "Premium",
+    adrLow: 2000, adrHigh: 5000,
+    occLow: 0.58, occHigh: 0.78,
+    gopLow: 0.28, gopHigh: 0.40,
+    fnbCapture: 0.18, otherRevPct: 0.05,
+    capexPerKeyLow: 1800000, capexPerKeyHigh: 3500000,
+    ffePerKeyLow: 300000, ffePerKeyHigh: 600000,
+    baseFeeTypical: 0.030, incentiveFeeTypical: 0.08,
+    royaltyTypical: 0.04,
+    minYoC: 0.07,
+    minRooms: 100,
+  },
+  luxury_lifestyle: {
+    label: "Premium",
+    adrLow: 2000, adrHigh: 5000,
+    occLow: 0.58, occHigh: 0.78,
+    gopLow: 0.28, gopHigh: 0.40,
+    fnbCapture: 0.18, otherRevPct: 0.05,
+    capexPerKeyLow: 1800000, capexPerKeyHigh: 3500000,
+    ffePerKeyLow: 300000, ffePerKeyHigh: 600000,
+    baseFeeTypical: 0.030, incentiveFeeTypical: 0.08,
+    royaltyTypical: 0.04,
+    minYoC: 0.07,
+    minRooms: 100,
   },
 };
 
 export function getPresetWarnings(inputs: FeasibilityInputs): Array<{ field: string; message: string; level: "amber" | "red" }> {
-  const preset = SEGMENT_PRESETS[inputs.segment];
-  if (!preset) return [];
+  const preset = SEGMENT_PRESETS[inputs.segment] || SEGMENT_PRESETS.midscale;
   const warnings: Array<{ field: string; message: string; level: "amber" | "red" }> = [];
 
   if (inputs.adr < preset.adrLow) {
-    const severity = inputs.adr < preset.adrLow * 0.8 ? "red" : "amber";
-    warnings.push({ field: "ADR", message: `ADR ${inputs.adr.toLocaleString()} MXN below ${preset.label} low bound (${preset.adrLow.toLocaleString()} MXN). Risk of brand dilution / revenue shortfall.`, level: severity });
+    const severity = inputs.adr < preset.adrLow * 0.75 ? "red" : "amber";
+    warnings.push({ field: "ADR", message: `ADR ${inputs.adr.toLocaleString()} MXN below ${preset.label} floor (${preset.adrLow.toLocaleString()} MXN). Risk of brand under-positioning.`, level: severity });
   }
   if (inputs.adr > preset.adrHigh * 1.3) {
-    warnings.push({ field: "ADR", message: `ADR seems exceptionally high for ${preset.label}. Validate with market data.`, level: "amber" });
+    warnings.push({ field: "ADR", message: `ADR unusually high for ${preset.label}. Validate market comparables.`, level: "amber" });
   }
   if (inputs.occupancy < preset.occLow) {
     warnings.push({ field: "Occupancy", message: `Occupancy ${(inputs.occupancy * 100).toFixed(0)}% below typical ${preset.label} range (${(preset.occLow * 100).toFixed(0)}%–${(preset.occHigh * 100).toFixed(0)}%).`, level: "amber" });
   }
   if (inputs.gopMargin < preset.gopLow) {
-    warnings.push({ field: "GOP Margin", message: `GOP ${(inputs.gopMargin * 100).toFixed(0)}% below ${preset.label} typical (${(preset.gopLow * 100).toFixed(0)}%–${(preset.gopHigh * 100).toFixed(0)}%). Check cost structure.`, level: inputs.gopMargin < preset.gopLow * 0.8 ? "red" : "amber" });
-  }
-  if (inputs.capexPerKey < preset.capexPerKeyLow * 0.7) {
-    warnings.push({ field: "CAPEX/Key", message: `CAPEX/key very low for ${preset.label}. May indicate under-specification or conversion.`, level: "amber" });
+    warnings.push({ field: "GOP Margin", message: `GOP ${(inputs.gopMargin * 100).toFixed(0)}% below ${preset.label} standard (${(preset.gopLow * 100).toFixed(0)}%–${(preset.gopHigh * 100).toFixed(0)}%). Review cost structure.`, level: inputs.gopMargin < preset.gopLow * 0.8 ? "red" : "amber" });
   }
   if (inputs.capexPerKey > preset.capexPerKeyHigh * 1.2) {
-    warnings.push({ field: "CAPEX/Key", message: `CAPEX/key above ${preset.label} typical high (${(preset.capexPerKeyHigh / 1000000).toFixed(1)}M MXN). Verify scope.`, level: "red" });
+    warnings.push({ field: "CAPEX/Key", message: `CAPEX/key above ${preset.label} typical high (${(preset.capexPerKeyHigh / 1000000).toFixed(1)}M MXN). Consider conversion vs new build.`, level: "red" });
+  }
+  if (inputs.capexPerKey < preset.capexPerKeyLow * 0.6) {
+    warnings.push({ field: "CAPEX/Key", message: `CAPEX/key very low for ${preset.label}. Validate scope — may indicate under-specification.`, level: "amber" });
   }
   return warnings;
 }
 
-// ─── Two-Sided Economics ─────────────────────────────────────────────────────
+// ─── Brand & Owner Economics ──────────────────────────────────────────────────
 export interface BrandEconomics {
   contractType: "management" | "franchise";
-  // Revenues to brand
   baseFeeAnnual: number;
   incentiveFeeAnnual: number;
   royaltyAnnual?: number;
   marketingFeeAnnual?: number;
+  distributionFeeAnnual?: number;
   totalGrossFees: number;
   supportCostsEstimate: number;
   netFees: number;
   netFeesUSD: number;
-  // Key money (if applicable)
   keyMoney: number;
-  keyMoneyROI: number; // net fees / key money
-  keyMoneyPayback: number; // years
-  // Brand payback
+  keyMoneyROI: number;
+  keyMoneyPayback: number;
   simplePaybackBrand: number;
 }
 
 export interface OwnerEconomics {
-  // Core metrics
-  ebitdaY5: number; // = NOI proxy
-  yieldOnCost: number; // ebitda / totalCapex
-  // Debt scenario (optional)
+  ebitdaY5: number;
+  yieldOnCost: number;
   debtEnabled: boolean;
-  ltv: number; // 0.55 default
-  interestRate: number; // 0.09 default
-  dscr: number; // NOI / annual debt service
+  ltv: number;
+  interestRate: number;
+  dscr: number;
   annualDebtService: number;
-  // Exit
-  capRate: number; // 0.08 default
-  exitValue: number; // ebitda / capRate
-  // IRR proxies (simplified)
-  unleveragedIRR: number; // simple NPV-based proxy
+  capRate: number;
+  exitValue: number;
+  unleveragedIRR: number;
   leveragedIRR: number;
-  // Break-even
-  breakEvenOccupancy: number; // occ needed for YoC >= threshold
-  breakEvenADR: number; // ADR needed for YoC >= threshold
+  breakEvenOccupancy: number;
+  breakEvenADR: number;
 }
 
 export interface TwoSidedEconomics {
@@ -152,36 +181,36 @@ export function computeBrandEconomics(
   contractType: "management" | "franchise",
   keyMoney: number = 0,
 ): BrandEconomics {
-  // Use Year 3 as stabilized
   const stabYear = outputs.years[2] || outputs.years[outputs.years.length - 1];
   const totalRevStab = stabYear.totalRevenue;
+  const roomsRevStab = stabYear.roomsRevenue;
 
-  let baseFeeAnnual = 0;
-  let incentiveFeeAnnual = 0;
-  let royaltyAnnual = 0;
-  let marketingFeeAnnual = 0;
+  let baseFeeAnnual = 0, incentiveFeeAnnual = 0;
+  let royaltyAnnual = 0, marketingFeeAnnual = 0, distributionFeeAnnual = 0;
   let totalGrossFees = 0;
 
-  if (contractType === "management") {
+  if (contractType === "franchise") {
+    const royaltyPct = (inputs as any).royaltyPct ?? 0.045;
+    const marketingPct = (inputs as any).marketingPct ?? 0.015;
+    const distributionPct = (inputs as any).distributionPct ?? 0.010;
+    royaltyAnnual = roomsRevStab * royaltyPct;
+    marketingFeeAnnual = roomsRevStab * marketingPct;
+    distributionFeeAnnual = roomsRevStab * distributionPct;
+    totalGrossFees = royaltyAnnual + marketingFeeAnnual + distributionFeeAnnual;
+  } else {
     baseFeeAnnual = totalRevStab * inputs.baseFee;
     incentiveFeeAnnual = stabYear.gop * inputs.incentiveFee;
     totalGrossFees = baseFeeAnnual + incentiveFeeAnnual;
-  } else {
-    // Franchise: royalty ~3.5%, marketing ~1.5%, distribution ~1%, loyalty ~1%
-    royaltyAnnual = totalRevStab * 0.035;
-    marketingFeeAnnual = totalRevStab * 0.015;
-    const distributionFee = totalRevStab * 0.01;
-    const loyaltyFee = totalRevStab * 0.01;
-    totalGrossFees = royaltyAnnual + marketingFeeAnnual + distributionFee + loyaltyFee;
   }
 
-  const supportCostsEstimate = contractType === "management" ? totalGrossFees * 0.18 : totalGrossFees * 0.05;
+  const supportCostsEstimate = contractType === "management"
+    ? totalGrossFees * 0.18
+    : totalGrossFees * 0.06; // franchise has lower support overhead
   const netFees = totalGrossFees - supportCostsEstimate;
   const netFeesUSD = netFees / inputs.fxRate;
 
   const keyMoneyROI = keyMoney > 0 ? (netFees / keyMoney) * 100 : 0;
   const keyMoneyPayback = keyMoney > 0 && netFees > 0 ? keyMoney / netFees : 0;
-  const simplePaybackBrand = netFees > 0 && keyMoney > 0 ? keyMoney / netFees : 0;
 
   return {
     contractType,
@@ -189,6 +218,7 @@ export function computeBrandEconomics(
     incentiveFeeAnnual: Math.round(incentiveFeeAnnual),
     royaltyAnnual: Math.round(royaltyAnnual),
     marketingFeeAnnual: Math.round(marketingFeeAnnual),
+    distributionFeeAnnual: Math.round(distributionFeeAnnual),
     totalGrossFees: Math.round(totalGrossFees),
     supportCostsEstimate: Math.round(supportCostsEstimate),
     netFees: Math.round(netFees),
@@ -196,7 +226,7 @@ export function computeBrandEconomics(
     keyMoney,
     keyMoneyROI: Math.round(keyMoneyROI * 10) / 10,
     keyMoneyPayback: Math.round(keyMoneyPayback * 10) / 10,
-    simplePaybackBrand: Math.round(simplePaybackBrand * 10) / 10,
+    simplePaybackBrand: Math.round((keyMoney > 0 && netFees > 0 ? keyMoney / netFees : 0) * 10) / 10,
   };
 }
 
@@ -214,37 +244,27 @@ export function computeOwnerEconomics(
 
   const yieldOnCost = totalCapex > 0 ? ebitdaY5 / totalCapex : 0;
 
-  // Debt
   const debtAmount = totalCapex * ltv;
-  const annualDebtService = debtEnabled ? debtAmount * interestRate * 1.15 : 0; // simple amortization proxy
+  const annualDebtService = debtEnabled ? debtAmount * interestRate * 1.15 : 0;
   const dscr = annualDebtService > 0 ? ebitdaY5 / annualDebtService : 0;
 
-  // Exit
   const exitValue = capRate > 0 ? ebitdaY5 / capRate : 0;
 
-  // Simplified IRR proxy (unlevered): assuming Year 5 exit, constant NOI
   const equity = debtEnabled ? totalCapex * (1 - ltv) : totalCapex;
-  const noiAvg = outputs.years.reduce((s, y) => s + y.noi, 0) / outputs.years.length;
-  // Unlevered IRR proxy: solve for r where sum(NOI/((1+r)^t)) + exitValue/((1+r)^5) = totalCapex
   const unleveragedIRR = computeSimpleIRR(totalCapex, outputs.years.map(y => y.noi), exitValue);
-  // Levered: higher risk/return
   const leveredCashFlows = outputs.years.map(y => y.noi - annualDebtService);
-  const leveredIRR = debtEnabled
+  const leveragedIRR = debtEnabled
     ? computeSimpleIRR(equity, leveredCashFlows, exitValue - debtAmount)
     : unleveragedIRR;
 
-  // Break-even occupancy for YoC >= minYoC
-  const preset = SEGMENT_PRESETS[inputs.segment];
-  const minYoC = preset?.minYoC || 0.08;
+  const preset = SEGMENT_PRESETS[inputs.segment] || SEGMENT_PRESETS.midscale;
+  const minYoC = preset.minYoC;
   const minNOI = totalCapex * minYoC;
-  // NOI = TotalRev * gopMargin - TotalRev * (baseFee + incentiveFee * gopMargin)
-  // simplified: NOI ≈ TotalRev * (gopMargin - fees)
   const netMargin = inputs.gopMargin - (inputs.baseFee + inputs.incentiveFee * inputs.gopMargin);
   const revPerRoomNight = inputs.adr * (1 + inputs.fnbRevenuePct + inputs.otherRevenuePct);
   const breakEvenOccupancy = netMargin > 0 && inputs.rooms > 0
     ? minNOI / (inputs.rooms * 365 * revPerRoomNight * netMargin)
     : 0;
-
   const breakEvenADR = inputs.occupancy > 0 && netMargin > 0 && inputs.rooms > 0
     ? minNOI / (inputs.rooms * 365 * inputs.occupancy * (1 + inputs.fnbRevenuePct + inputs.otherRevenuePct) * netMargin)
     : 0;
@@ -260,19 +280,17 @@ export function computeOwnerEconomics(
     capRate,
     exitValue: Math.round(exitValue),
     unleveragedIRR: Math.round(unleveragedIRR * 1000) / 10,
-    leveragedIRR: Math.round(leveredIRR * 1000) / 10,
+    leveragedIRR: Math.round(leveragedIRR * 1000) / 10,
     breakEvenOccupancy: Math.min(Math.max(breakEvenOccupancy, 0), 0.99),
     breakEvenADR: Math.round(breakEvenADR),
   };
 }
 
 function computeSimpleIRR(investment: number, cashFlows: number[], exitValue: number): number {
-  // Newton-Raphson on IRR
   if (investment <= 0) return 0;
   let r = 0.10;
   for (let iter = 0; iter < 50; iter++) {
-    let npv = -investment;
-    let dnpv = 0;
+    let npv = -investment, dnpv = 0;
     cashFlows.forEach((cf, i) => {
       const t = i + 1;
       npv += cf / Math.pow(1 + r, t);
@@ -292,7 +310,7 @@ function computeSimpleIRR(investment: number, cashFlows: number[], exitValue: nu
 
 // ─── Data Completeness ───────────────────────────────────────────────────────
 export interface CompletenessScore {
-  score: number; // 0-100
+  score: number;
   breakdown: Record<string, { weight: number; earned: number; label: string }>;
   missing: string[];
 }
@@ -309,7 +327,7 @@ export function computeCompleteness(deal: any, hasFeasInputs: boolean, contactCo
     score: { weight: 8, label: "Qualification score", check: () => (deal.score_total || 0) > 0 },
     feasibility: { weight: 30, label: "Feasibility inputs", check: () => hasFeasInputs },
     contact: { weight: 8, label: "Contact information", check: () => contactCount > 0 },
-    tasks: { weight: 8, label: "Next steps / tasks", check: () => false }, // checked externally
+    tasks: { weight: 8, label: "Next steps / tasks", check: () => false },
   };
 
   const breakdown: Record<string, { weight: number; earned: number; label: string }> = {};
@@ -332,20 +350,24 @@ export interface ICThresholds {
   minNetFeesUSD: number;
   minROI: number;
   maxPaybackYears: number;
-  minYoCUpscale: number;
-  minYoCLuxury: number;
+  minYoCPremium: number;
+  minYoCMidscaleEconomy: number;
   minDSCR: number;
-  minRoomsUpscale: number;
+  minRoomsEconomy: number;
+  minRoomsMidscale: number;
+  minRoomsPremium: number;
 }
 
 export const DEFAULT_THRESHOLDS: ICThresholds = {
-  minNetFeesUSD: 350000,
-  minROI: 18,
-  maxPaybackYears: 6,
-  minYoCUpscale: 0.08,
-  minYoCLuxury: 0.07,
+  minNetFeesUSD: 120000,   // Lower for PMS&E franchise model
+  minROI: 15,
+  maxPaybackYears: 8,
+  minYoCPremium: 0.07,
+  minYoCMidscaleEconomy: 0.08,
   minDSCR: 1.30,
-  minRoomsUpscale: 70,
+  minRoomsEconomy: 50,
+  minRoomsMidscale: 60,
+  minRoomsPremium: 100,
 };
 
 export interface HardGateResult {
@@ -360,14 +382,20 @@ export interface ICDecision {
   confidence: "high" | "medium" | "low";
   hardGates: HardGateResult[];
   hardGateFailed: boolean;
-  brandScore: number; // 0-35
-  ownerScore: number; // 0-25
-  locationScore: number; // 0-20
-  executionScore: number; // 0-20
+  locationScore: number;     // 0–25
+  demandScore: number;       // 0–25
+  conversionScore: number;   // 0–20
+  ownerScore: number;        // 0–15
+  executionScore: number;    // 0–15
   conditions: string[];
   redFlags: string[];
   narrative: string;
   dataCompleteness: number;
+}
+
+// Legacy field alias for backward compat
+export interface ICDecisionLegacy extends ICDecision {
+  brandScore: number;
 }
 
 export function computeICDecision(
@@ -382,124 +410,132 @@ export function computeICDecision(
   const redFlags: string[] = [];
   const conditions: string[] = [];
 
-  // ── Hard Gates ───────────────────────────────────────────
-  const hardGates: HardGateResult[] = [];
-  const isLuxury = ["luxury", "luxury_lifestyle"].includes(deal.segment || inputs.segment);
-  const isUpscalePlus = ["luxury", "luxury_lifestyle", "upper_upscale"].includes(deal.segment || inputs.segment);
+  const segment = deal.segment || inputs.segment || 'midscale';
+  const preset = SEGMENT_PRESETS[segment] || SEGMENT_PRESETS.midscale;
+  const isPremium = segment === 'premium' || segment === 'upper_upscale' || segment === 'luxury' || segment === 'luxury_lifestyle';
+  const isConversion = ['conversion', 'rebranding', 'franchise_takeover'].includes(deal.opening_type || inputs.openingType || '');
 
-  hardGates.push({
-    name: "Data Completeness ≥ 55",
-    passed: completeness.score >= 55,
-    reason: completeness.score < 55 ? `Completeness ${completeness.score}% — insufficient underwriting data. Missing: ${completeness.missing.slice(0, 3).join(", ")}.` : undefined,
-  });
-
+  // Min rooms threshold by segment
+  const minRooms = isPremium ? thresholds.minRoomsPremium : segment === 'midscale' ? thresholds.minRoomsMidscale : thresholds.minRoomsEconomy;
   const roomsMax = deal.rooms_max || inputs.rooms;
+  const minYoC = isPremium ? thresholds.minYoCPremium : thresholds.minYoCMidscaleEconomy;
+
+  // ── Hard Gates ────────────────────────────────────────────
+  const hardGates: HardGateResult[] = [];
+
   hardGates.push({
-    name: `Min Rooms (${thresholds.minRoomsUpscale}) for Upscale+`,
-    passed: !isUpscalePlus || roomsMax >= thresholds.minRoomsUpscale,
-    reason: isUpscalePlus && roomsMax < thresholds.minRoomsUpscale
-      ? `${roomsMax} rooms below ${thresholds.minRoomsUpscale} minimum for ${deal.segment} segment. Consider boutique flag or segment repositioning.`
-      : undefined,
+    name: "Data Completeness ≥ 50",
+    passed: completeness.score >= 50,
+    reason: completeness.score < 50 ? `Completeness ${completeness.score}% — insufficient data. Missing: ${completeness.missing.slice(0, 3).join(", ")}.` : undefined,
   });
 
   hardGates.push({
-    name: "Net Fees USD ≥ Min Threshold",
-    passed: brandEcon.netFeesUSD >= thresholds.minNetFeesUSD,
-    reason: brandEcon.netFeesUSD < thresholds.minNetFeesUSD
-      ? `Net fees $${brandEcon.netFeesUSD.toLocaleString()} USD below minimum $${thresholds.minNetFeesUSD.toLocaleString()} USD.`
-      : undefined,
+    name: `Min Rooms (${minRooms}) for ${preset.label}`,
+    passed: roomsMax >= minRooms,
+    reason: roomsMax < minRooms ? `${roomsMax} rooms below ${minRooms} minimum for ${preset.label} brand economics.` : undefined,
+  });
+
+  hardGates.push({
+    name: "ADR in Segment Range",
+    passed: inputs.adr >= preset.adrLow * 0.7,
+    reason: inputs.adr < preset.adrLow * 0.7 ? `ADR ${inputs.adr.toLocaleString()} MXN incompatible with ${preset.label} segment. Cannot support brand fee structure.` : undefined,
+  });
+
+  hardGates.push({
+    name: "CAPEX/Key Realistic",
+    passed: inputs.capexPerKey <= preset.capexPerKeyHigh * 1.5,
+    reason: inputs.capexPerKey > preset.capexPerKeyHigh * 1.5 ? `CAPEX/key ${inputs.capexPerKey.toLocaleString()} MXN far exceeds ${preset.label} typical maximum. Deal economics broken.` : undefined,
   });
 
   const hardGateFailed = hardGates.some(g => !g.passed);
 
-  // ── Weighted Scoring ──────────────────────────────────────
-
-  // Brand Economics (35%)
-  let brandScore = 0;
-  const netFeesRatio = brandEcon.netFeesUSD / thresholds.minNetFeesUSD;
-  brandScore += Math.min(20, 20 * Math.min(netFeesRatio, 2) / 2); // 0-20 based on net fees vs threshold
-  if (brandEcon.keyMoney > 0) {
-    const roiScore = brandEcon.keyMoneyROI >= thresholds.minROI ? 10 : (brandEcon.keyMoneyROI / thresholds.minROI) * 10;
-    brandScore += Math.min(10, roiScore);
-    const paybackScore = brandEcon.keyMoneyPayback <= thresholds.maxPaybackYears ? 5 : Math.max(0, 5 - (brandEcon.keyMoneyPayback - thresholds.maxPaybackYears));
-    brandScore += paybackScore;
-  } else {
-    brandScore += 15; // No key money risk — full allocation
-  }
-  brandScore = Math.min(35, Math.round(brandScore));
-
-  // Owner Economics (25%)
-  let ownerScore = 0;
-  const minYoC = isLuxury ? thresholds.minYoCLuxury : thresholds.minYoCUpscale;
-  const yocRatio = ownerEcon.yieldOnCost / minYoC;
-  ownerScore += Math.min(15, 15 * Math.min(yocRatio, 1.5) / 1.5);
-  if (ownerEcon.debtEnabled) {
-    const dscrScore = ownerEcon.dscr >= thresholds.minDSCR ? 5 : Math.max(0, 5 * ownerEcon.dscr / thresholds.minDSCR);
-    ownerScore += dscrScore;
-  } else {
-    ownerScore += 5; // No debt risk
-  }
-  const exitScore = ownerEcon.exitValue > outputs.totalCapex * 1.5 ? 5 : Math.max(0, 5 * (ownerEcon.exitValue - outputs.totalCapex) / (outputs.totalCapex * 0.5));
-  ownerScore += exitScore;
-  ownerScore = Math.min(25, Math.round(ownerScore));
-
-  // Location/Market (20%)
+  // ── Weighted Scoring (100 pts total) ─────────────────────
+  // Location (0–25)
   const locationRaw = (deal.score_breakdown as any)?.location || 0;
-  const locationScore = Math.min(20, Math.round((locationRaw / 25) * 20));
+  const locationScore = Math.min(25, Math.round((locationRaw / 25) * 25));
 
-  // Execution Risk (20%) — inverse of risk score
+  // Demand Strength (0–25)
+  let demandScore = 0;
+  const occRatio = inputs.occupancy / preset.occHigh;
+  demandScore += Math.min(12, Math.round(12 * Math.min(occRatio, 1)));
+  const adrRatio = Math.min(inputs.adr / preset.adrHigh, 1.2);
+  demandScore += Math.min(8, Math.round(8 * Math.min(adrRatio, 1)));
+  if (brandEcon.netFeesUSD >= thresholds.minNetFeesUSD) demandScore += 5;
+  else demandScore += Math.round(5 * brandEcon.netFeesUSD / thresholds.minNetFeesUSD);
+  demandScore = Math.min(25, Math.round(demandScore));
+
+  // Conversion Ease (0–20) — critical for PMS&E strategy
+  let conversionScore = 0;
+  if (isConversion) conversionScore += 8; // Existing hotel structure
+  else conversionScore += 2;             // New build baseline
+  if (roomsMax >= minRooms && roomsMax <= minRooms * 4) conversionScore += 5; // Room count compatible
+  const capexRatio = inputs.capexPerKey / preset.capexPerKeyHigh;
+  if (capexRatio <= 0.8) conversionScore += 4; // CAPEX efficient
+  else if (capexRatio <= 1.0) conversionScore += 2;
+  if (inputs.adr >= preset.adrLow && inputs.adr <= preset.adrHigh) conversionScore += 3; // Brand ADR viable
+  conversionScore = Math.min(20, Math.round(conversionScore));
+
+  // Owner / Asset Quality (0–15)
+  let ownerScore = 0;
+  const yocRatio = ownerEcon.yieldOnCost / minYoC;
+  ownerScore += Math.min(10, Math.round(10 * Math.min(yocRatio, 1.5) / 1.5));
+  if (ownerEcon.debtEnabled) {
+    ownerScore += ownerEcon.dscr >= thresholds.minDSCR ? 5 : Math.round(5 * ownerEcon.dscr / thresholds.minDSCR);
+  } else {
+    ownerScore += 5;
+  }
+  ownerScore = Math.min(15, Math.round(ownerScore));
+
+  // Execution Risk (0–15) — inverse of risk
   const riskRaw = (deal.score_breakdown as any)?.risk || 0;
-  const executionScore = Math.min(20, Math.round(((25 - riskRaw) / 25) * 20));
+  const executionScore = Math.min(15, Math.round(((25 - riskRaw) / 25) * 15));
 
-  const icScore = brandScore + ownerScore + locationScore + executionScore;
+  const icScore = locationScore + demandScore + conversionScore + ownerScore + executionScore;
 
-  // ── Decision Mapping ───────────────────────────────────────
+  // ── Decision Mapping ──────────────────────────────────────
   let decision: "go" | "go_with_conditions" | "no_go";
-  if (hardGateFailed || icScore < 60) {
+  if (hardGateFailed || icScore < 55) {
     decision = "no_go";
-  } else if (icScore >= 75) {
+  } else if (icScore >= 72) {
     decision = "go";
   } else {
     decision = "go_with_conditions";
   }
 
-  // ── Conditions Generator ────────────────────────────────────
-  const preset = SEGMENT_PRESETS[inputs.segment] || SEGMENT_PRESETS.upper_upscale;
-
-  if (brandEcon.netFeesUSD < thresholds.minNetFeesUSD) {
-    conditions.push(`Increase net fees to ≥ $${thresholds.minNetFeesUSD.toLocaleString()} USD — currently $${brandEcon.netFeesUSD.toLocaleString()} USD. Explore larger room count or ADR upside.`);
-  }
-  if (ownerEcon.yieldOnCost < minYoC) {
-    conditions.push(`Improve YoC to ≥ ${(minYoC * 100).toFixed(0)}% (currently ${(ownerEcon.yieldOnCost * 100).toFixed(1)}%). Reduce CAPEX/key, increase ADR, or renegotiate scope.`);
-  }
-  if (ownerEcon.debtEnabled && ownerEcon.dscr < thresholds.minDSCR) {
-    conditions.push(`DSCR ${ownerEcon.dscr.toFixed(2)}x below minimum ${thresholds.minDSCR}x. Reduce leverage (LTV), improve NOI, or secure debt reserve.`);
+  // ── Conditions Generator ──────────────────────────────────
+  if (inputs.capexPerKey > preset.capexPerKeyHigh) {
+    conditions.push(`Reduce CAPEX/key to ≤ ${(preset.capexPerKeyHigh / 1000000).toFixed(1)}M MXN (currently ${(inputs.capexPerKey / 1000000).toFixed(1)}M). Consider phased renovation or conversion scope reduction.`);
   }
   if (inputs.adr < preset.adrLow) {
-    conditions.push(`ADR ${inputs.adr.toLocaleString()} MXN below ${preset.label} low bound. Secure brand positioning premium or validate comp set support.`);
+    conditions.push(`Reposition ADR strategy to ≥ ${preset.adrLow.toLocaleString()} MXN. Validate comp set and demand generators.`);
   }
-  if (inputs.capexPerKey > preset.capexPerKeyHigh) {
-    conditions.push(`CAPEX/key ${inputs.capexPerKey.toLocaleString()} MXN exceeds ${preset.label} typical high. Reduce to ≤ ${preset.capexPerKeyHigh.toLocaleString()} MXN or renegotiate construction scope.`);
+  if (ownerEcon.yieldOnCost < minYoC) {
+    conditions.push(`Improve YoC to ≥ ${(minYoC * 100).toFixed(0)}% (currently ${(ownerEcon.yieldOnCost * 100).toFixed(1)}%). Reduce CAPEX, increase ADR, or optimize operating model.`);
   }
-  if (completeness.score < 70) {
+  if (brandEcon.contractType === 'management' && brandEcon.netFeesUSD < thresholds.minNetFeesUSD) {
+    conditions.push(`Switch to Franchise contract — management fees $${brandEcon.netFeesUSD.toLocaleString()} USD below viability threshold. Franchise royalties more efficient at this scale.`);
+  }
+  if (ownerEcon.debtEnabled && ownerEcon.dscr < thresholds.minDSCR) {
+    conditions.push(`DSCR ${ownerEcon.dscr.toFixed(2)}x below ${thresholds.minDSCR}x minimum. Reduce LTV or improve NOI before debt drawdown.`);
+  }
+  if (completeness.score < 65) {
     conditions.push(`Complete underwriting data (currently ${completeness.score}%). Add: ${completeness.missing.slice(0, 3).join(", ")}.`);
   }
-  if (!deal.lat || !deal.lon) {
-    conditions.push("Confirm exact land parcel and obtain land-use compliance (e.g., CDMX SEDUVI or state municipal).");
+  if (!isConversion && segment === 'economy') {
+    conditions.push(`Prefer Conversion or Franchise Takeover over New Build for Economy segment — faster time-to-market and lower CAPEX risk.`);
   }
 
-  // ── Red Flags ──────────────────────────────────────────────
-  if (inputs.gopMargin < preset.gopLow * 0.8) redFlags.push(`GOP margin ${(inputs.gopMargin * 100).toFixed(0)}% critically below ${preset.label} standard — operational viability at risk.`);
-  if (brandEcon.keyMoneyPayback > thresholds.maxPaybackYears * 1.5) redFlags.push(`Key money payback ${brandEcon.keyMoneyPayback} years — exceeds ${thresholds.maxPaybackYears * 1.5} year tolerance.`);
-  if (completeness.score < 55) redFlags.push(`Data completeness ${completeness.score}% — insufficient for IC review. Underwriting is speculative.`);
-  if (roomsMax < 50 && isUpscalePlus) redFlags.push(`${roomsMax} rooms — below viable threshold for brand economics. Consider boutique repositioning.`);
-  if (outputs.simplePayback > 15) redFlags.push(`Simple payback ${outputs.simplePayback} years — marginal capital efficiency.`);
-  if (ownerEcon.yieldOnCost < minYoC * 0.75) redFlags.push(`YoC ${(ownerEcon.yieldOnCost * 100).toFixed(1)}% — significantly below owner threshold. Difficult to compete with alternative allocations.`);
+  // ── Red Flags ─────────────────────────────────────────────
+  if (inputs.gopMargin < preset.gopLow * 0.8) redFlags.push(`GOP ${(inputs.gopMargin * 100).toFixed(0)}% critically below ${preset.label} minimum — operational viability at risk.`);
+  if (completeness.score < 50) redFlags.push(`Data completeness ${completeness.score}% — insufficient for IC review.`);
+  if (roomsMax < minRooms) redFlags.push(`${roomsMax} rooms below ${minRooms} minimum for ${preset.label} brand.`);
+  if (outputs.simplePayback > 12) redFlags.push(`Simple payback ${outputs.simplePayback} years — marginal for segment.`);
+  if (ownerEcon.yieldOnCost < minYoC * 0.70) redFlags.push(`YoC ${(ownerEcon.yieldOnCost * 100).toFixed(1)}% — significantly below ${(minYoC * 100).toFixed(0)}% owner threshold.`);
   for (const gate of hardGates.filter(g => !g.passed)) {
     redFlags.push(`Hard gate failed: ${gate.name} — ${gate.reason}`);
   }
 
-  // ── Confidence ──────────────────────────────────────────────
+  // ── Confidence ────────────────────────────────────────────
   const sensitivityVolatility = Math.abs(
     (outputs.years[4]?.noi || 0) - (outputs.sensitivities.occDown10[4]?.noi || 0)
   ) / Math.max(1, outputs.years[4]?.noi || 1);
@@ -511,19 +547,22 @@ export function computeICDecision(
 
   // ── Narrative ─────────────────────────────────────────────
   const city = deal.city || "the target market";
-  const segment = preset.label;
+  const brandName = inputs.brand || preset.label;
+  const contractLabel = brandEcon.contractType === 'franchise' ? 'Franchise' : 'Management';
   const decisionLabel = decision === "go" ? "GO" : decision === "go_with_conditions" ? "GO WITH CONDITIONS" : "NO-GO";
-  const netFeesStr = `$${brandEcon.netFeesUSD.toLocaleString()} USD`;
   const yocStr = `${(ownerEcon.yieldOnCost * 100).toFixed(1)}%`;
   const paybackStr = `${outputs.simplePayback} years`;
+  const convEase = isConversion ? 'as a conversion project' : 'as a new build';
 
-  const narrative = `The Investment Committee has evaluated ${deal.name || "this opportunity"} as a ${segment} hotel project in ${city}. The overall IC Score is ${icScore}/100, leading to a ${decisionLabel} recommendation with ${confidence} confidence.
+  const narrative = `The Investment Committee has screened ${deal.name || "this opportunity"} ${convEase} for the ${brandName} brand in ${city} (${preset.label} segment). IC Score: ${icScore}/100 → ${decisionLabel} with ${confidence} confidence.
 
-From a brand economics perspective, stabilized net fees to Accor are estimated at ${netFeesStr} annually under the ${brandEcon.contractType === "management" ? "management" : "franchise"} contract structure. ${brandEcon.netFeesUSD >= thresholds.minNetFeesUSD ? "This exceeds the minimum threshold, demonstrating viable brand economics." : "This falls below the minimum threshold, requiring corrective action."}
+Brand economics under the ${contractLabel} contract: stabilized net fees estimated at $${brandEcon.netFeesUSD.toLocaleString()} USD/year. ${brandEcon.netFeesUSD >= thresholds.minNetFeesUSD ? "Meets minimum viability threshold." : "Below minimum threshold — requires restructuring."}
 
-Owner economics indicate a yield on cost of ${yocStr} on total invested capital of ${outputs.totalCapex > 0 ? `MXN ${outputs.totalCapex.toLocaleString()}` : "TBD"}, with a simple payback of ${paybackStr}. ${ownerEcon.yieldOnCost >= minYoC ? "YoC meets the owner threshold, supporting a compelling investment case." : "YoC is below the owner minimum — the deal requires restructuring."}
+Owner economics: YoC ${yocStr} on total CAPEX of ${outputs.totalCapex > 0 ? `MXN ${(outputs.totalCapex / 1000000).toFixed(1)}M` : "TBD"}, simple payback ${paybackStr}. ${ownerEcon.yieldOnCost >= minYoC ? "Owner threshold met." : "Owner return below threshold — CAPEX reduction or ADR improvement required."}
 
-${redFlags.length > 0 ? `Key concerns include: ${redFlags.slice(0, 2).join("; ")}. ` : "No critical red flags were identified. "}${conditions.length > 0 ? `To advance to LOI, the team must resolve the following: ${conditions.slice(0, 2).join("; ")}.` : "The deal is recommended for immediate advancement to LOI preparation."}`;
+Conversion Ease Score: ${conversionScore}/20. ${conversionScore >= 15 ? "Strong conversion suitability." : conversionScore >= 10 ? "Moderate conversion complexity — phased approach recommended." : "Low conversion suitability — validate structural and brand positioning fit."}
+
+${redFlags.length > 0 ? `Key concerns: ${redFlags.slice(0, 2).join("; ")}.` : "No critical red flags identified."} ${conditions.length > 0 ? `Conditions to advance: ${conditions.slice(0, 2).join("; ")}.` : "Recommend advancement to LOI preparation."}`;
 
   return {
     decision,
@@ -531,9 +570,10 @@ ${redFlags.length > 0 ? `Key concerns include: ${redFlags.slice(0, 2).join("; ")
     confidence,
     hardGates,
     hardGateFailed,
-    brandScore,
-    ownerScore,
     locationScore,
+    demandScore,
+    conversionScore,
+    ownerScore,
     executionScore,
     conditions,
     redFlags,
@@ -547,7 +587,7 @@ export interface HeatmapCell {
   occ: number;
   adr: number;
   value: number;
-  tier: "strong" | "good" | "marginal" | "weak"; // for color coding
+  tier: "strong" | "good" | "marginal" | "weak";
 }
 
 export function computeHeatmap(
@@ -557,35 +597,33 @@ export function computeHeatmap(
 ): HeatmapCell[][] {
   const occs = [0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80];
   const adrs = [
-    inputs.adr * 0.70,
-    inputs.adr * 0.80,
-    inputs.adr * 0.90,
-    inputs.adr,
-    inputs.adr * 1.10,
-    inputs.adr * 1.20,
+    inputs.adr * 0.70, inputs.adr * 0.80, inputs.adr * 0.90,
+    inputs.adr, inputs.adr * 1.10, inputs.adr * 1.20,
   ].map(a => Math.round(a / 100) * 100);
+
+  const { computeFeasibility } = require("./feasibility");
 
   return occs.map(occ => {
     return adrs.map(adr => {
       const modInputs = { ...inputs, adr, occupancy: occ };
-      const { computeFeasibility } = require("./feasibility");
       const out = computeFeasibility(modInputs);
       const stabYear = out.years[2] || out.years[0];
       let value = 0;
       let tier: HeatmapCell["tier"] = "weak";
+      const preset = SEGMENT_PRESETS[inputs.segment] || SEGMENT_PRESETS.midscale;
 
       if (mode === "net_fees") {
-        const fees = stabYear.totalRevenue * (inputs.baseFee + inputs.incentiveFee * inputs.gopMargin);
-        const netFees = fees * 0.82; // approx 18% support costs
-        value = Math.round(netFees / fxRate);
-        if (value >= 600000) tier = "strong";
-        else if (value >= 400000) tier = "good";
-        else if (value >= 250000) tier = "marginal";
+        const royaltyPct = (inputs as any).royaltyPct ?? preset.royaltyTypical;
+        const totalFeePct = royaltyPct + 0.015 + 0.01;
+        const fees = stabYear.roomsRevenue * totalFeePct;
+        value = Math.round(fees * 0.94 / fxRate);
+        if (value >= 250000) tier = "strong";
+        else if (value >= 120000) tier = "good";
+        else if (value >= 60000) tier = "marginal";
         else tier = "weak";
       } else {
-        const preset = SEGMENT_PRESETS[inputs.segment] || SEGMENT_PRESETS.upper_upscale;
         const yoc = stabYear.noi / out.totalCapex;
-        value = Math.round(yoc * 1000) / 10; // percentage
+        value = Math.round(yoc * 1000) / 10;
         if (yoc >= preset.minYoC * 1.3) tier = "strong";
         else if (yoc >= preset.minYoC) tier = "good";
         else if (yoc >= preset.minYoC * 0.8) tier = "marginal";

@@ -121,7 +121,7 @@ export default function Dashboard() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl lg:text-3xl font-semibold tracking-tight">Deal Engine</h1>
-          <p className="text-sm text-muted-foreground mt-1">Accor Luxury & Lifestyle — Mexico</p>
+          <p className="text-sm text-muted-foreground mt-1">Accor Development — Mexico / LATAM Expansion</p>
         </div>
         <div className="flex gap-2 shrink-0">
           {totalDeals < 10 && (

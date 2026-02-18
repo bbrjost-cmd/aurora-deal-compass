@@ -1,382 +1,247 @@
-// Accor Luxury & Lifestyle Brands for Mexico market
-export const ACCOR_BRANDS = [
-  "Raffles",
-  "Fairmont",
-  "Sofitel",
-  "Sofitel Legend",
-  "Orient Express",
-  "Emblems Collection",
-  "MGallery",
-  "Delano",
-  "Mondrian",
-  "SLS",
-] as const;
+// Accor PMS&E Brands for Mexico / LATAM expansion
+import { BRANDS_BY_SEGMENT, ALL_BRANDS } from './constants';
+import type { AccorBrand } from './constants';
 
-export type AccorBrand = typeof ACCOR_BRANDS[number];
-
-export interface LuxuryProspect {
-  name: string;
-  owner: string;
-  city: string;
-  state: string;
-  lat: number;
-  lon: number;
-  segment: string;
-  opening_type: string;
-  rooms_min: number;
-  rooms_max: number;
-  brands: AccorBrand[];
-  notes: string;
-  destination: string;
-}
+export type { AccorBrand };
+export { ALL_BRANDS as ACCOR_BRANDS };
 
 export const BRAND_STRATEGY_NOTES: Record<string, string> = {
-  "Raffles": "Ultra-luxe, trophy assets, branded residences potential",
-  "Fairmont": "Iconic resort positioning, established luxury",
-  "Sofitel": "International luxury, urban or resort",
-  "Sofitel Legend": "Heritage/landmark properties only",
-  "Orient Express": "Exceptional one-of-a-kind assets",
-  "Emblems Collection": "Independent ultra-luxe signature properties",
-  "MGallery": "Soft brand, cultural/experiential luxury",
-  "Delano": "Urban lifestyle luxury",
-  "Mondrian": "Luxury lifestyle, art-driven",
-  "SLS": "Premium lifestyle, F&B driven",
+  // Economy
+  'ibis': 'High-volume economy flag. Conversion-friendly, strong RCP distribution.',
+  'ibis Styles': 'Design-led economy, lifestyle angle, franchise model.',
+  'ibis Budget': 'Budget flag for high-demand urban/suburban corridors.',
+  'greet': 'Eco-responsible economy soft brand. Conversion-first.',
+  // Midscale
+  'Mercure': 'Local character midscale. Conversion priority, franchise-ready.',
+  'Novotel': 'Global midscale standard. Business & family. New build or conversion.',
+  'Adagio': 'Aparthotel / extended stay. Urban locations. Hybrid model.',
+  // Premium
+  'Pullman': 'Business premium. Meeting-driven. Tier-1 cities.',
+  'Swissôtel': 'International premium. Corporate & leisure blend.',
+  'Mövenpick': 'LATAM premium with food & beverage heritage.',
 };
 
-// Brand fit criteria for scoring engine
-// Each brand defines its ideal positioning parameters
+export const DESTINATION_BRANDS: Record<string, string[]> = {
+  'Mexico City': ['Pullman', 'Novotel', 'Mercure', 'ibis Styles', 'ibis'],
+  'Monterrey': ['Pullman', 'Novotel', 'Mercure', 'ibis'],
+  'Guadalajara': ['Novotel', 'Mercure', 'ibis Styles', 'ibis'],
+  'Cancún': ['Novotel', 'Mercure', 'ibis Styles', 'Swissôtel'],
+  'Riviera Maya': ['Mövenpick', 'Novotel', 'Mercure'],
+  'Los Cabos': ['Swissôtel', 'Mövenpick', 'Pullman'],
+  'Puebla': ['Novotel', 'Mercure', 'ibis'],
+  'Querétaro': ['Mercure', 'ibis Styles', 'Novotel'],
+};
+
+// Brand fit criteria for scoring
 interface BrandCriteria {
-  // Segment fit: which segments score high
-  segments: { [key: string]: number }; // 0-40 pts
-  // Rooms range fit: [min, ideal_min, ideal_max, max]
+  segments: Record<string, number>;
   roomsRange: [number, number, number, number];
-  // Opening type preference
-  openingTypes: { [key: string]: number }; // 0-20 pts
-  // Base success rate (historical win rate proxy for Mexico market)
-  baseSuccessRate: number; // 50-95
+  openingTypes: Record<string, number>;
+  contractPreference: 'franchise' | 'management' | 'both';
+  baseSuccessRate: number;
 }
 
-const BRAND_CRITERIA: Record<AccorBrand, BrandCriteria> = {
-  "Raffles": {
-    segments: { luxury: 40, luxury_lifestyle: 20, upper_upscale: 5 },
-    roomsRange: [60, 80, 200, 350],
-    openingTypes: { conversion: 30, new_build: 25, renovation: 20 },
-    baseSuccessRate: 72,
+const BRAND_CRITERIA: Record<string, BrandCriteria> = {
+  'ibis': {
+    segments: { economy: 40, midscale: 10 },
+    roomsRange: [60, 80, 250, 400],
+    openingTypes: { conversion: 35, franchise_takeover: 35, new_build: 20, rebranding: 30 },
+    contractPreference: 'franchise',
+    baseSuccessRate: 88,
   },
-  "Fairmont": {
-    segments: { luxury: 38, luxury_lifestyle: 22, upper_upscale: 8 },
-    roomsRange: [80, 120, 300, 500],
-    openingTypes: { new_build: 28, conversion: 28, renovation: 18 },
-    baseSuccessRate: 76,
+  'ibis Styles': {
+    segments: { economy: 40, midscale: 15 },
+    roomsRange: [50, 70, 200, 350],
+    openingTypes: { conversion: 38, franchise_takeover: 32, new_build: 22, rebranding: 35 },
+    contractPreference: 'franchise',
+    baseSuccessRate: 85,
   },
-  "Sofitel": {
-    segments: { luxury: 30, luxury_lifestyle: 30, upper_upscale: 20 },
-    roomsRange: [80, 120, 350, 600],
-    openingTypes: { new_build: 25, conversion: 25, renovation: 20 },
-    baseSuccessRate: 78,
-  },
-  "Sofitel Legend": {
-    segments: { luxury: 40, luxury_lifestyle: 10, upper_upscale: 0 },
-    roomsRange: [50, 60, 150, 250],
-    openingTypes: { conversion: 35, renovation: 30, new_build: 5 },
-    baseSuccessRate: 58,
-  },
-  "Orient Express": {
-    segments: { luxury: 40, luxury_lifestyle: 15, upper_upscale: 0 },
-    roomsRange: [30, 40, 100, 150],
-    openingTypes: { conversion: 30, new_build: 25, renovation: 20 },
-    baseSuccessRate: 55,
-  },
-  "Emblems Collection": {
-    segments: { luxury: 40, luxury_lifestyle: 25, upper_upscale: 5 },
-    roomsRange: [25, 35, 120, 200],
-    openingTypes: { conversion: 30, new_build: 28, renovation: 22 },
-    baseSuccessRate: 65,
-  },
-  "MGallery": {
-    segments: { luxury_lifestyle: 38, luxury: 28, upper_upscale: 22 },
-    roomsRange: [40, 60, 200, 350],
-    openingTypes: { conversion: 32, renovation: 28, new_build: 18 },
+  'ibis Budget': {
+    segments: { economy: 40, midscale: 5 },
+    roomsRange: [80, 100, 300, 500],
+    openingTypes: { new_build: 30, conversion: 30, franchise_takeover: 30, rebranding: 20 },
+    contractPreference: 'franchise',
     baseSuccessRate: 82,
   },
-  "Delano": {
-    segments: { luxury_lifestyle: 40, luxury: 20, upper_upscale: 20 },
-    roomsRange: [80, 120, 280, 400],
-    openingTypes: { new_build: 30, conversion: 25, renovation: 20 },
-    baseSuccessRate: 68,
+  'greet': {
+    segments: { economy: 38, midscale: 18 },
+    roomsRange: [40, 55, 150, 250],
+    openingTypes: { conversion: 40, rebranding: 35, franchise_takeover: 28, new_build: 15 },
+    contractPreference: 'franchise',
+    baseSuccessRate: 75,
   },
-  "Mondrian": {
-    segments: { luxury_lifestyle: 40, luxury: 18, upper_upscale: 18 },
-    roomsRange: [80, 100, 250, 400],
-    openingTypes: { new_build: 28, conversion: 28, renovation: 18 },
+  'Mercure': {
+    segments: { midscale: 40, economy: 15, premium: 15 },
+    roomsRange: [60, 80, 220, 400],
+    openingTypes: { conversion: 38, rebranding: 35, franchise_takeover: 30, new_build: 22 },
+    contractPreference: 'franchise',
+    baseSuccessRate: 84,
+  },
+  'Novotel': {
+    segments: { midscale: 38, premium: 18, economy: 8 },
+    roomsRange: [80, 120, 300, 500],
+    openingTypes: { new_build: 32, conversion: 28, franchise_takeover: 22, rebranding: 25 },
+    contractPreference: 'both',
+    baseSuccessRate: 80,
+  },
+  'Adagio': {
+    segments: { midscale: 40, premium: 15, economy: 10 },
+    roomsRange: [50, 70, 180, 300],
+    openingTypes: { new_build: 35, conversion: 30, rebranding: 28, franchise_takeover: 20 },
+    contractPreference: 'management',
+    baseSuccessRate: 72,
+  },
+  'Pullman': {
+    segments: { premium: 40, midscale: 15 },
+    roomsRange: [120, 180, 400, 600],
+    openingTypes: { new_build: 32, conversion: 28, franchise_takeover: 20, rebranding: 22 },
+    contractPreference: 'management',
+    baseSuccessRate: 76,
+  },
+  'Swissôtel': {
+    segments: { premium: 40, midscale: 10 },
+    roomsRange: [100, 150, 350, 550],
+    openingTypes: { new_build: 30, conversion: 28, franchise_takeover: 18, rebranding: 20 },
+    contractPreference: 'management',
     baseSuccessRate: 70,
   },
-  "SLS": {
-    segments: { luxury_lifestyle: 40, upper_upscale: 25, luxury: 15 },
-    roomsRange: [100, 150, 350, 600],
-    openingTypes: { new_build: 30, conversion: 22, renovation: 18 },
-    baseSuccessRate: 73,
+  'Mövenpick': {
+    segments: { premium: 38, midscale: 20 },
+    roomsRange: [100, 140, 320, 500],
+    openingTypes: { new_build: 28, conversion: 30, franchise_takeover: 20, rebranding: 25 },
+    contractPreference: 'both',
+    baseSuccessRate: 74,
   },
 };
 
 export interface BrandRecommendation {
-  brand: AccorBrand;
-  fitScore: number;       // 0–100 brand-deal alignment score
-  successRate: number;    // % success rate for this brand in this context
+  brand: string;
+  fitScore: number;
+  successRate: number;
   note: string;
-  reasons: string[];      // Why this brand fits
+  reasons: string[];
+  contractPreference: string;
 }
 
-/**
- * Score a brand against deal metrics.
- * Returns a 0–100 fit score and a contextual success rate.
- */
-function scoreBrand(brand: AccorBrand, deal: any): { fitScore: number; successRate: number; reasons: string[] } {
+function scoreBrand(brand: string, deal: any): { fitScore: number; successRate: number; reasons: string[] } {
   const criteria = BRAND_CRITERIA[brand];
+  if (!criteria) return { fitScore: 0, successRate: 0, reasons: [] };
+
   const rooms = ((deal.rooms_min || 80) + (deal.rooms_max || 150)) / 2;
-  const segment = deal.segment || "upper_upscale";
-  const openingType = deal.opening_type || "new_build";
+  const segment = deal.segment || 'midscale';
+  const openingType = deal.opening_type || 'conversion';
   const icScore = deal.score_total || 0;
 
   const reasons: string[] = [];
   let score = 0;
 
-  // 1. Segment fit (0–40 pts)
+  // Segment fit (0–40)
   const segPts = criteria.segments[segment] ?? 0;
   score += segPts;
-  if (segPts >= 35) reasons.push(`Segment ${segment.replace(/_/g, " ")} idéal`);
-  else if (segPts >= 20) reasons.push(`Segment compatible`);
-  else if (segPts > 0) reasons.push(`Segment acceptable`);
+  if (segPts >= 35) reasons.push(`Ideal segment match (${segment})`);
+  else if (segPts >= 20) reasons.push(`Compatible segment`);
 
-  // 2. Rooms fit (0–20 pts)
+  // Rooms fit (0–20)
   const [rMin, rIdealMin, rIdealMax, rMax] = criteria.roomsRange;
   let roomsPts = 0;
   if (rooms >= rIdealMin && rooms <= rIdealMax) {
     roomsPts = 20;
-    reasons.push(`${Math.round(rooms)} keys within ideal range`);
+    reasons.push(`${Math.round(rooms)} keys in ideal range`);
   } else if (rooms >= rMin && rooms < rIdealMin) {
     roomsPts = Math.round(20 * ((rooms - rMin) / (rIdealMin - rMin)));
-    reasons.push(`${Math.round(rooms)} keys, légèrement sous le seuil optimal`);
   } else if (rooms > rIdealMax && rooms <= rMax) {
     roomsPts = Math.round(20 * (1 - (rooms - rIdealMax) / (rMax - rIdealMax)));
-    reasons.push(`${Math.round(rooms)} keys, above optimal range`);
-  } else {
-    roomsPts = 0;
   }
   score += roomsPts;
 
-  // 3. Opening type fit (0–30 pts)
+  // Opening type fit (0–30)
   const typePts = criteria.openingTypes[openingType] ?? 10;
   score += typePts;
-  if (typePts >= 28) reasons.push(`${openingType.replace(/_/g, " ")} strongly preferred by this brand`);
-  else if (typePts >= 20) reasons.push(`${openingType.replace(/_/g, " ")} compatible`);
+  if (typePts >= 32) reasons.push(`${openingType.replace(/_/g, ' ')} strongly preferred`);
+  else if (typePts >= 22) reasons.push(`${openingType.replace(/_/g, ' ')} compatible`);
 
-  // 4. IC score bonus (0–10 pts)
+  // IC score bonus (0–10)
   const icBonus = Math.round((icScore / 100) * 10);
   score += icBonus;
-  if (icScore >= 75) reasons.push(`Score IC ${icScore}/100 renforce la crédibilité`);
 
-  // Clamp to 0–100
   const fitScore = Math.min(100, Math.max(0, score));
-
-  // Success rate = base ± adjustment based on fit
-  // If fit is 100%, success rate approaches base + 15
-  // If fit is 0%, success rate = base - 20
   const delta = ((fitScore - 50) / 50) * 18;
   const successRate = Math.min(95, Math.max(30, Math.round(criteria.baseSuccessRate + delta)));
 
   return { fitScore, successRate, reasons };
 }
 
-/**
- * Main brand recommender.
- * Returns top brands sorted by fit score, all with >0 fit.
- */
 export function recommendBrands(deal: any): BrandRecommendation[] {
-  const results: BrandRecommendation[] = ACCOR_BRANDS.map((brand) => {
-    const { fitScore, successRate, reasons } = scoreBrand(brand, deal);
-    return {
-      brand,
-      fitScore,
-      successRate,
-      note: BRAND_STRATEGY_NOTES[brand],
-      reasons,
-    };
-  });
+  const segment = deal.segment || 'midscale';
+  const eligibleBrands = BRANDS_BY_SEGMENT[segment] || ALL_BRANDS;
 
-  // Sort by fit score desc, return top 5 with fitScore > 10
-  return results
-    .filter((r) => r.fitScore > 10)
+  return eligibleBrands
+    .map((brand) => {
+      const { fitScore, successRate, reasons } = scoreBrand(brand, deal);
+      const criteria = BRAND_CRITERIA[brand];
+      return {
+        brand,
+        fitScore,
+        successRate,
+        note: BRAND_STRATEGY_NOTES[brand] || '',
+        reasons,
+        contractPreference: criteria?.contractPreference || 'both',
+      };
+    })
+    .filter(r => r.fitScore > 10)
     .sort((a, b) => b.fitScore - a.fitScore)
     .slice(0, 5);
 }
 
-export const DESTINATION_BRANDS: Record<string, AccorBrand[]> = {
-  "Tulum": ["Emblems Collection", "MGallery", "Mondrian", "Delano"],
-  "Riviera Maya": ["Raffles", "Fairmont", "Emblems Collection", "Sofitel"],
-  "Los Cabos": ["Raffles", "Fairmont", "Sofitel", "Emblems Collection"],
-  "Mexico City": ["Delano", "Mondrian", "SLS", "Sofitel", "Emblems Collection"],
-  "Punta Mita / Nayarit": ["Raffles", "Fairmont", "Emblems Collection", "SLS"],
-};
+// Conversion suitability factors
+export interface ConversionScore {
+  score: number; // 0–100
+  label: 'Excellent' | 'Good' | 'Fair' | 'Poor';
+  factors: string[];
+}
 
-export const LUXURY_PROSPECTS: LuxuryProspect[] = [
-  {
-    name: "RLH Properties — Riviera Maya",
-    owner: "Borja Escalada",
-    city: "Playa del Carmen",
-    state: "Quintana Roo",
-    lat: 20.6296,
-    lon: -87.0739,
-    segment: "luxury",
-    opening_type: "conversion",
-    rooms_min: 80,
-    rooms_max: 150,
-    brands: ["Emblems Collection", "Raffles", "Fairmont"],
-    notes: "Owner of Rosewood Mayakoba & One&Only Mandarina. Asset value enhancement + branded residences pitch. Ultra-luxe independent positioning.",
-    destination: "Riviera Maya",
-  },
-  {
-    name: "Grupo Xcaret — Experiential Resort",
-    owner: "Grupo Xcaret (Development Team)",
-    city: "Playa del Carmen",
-    state: "Quintana Roo",
-    lat: 20.5810,
-    lon: -87.1180,
-    segment: "luxury",
-    opening_type: "new_build",
-    rooms_min: 150,
-    rooms_max: 300,
-    brands: ["Emblems Collection", "MGallery"],
-    notes: "Experiential/cultural resort operators. MGallery ideal for cultural positioning. Emphasis on sustainability + unique guest experience.",
-    destination: "Riviera Maya",
-  },
-  {
-    name: "Tulum Eco-Luxury Boutique",
-    owner: "Independent Owner (Boutique)",
-    city: "Tulum",
-    state: "Quintana Roo",
-    lat: 20.2114,
-    lon: -87.4654,
-    segment: "luxury",
-    opening_type: "conversion",
-    rooms_min: 40,
-    rooms_max: 80,
-    brands: ["Emblems Collection", "MGallery"],
-    notes: "Boutique eco-luxury property. Perfect for Emblems Collection signature positioning. ADR uplift + global distribution power key selling points.",
-    destination: "Tulum",
-  },
-  {
-    name: "Pueblo Bonito — Los Cabos Ultra-Luxe",
-    owner: "Pueblo Bonito Resorts",
-    city: "Cabo San Lucas",
-    state: "Baja California Sur",
-    lat: 22.8905,
-    lon: -109.9167,
-    segment: "luxury",
-    opening_type: "conversion",
-    rooms_min: 120,
-    rooms_max: 250,
-    brands: ["Raffles", "Fairmont", "Sofitel"],
-    notes: "Premium resort portfolio. Raffles repositioning for ultra-luxe segment. Branded Residences economics as key value proposition.",
-    destination: "Los Cabos",
-  },
-  {
-    name: "Los Cabos Trophy Asset",
-    owner: "JV / Local Developer",
-    city: "San José del Cabo",
-    state: "Baja California Sur",
-    lat: 23.0598,
-    lon: -109.7006,
-    segment: "luxury",
-    opening_type: "new_build",
-    rooms_min: 80,
-    rooms_max: 120,
-    brands: ["Emblems Collection", "Orient Express", "Raffles"],
-    notes: "One&Only / Montage / Auberge type owner. Orient Express for exceptional asset. US UHNW clientele focus.",
-    destination: "Los Cabos",
-  },
-  {
-    name: "Thor Urbana — CDMX Mixed-Use Luxury",
-    owner: "Jaime Fasja",
-    city: "Ciudad de México",
-    state: "Ciudad de México",
-    lat: 19.4326,
-    lon: -99.1680,
-    segment: "luxury",
-    opening_type: "new_build",
-    rooms_min: 150,
-    rooms_max: 250,
-    brands: ["Delano", "Mondrian", "SLS", "Sofitel"],
-    notes: "Mixed-use high-end development. Delano for urban lifestyle luxury. Branded Residences + F&B driven concept. Polanco / Reforma corridor.",
-    destination: "Mexico City",
-  },
-  {
-    name: "RLH Properties — CDMX Urban Luxury",
-    owner: "Borja Escalada",
-    city: "Ciudad de México",
-    state: "Ciudad de México",
-    lat: 19.4284,
-    lon: -99.2042,
-    segment: "luxury",
-    opening_type: "conversion",
-    rooms_min: 100,
-    rooms_max: 180,
-    brands: ["Raffles", "Sofitel Legend", "Emblems Collection"],
-    notes: "Urban luxury asset repositioning. Sofitel Legend for heritage property. Raffles for trophy positioning with residences component.",
-    destination: "Mexico City",
-  },
-  {
-    name: "Grupo Danhos / GICSA — CDMX Premium",
-    owner: "Abraham Cababie",
-    city: "Ciudad de México",
-    state: "Ciudad de México",
-    lat: 19.4400,
-    lon: -99.2050,
-    segment: "luxury",
-    opening_type: "new_build",
-    rooms_min: 200,
-    rooms_max: 350,
-    brands: ["Sofitel", "MGallery", "Delano", "Mondrian"],
-    notes: "Premium/luxury developer. Mixed-use expertise. Sofitel for international luxury positioning. Mondrian for art-driven lifestyle.",
-    destination: "Mexico City",
-  },
-  {
-    name: "Grupo Vidanta — Nayarit Mega Resort",
-    owner: "Iván Chávez",
-    city: "Nuevo Vallarta",
-    state: "Nayarit",
-    lat: 20.6976,
-    lon: -105.2970,
-    segment: "luxury",
-    opening_type: "new_build",
-    rooms_min: 200,
-    rooms_max: 500,
-    brands: ["Raffles", "Fairmont", "SLS", "Delano", "Emblems Collection"],
-    notes: "Mega resort + residences + entertainment. Multiple brand opportunities. Raffles for flagship. SLS/Delano for lifestyle component. Giga-project approach.",
-    destination: "Punta Mita / Nayarit",
-  },
-  {
-    name: "Punta Mita Luxury Development",
-    owner: "Punta Mita Owner Group",
-    city: "Punta de Mita",
-    state: "Nayarit",
-    lat: 20.7700,
-    lon: -105.5200,
-    segment: "luxury",
-    opening_type: "conversion",
-    rooms_min: 60,
-    rooms_max: 120,
-    brands: ["Emblems Collection", "Raffles", "Fairmont"],
-    notes: "Riviera Nayarit luxury corridor. Emblems for independent signature. Fairmont for established resort luxury. ADR uplift + brand premium key pitch.",
-    destination: "Punta Mita / Nayarit",
-  },
-];
+export function assessConversionSuitability(deal: any): ConversionScore {
+  let score = 0;
+  const factors: string[] = [];
 
-// Key selling points for luxury owners in Mexico
-export const LUXURY_PITCH_POINTS = [
-  "Asset value enhancement",
-  "ADR uplift / brand premium",
-  "Global distribution power",
-  "Branded Residences economics",
-  "Repositioning strategy",
+  // Is it already a hotel?
+  if (['conversion', 'rebranding', 'franchise_takeover'].includes(deal.opening_type)) {
+    score += 30;
+    factors.push('Existing hotel structure — conversion viable');
+  }
+
+  // Room count compatibility
+  const rooms = ((deal.rooms_min || 0) + (deal.rooms_max || 0)) / 2;
+  if (rooms >= 60 && rooms <= 300) {
+    score += 25;
+    factors.push(`${Math.round(rooms)} keys within conversion sweet spot`);
+  } else if (rooms >= 40) {
+    score += 12;
+  }
+
+  // Segment fit for conversion
+  if (deal.segment === 'economy') { score += 25; factors.push('Economy segment — highest conversion velocity'); }
+  else if (deal.segment === 'midscale') { score += 20; factors.push('Midscale segment — strong conversion potential'); }
+  else if (deal.segment === 'premium') { score += 12; factors.push('Premium segment — selective conversion'); }
+
+  // Score bonus
+  if ((deal.score_total || 0) >= 70) { score += 20; factors.push('High qualification score'); }
+  else if ((deal.score_total || 0) >= 50) { score += 10; }
+
+  const capped = Math.min(100, score);
+  const label: ConversionScore['label'] =
+    capped >= 75 ? 'Excellent' :
+    capped >= 55 ? 'Good' :
+    capped >= 35 ? 'Fair' : 'Poor';
+
+  return { score: capped, label, factors };
+}
+
+// Development pitch points for PMS&E context
+export const DEVELOPMENT_PITCH_POINTS = [
+  'Fast conversion to Accor network — immediate distribution uplift',
+  'Franchise model: low Accor overhead, high owner ROI',
+  'RCP loyalty programme — 100M+ members driving occupancy',
+  'Brand recognition reducing OTA dependency',
+  'Proven CAPEX efficiency in Midscale/Economy conversions',
 ];
