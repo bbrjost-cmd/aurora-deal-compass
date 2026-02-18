@@ -67,6 +67,21 @@ export default {
           "nogo-muted": "hsl(var(--ic-nogo-muted))",
           "nogo-border": "hsl(var(--ic-nogo-border))",
         },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
+          muted: "hsl(var(--warning-muted))",
+        },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+          muted: "hsl(var(--success-muted))",
+        },
+        hotel: {
+          independent: "hsl(var(--hotel-independent))",
+          chain: "hsl(var(--hotel-chain))",
+          unknown: "hsl(var(--hotel-unknown))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
