@@ -39,6 +39,22 @@
     --aurora-gold: 43 73% 47.1%;
     --aurora-gold-foreground: 0 0% 6.7%;
 
+    /* IC Decision Status tokens */
+    --ic-go: 142 72% 29%;
+    --ic-go-foreground: 0 0% 100%;
+    --ic-go-muted: 142 76% 97%;
+    --ic-go-border: 142 72% 70%;
+
+    --ic-conditions: 38 92% 40%;
+    --ic-conditions-foreground: 0 0% 100%;
+    --ic-conditions-muted: 48 100% 96%;
+    --ic-conditions-border: 38 92% 70%;
+
+    --ic-nogo: 0 72% 42%;
+    --ic-nogo-foreground: 0 0% 100%;
+    --ic-nogo-muted: 0 86% 97%;
+    --ic-nogo-border: 0 72% 70%;
+
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 0 0% 26.1%;
     --sidebar-primary: 0 0% 10%;

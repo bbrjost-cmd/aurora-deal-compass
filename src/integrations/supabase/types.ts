@@ -14,6 +14,58 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_log: {
+        Row: {
+          action: string
+          actor_profile_id: string | null
+          created_at: string
+          deal_id: string | null
+          diff_json: Json | null
+          id: string
+          org_id: string
+        }
+        Insert: {
+          action: string
+          actor_profile_id?: string | null
+          created_at?: string
+          deal_id?: string | null
+          diff_json?: Json | null
+          id?: string
+          org_id: string
+        }
+        Update: {
+          action?: string
+          actor_profile_id?: string | null
+          created_at?: string
+          deal_id?: string | null
+          diff_json?: Json | null
+          id?: string
+          org_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_log_actor_profile_id_fkey"
+            columns: ["actor_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audit_log_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audit_log_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cached_overpass: {
         Row: {
           center_lat: number
@@ -46,6 +98,65 @@ export type Database = {
           radius_m?: number
         }
         Relationships: []
+      }
+      city_benchmarks: {
+        Row: {
+          adr_high: number
+          adr_low: number
+          cap_rate_high: number
+          cap_rate_low: number
+          city: string
+          gop_high: number
+          gop_low: number
+          id: string
+          occ_high: number
+          occ_low: number
+          org_id: string
+          source_note: string | null
+          state: string | null
+          updated_at: string
+        }
+        Insert: {
+          adr_high?: number
+          adr_low?: number
+          cap_rate_high?: number
+          cap_rate_low?: number
+          city: string
+          gop_high?: number
+          gop_low?: number
+          id?: string
+          occ_high?: number
+          occ_low?: number
+          org_id: string
+          source_note?: string | null
+          state?: string | null
+          updated_at?: string
+        }
+        Update: {
+          adr_high?: number
+          adr_low?: number
+          cap_rate_high?: number
+          cap_rate_low?: number
+          city?: string
+          gop_high?: number
+          gop_low?: number
+          id?: string
+          occ_high?: number
+          occ_low?: number
+          org_id?: string
+          source_note?: string | null
+          state?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "city_benchmarks_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       city_settings: {
         Row: {
@@ -243,6 +354,82 @@ export type Database = {
           },
         ]
       }
+      decision_history: {
+        Row: {
+          conditions_json: Json | null
+          confidence: string
+          created_at: string
+          data_completeness: number | null
+          deal_id: string | null
+          decision: string
+          hard_gates_json: Json | null
+          ic_score: number
+          id: string
+          narrative_text: string | null
+          org_id: string
+          overridden_by_profile_id: string | null
+          override_reason: string | null
+          red_flags_json: Json | null
+          thresholds_json: Json | null
+        }
+        Insert: {
+          conditions_json?: Json | null
+          confidence?: string
+          created_at?: string
+          data_completeness?: number | null
+          deal_id?: string | null
+          decision: string
+          hard_gates_json?: Json | null
+          ic_score?: number
+          id?: string
+          narrative_text?: string | null
+          org_id: string
+          overridden_by_profile_id?: string | null
+          override_reason?: string | null
+          red_flags_json?: Json | null
+          thresholds_json?: Json | null
+        }
+        Update: {
+          conditions_json?: Json | null
+          confidence?: string
+          created_at?: string
+          data_completeness?: number | null
+          deal_id?: string | null
+          decision?: string
+          hard_gates_json?: Json | null
+          ic_score?: number
+          id?: string
+          narrative_text?: string | null
+          org_id?: string
+          overridden_by_profile_id?: string | null
+          override_reason?: string | null
+          red_flags_json?: Json | null
+          thresholds_json?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "decision_history_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "decision_history_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "decision_history_overridden_by_profile_id_fkey"
+            columns: ["overridden_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       docs: {
         Row: {
           created_at: string
@@ -396,6 +583,101 @@ export type Database = {
             foreignKeyName: "geo_boundaries_org_id_fkey"
             columns: ["org_id"]
             isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      loi_checklist: {
+        Row: {
+          checked: boolean
+          created_at: string
+          deal_id: string
+          id: string
+          item: string
+          org_id: string
+          stage_requirement: string | null
+        }
+        Insert: {
+          checked?: boolean
+          created_at?: string
+          deal_id: string
+          id?: string
+          item: string
+          org_id: string
+          stage_requirement?: string | null
+        }
+        Update: {
+          checked?: boolean
+          created_at?: string
+          deal_id?: string
+          id?: string
+          item?: string
+          org_id?: string
+          stage_requirement?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loi_checklist_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loi_checklist_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "orgs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      org_thresholds: {
+        Row: {
+          competitor_density_threshold: number
+          id: string
+          max_payback_years: number
+          min_dscr: number
+          min_net_fees_usd: number
+          min_roi_pct: number
+          min_rooms_upscale: number
+          min_yoc_luxury: number
+          min_yoc_upscale: number
+          org_id: string
+          updated_at: string
+        }
+        Insert: {
+          competitor_density_threshold?: number
+          id?: string
+          max_payback_years?: number
+          min_dscr?: number
+          min_net_fees_usd?: number
+          min_roi_pct?: number
+          min_rooms_upscale?: number
+          min_yoc_luxury?: number
+          min_yoc_upscale?: number
+          org_id: string
+          updated_at?: string
+        }
+        Update: {
+          competitor_density_threshold?: number
+          id?: string
+          max_payback_years?: number
+          min_dscr?: number
+          min_net_fees_usd?: number
+          min_roi_pct?: number
+          min_rooms_upscale?: number
+          min_yoc_luxury?: number
+          min_yoc_upscale?: number
+          org_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_thresholds_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: true
             referencedRelation: "orgs"
             referencedColumns: ["id"]
           },
