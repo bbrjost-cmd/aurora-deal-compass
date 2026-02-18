@@ -391,6 +391,250 @@ export function generateDealPDF(deal: any, tasks: any[], feasibilityOutputs?: an
   doc.save(`${safeName}_Memo.pdf`);
 }
 
+// ─── IC Decision Center — Quick Memo (from decision_history only) ─────────────
+/**
+ * Generates an IC memo PDF directly from decision_history data.
+ * No FeasibilityInputs/Outputs required — works standalone from the IC Center.
+ */
+export function generateICDecisionMemoPDF(decision: any) {
+  const deal = decision.deal || {};
+  const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+  const PW = 210;
+  const now = new Date().toLocaleDateString("fr-FR", {
+    year: "numeric", month: "long", day: "numeric",
+    hour: "2-digit", minute: "2-digit",
+  });
+
+  // Normalise hard gates (obj or array)
+  const rawHG = decision.hard_gates_json;
+  const hardGates: Array<{ name: string; passed: boolean; reason?: string }> =
+    Array.isArray(rawHG)
+      ? rawHG
+      : rawHG && typeof rawHG === "object"
+        ? Object.values(rawHG).map((v: any) => ({ name: v?.name ?? "", passed: Boolean(v?.passed), reason: v?.reason }))
+        : [];
+
+  const conditions: string[] = Array.isArray(decision.conditions_json) ? decision.conditions_json : [];
+  const redFlags: string[] = Array.isArray(decision.red_flags_json) ? decision.red_flags_json : [];
+
+  const icScore: number = decision.ic_score ?? 0;
+  const confidence: string = decision.confidence ?? "—";
+  const decisionKey: string = decision.decision ?? "no_go";
+
+  const decisionLabel = decisionKey === "go" ? "GO"
+    : decisionKey === "go_with_conditions" ? "GO — AVEC CONDITIONS"
+    : "NO-GO";
+  const decisionColor: [number, number, number] = decisionKey === "go" ? [22, 163, 74]
+    : decisionKey === "go_with_conditions" ? [202, 138, 4]
+    : [220, 38, 38];
+
+  // ── HEADER ──────────────────────────────────────────────────────────────────
+  doc.setFillColor(...C.black);
+  doc.rect(0, 0, PW, 58, "F");
+  doc.setFillColor(...C.gold);
+  doc.rect(0, 58, PW, 1.5, "F");
+
+  setFont(doc, 20, "bold", C.white);
+  doc.text("AURORA", 14, 17);
+  setFont(doc, 6.5, "normal", C.gold);
+  doc.text("ACCOR DEVELOPMENT PLATFORM  ·  IC DECISION MEMORANDUM", 14, 24);
+
+  // Decision badge
+  doc.setFillColor(...decisionColor);
+  doc.roundedRect(PW - 72, 8, 58, 18, 2.5, 2.5, "F");
+  setFont(doc, 10, "bold", C.white);
+  doc.text(decisionLabel, PW - 43, 18.5, { align: "center" });
+  setFont(doc, 6.5, "normal", C.white);
+  doc.text(`IC Score: ${icScore} / 100  ·  ${confidence.toUpperCase()}`, PW - 43, 25.5, { align: "center" });
+
+  setFont(doc, 13, "bold", C.white);
+  doc.text(deal.name || "Deal", 14, 38);
+  setFont(doc, 7.5, "normal", C.grey300);
+  const sub = [deal.city, deal.state].filter(Boolean).join(", ");
+  if (sub) doc.text(sub, 14, 45);
+  setFont(doc, 6.5, "normal", C.grey500);
+  const meta = [
+    STAGE_LABELS[deal.stage] || deal.stage || "",
+    SEGMENT_LABELS[deal.segment] || deal.segment || "",
+    deal.rooms_min && deal.rooms_max ? `${deal.rooms_min}–${deal.rooms_max} keys` : "",
+  ].filter(Boolean).join("  ·  ");
+  if (meta) doc.text(meta, 14, 51);
+  setFont(doc, 6, "normal", C.grey500);
+  doc.text(`Émis le ${now}  ·  CONFIDENTIEL — Usage interne`, PW - 14, 55, { align: "right" });
+
+  let y = 68;
+
+  // ── IC SCORE GAUGE ───────────────────────────────────────────────────────────
+  y = sectionTitle(doc, "Résultat de l'Analyse IC", y);
+
+  // Score segments (proportional breakdown 35/25/20/20)
+  const scoreSegs = [
+    { label: "Brand Écon. (35%)", value: Math.round(icScore * 0.35), max: 35, color: C.gold },
+    { label: "Owner Écon. (25%)", value: Math.round(icScore * 0.25), max: 25, color: [59, 130, 246] as [number,number,number] },
+    { label: "Localisation (20%)", value: Math.round(icScore * 0.20), max: 20, color: [16, 185, 129] as [number,number,number] },
+    { label: "Exécution (20%)", value: Math.round(icScore * 0.20), max: 20, color: [168, 85, 247] as [number,number,number] },
+  ];
+
+  autoTable(doc, {
+    startY: y,
+    head: [["Critère", "Score", "Max", "Barre"]],
+    body: scoreSegs.map(s => [s.label, s.value, s.max, ""]),
+    theme: "plain",
+    headStyles: { fillColor: C.grey100 as any, fontSize: 7, fontStyle: "bold", textColor: C.grey700 as any },
+    styles: { fontSize: 7.5, cellPadding: { top: 3, bottom: 3, left: 4, right: 4 } },
+    columnStyles: {
+      0: { cellWidth: 70 },
+      1: { cellWidth: 18, halign: "center", fontStyle: "bold" },
+      2: { cellWidth: 14, halign: "center", textColor: C.grey500 as any },
+      3: { cellWidth: 80 },
+    },
+    didDrawCell: (data: any) => {
+      if (data.column.index === 3 && data.section === "body") {
+        const seg = scoreSegs[data.row.index];
+        const barX = data.cell.x + 2;
+        const barY = data.cell.y + data.cell.height / 2 - 2;
+        const barW = data.cell.width - 4;
+        const barH = 4;
+        // Background
+        doc.setFillColor(230, 230, 230);
+        doc.roundedRect(barX, barY, barW, barH, 1, 1, "F");
+        // Fill
+        const fillW = (seg.value / seg.max) * barW;
+        doc.setFillColor(...seg.color);
+        doc.roundedRect(barX, barY, fillW, barH, 1, 1, "F");
+      }
+    },
+    bodyStyles: { lineColor: C.grey100 as any, lineWidth: 0.1 },
+    margin: { left: 14, right: 14 },
+  });
+  y = (doc as any).lastAutoTable.finalY + 5;
+
+  // Total score line
+  doc.setFillColor(icScore >= 75 ? 22 : icScore >= 60 ? 202 : 220, icScore >= 75 ? 163 : icScore >= 60 ? 138 : 38, icScore >= 75 ? 74 : icScore >= 60 ? 4 : 38);
+  doc.roundedRect(14, y, 182, 8, 1.5, 1.5, "F");
+  setFont(doc, 8, "bold", C.white);
+  doc.text(`SCORE TOTAL IC : ${icScore} / 100`, PW / 2, y + 5.5, { align: "center" });
+  y += 13;
+
+  // Data completeness
+  const completeness = Math.round(decision.data_completeness || 0);
+  setFont(doc, 7, "normal", C.grey700);
+  doc.text(`Complétude des données : ${completeness}%`, 14, y);
+  // mini bar
+  doc.setFillColor(220, 220, 220);
+  doc.roundedRect(70, y - 3.5, 100, 4, 1, 1, "F");
+  doc.setFillColor(completeness >= 80 ? 22 : completeness >= 60 ? 202 : 220, completeness >= 80 ? 163 : completeness >= 60 ? 138 : 38, completeness >= 80 ? 74 : completeness >= 60 ? 4 : 38);
+  doc.roundedRect(70, y - 3.5, completeness, 4, 1, 1, "F");
+  y += 10;
+
+  // ── HARD GATES ──────────────────────────────────────────────────────────────
+  if (hardGates.length > 0) {
+    y = sectionTitle(doc, "Hard Gates IC", y);
+    autoTable(doc, {
+      startY: y,
+      head: [["Critère", "Statut", "Remarque"]],
+      body: hardGates.map(g => [g.name, g.passed ? "✓ PASSÉ" : "✗ ÉCHOUÉ", g.reason || ""]),
+      theme: "plain",
+      headStyles: { fillColor: C.grey100 as any, fontSize: 7, fontStyle: "bold", textColor: C.grey700 as any },
+      styles: { fontSize: 7, cellPadding: { top: 2.5, bottom: 2.5, left: 4, right: 4 } },
+      columnStyles: {
+        0: { cellWidth: 75 },
+        1: { cellWidth: 22, halign: "center", fontStyle: "bold" },
+        2: { cellWidth: 85, textColor: C.grey500 as any },
+      },
+      bodyStyles: { lineColor: C.grey100 as any, lineWidth: 0.1 },
+      didDrawCell: (data: any) => {
+        if (data.column.index === 1 && data.section === "body") {
+          const passed = hardGates[data.row.index]?.passed;
+          doc.setTextColor(...(passed ? [22, 163, 74] : [220, 38, 38]) as [number, number, number]);
+        }
+      },
+      margin: { left: 14, right: 14 },
+    });
+    y = (doc as any).lastAutoTable.finalY + 8;
+  }
+
+  // ── CONDITIONS & RED FLAGS ───────────────────────────────────────────────────
+  if (conditions.length > 0 || redFlags.length > 0) {
+    if (y > 220) { doc.addPage(); y = 20; }
+    const combinedRows: [string, string][] = [
+      ...conditions.map(c => ["Condition", c] as [string, string]),
+      ...redFlags.map(r => ["🚩 Red Flag", r] as [string, string]),
+    ];
+    if (combinedRows.length > 0) {
+      y = sectionTitle(doc, "Conditions & Red Flags", y);
+      autoTable(doc, {
+        startY: y,
+        head: [["Type", "Détail"]],
+        body: combinedRows,
+        theme: "plain",
+        headStyles: { fillColor: C.grey100 as any, fontSize: 7, fontStyle: "bold", textColor: C.grey700 as any },
+        styles: { fontSize: 7, cellPadding: { top: 2.5, bottom: 2.5, left: 4, right: 4 } },
+        columnStyles: {
+          0: { cellWidth: 30, fontStyle: "bold" },
+          1: { cellWidth: 152 },
+        },
+        bodyStyles: { lineColor: C.grey100 as any, lineWidth: 0.1 },
+        margin: { left: 14, right: 14 },
+      });
+      y = (doc as any).lastAutoTable.finalY + 8;
+    }
+  }
+
+  // ── IC NARRATIVE ────────────────────────────────────────────────────────────
+  if (decision.narrative_text) {
+    if (y > 210) { doc.addPage(); y = 20; }
+    y = sectionTitle(doc, "Narrative du Comité d'Investissement", y);
+    doc.setFillColor(...C.grey50);
+    const narrativeLines = doc.splitTextToSize(decision.narrative_text, 170);
+    const narrativeH = narrativeLines.length * 4.5 + 8;
+    doc.rect(14, y, 182, narrativeH, "F");
+    doc.setDrawColor(...C.grey300);
+    doc.setLineWidth(0.2);
+    doc.rect(14, y, 182, narrativeH, "S");
+    // Gold left accent bar
+    doc.setFillColor(...C.gold);
+    doc.rect(14, y, 1.5, narrativeH, "F");
+    setFont(doc, 7.5, "normal", C.black);
+    doc.text(narrativeLines, 19, y + 5);
+    y += narrativeH + 8;
+  }
+
+  // ── RECOMMENDATION BOX ───────────────────────────────────────────────────────
+  if (y > 240) { doc.addPage(); y = 20; }
+  doc.setFillColor(...decisionColor);
+  doc.setDrawColor(...decisionColor);
+  doc.setLineWidth(0.3);
+  doc.roundedRect(14, y, 182, 18, 2, 2, "F");
+  setFont(doc, 9, "bold", C.white);
+  doc.text(`Recommandation IC : ${decisionLabel}`, PW / 2, y + 7, { align: "center" });
+  setFont(doc, 7, "normal", C.white);
+  doc.text(`Score ${icScore}/100  ·  Confiance: ${confidence.toUpperCase()}  ·  Complétude: ${completeness}%`, PW / 2, y + 14, { align: "center" });
+  y += 24;
+
+  // ── DISCLAIMER ──────────────────────────────────────────────────────────────
+  if (y > 255) { doc.addPage(); y = 20; }
+  doc.setFillColor(...C.grey100);
+  doc.rect(14, y, 182, 16, "F");
+  setFont(doc, 5.5, "normal", C.grey500);
+  const disc = doc.splitTextToSize(
+    "Ce mémorandum est préparé par Accor Development et contient une analyse préliminaire basée sur les données disponibles. " +
+    "Toutes les projections sont des estimations sujettes à révision. Document strictement confidentiel à usage interne du Comité d'Investissement.",
+    176,
+  );
+  doc.text(disc, 17, y + 5);
+
+  // ── FOOTER ──────────────────────────────────────────────────────────────────
+  const pageCount = (doc as any).internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    addPageFooter(doc, i, pageCount);
+  }
+
+  const safeName = (deal.name || "Deal").replace(/[^a-zA-Z0-9]/g, "_");
+  doc.save(`${safeName}_IC_Decision_Memo.pdf`);
+}
+
 // ─── IC Memo (IC-grade, full version) ────────────────────────────────────────
 export function generateICMemo(
   deal: any,
