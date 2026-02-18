@@ -422,7 +422,7 @@ export function generateICDecisionMemoPDF(decision: any) {
   const decisionKey: string = decision.decision ?? "no_go";
 
   const decisionLabel = decisionKey === "go" ? "GO"
-    : decisionKey === "go_with_conditions" ? "GO — AVEC CONDITIONS"
+    : decisionKey === "go_with_conditions" ? "GO — WITH CONDITIONS"
     : "NO-GO";
   const decisionColor: [number, number, number] = decisionKey === "go" ? [22, 163, 74]
     : decisionKey === "go_with_conditions" ? [202, 138, 4]
@@ -460,7 +460,7 @@ export function generateICDecisionMemoPDF(decision: any) {
   ].filter(Boolean).join("  ·  ");
   if (meta) doc.text(meta, 14, 51);
   setFont(doc, 6, "normal", C.grey500);
-  doc.text(`Émis le ${now}  ·  CONFIDENTIEL — Usage interne`, PW - 14, 55, { align: "right" });
+  doc.text(`Issued ${now}  ·  CONFIDENTIAL — Internal use only`, PW - 14, 55, { align: "right" });
 
   let y = 68;
 
@@ -519,7 +519,7 @@ export function generateICDecisionMemoPDF(decision: any) {
   // Data completeness
   const completeness = Math.round(decision.data_completeness || 0);
   setFont(doc, 7, "normal", C.grey700);
-  doc.text(`Complétude des données : ${completeness}%`, 14, y);
+  doc.text(`Data completeness: ${completeness}%`, 14, y);
   // mini bar
   doc.setFillColor(220, 220, 220);
   doc.roundedRect(70, y - 3.5, 100, 4, 1, 1, "F");
@@ -584,7 +584,7 @@ export function generateICDecisionMemoPDF(decision: any) {
   // ── IC NARRATIVE ────────────────────────────────────────────────────────────
   if (decision.narrative_text) {
     if (y > 210) { doc.addPage(); y = 20; }
-    y = sectionTitle(doc, "Narrative du Comité d'Investissement", y);
+    y = sectionTitle(doc, "Investment Committee Narrative", y);
     doc.setFillColor(...C.grey50);
     const narrativeLines = doc.splitTextToSize(decision.narrative_text, 170);
     const narrativeH = narrativeLines.length * 4.5 + 8;
@@ -607,9 +607,9 @@ export function generateICDecisionMemoPDF(decision: any) {
   doc.setLineWidth(0.3);
   doc.roundedRect(14, y, 182, 18, 2, 2, "F");
   setFont(doc, 9, "bold", C.white);
-  doc.text(`Recommandation IC : ${decisionLabel}`, PW / 2, y + 7, { align: "center" });
+  doc.text(`IC Recommendation: ${decisionLabel}`, PW / 2, y + 7, { align: "center" });
   setFont(doc, 7, "normal", C.white);
-  doc.text(`Score ${icScore}/100  ·  Confiance: ${confidence.toUpperCase()}  ·  Complétude: ${completeness}%`, PW / 2, y + 14, { align: "center" });
+  doc.text(`Score ${icScore}/100  ·  Confidence: ${confidence.toUpperCase()}  ·  Completeness: ${completeness}%`, PW / 2, y + 14, { align: "center" });
   y += 24;
 
   // ── DISCLAIMER ──────────────────────────────────────────────────────────────
@@ -618,8 +618,8 @@ export function generateICDecisionMemoPDF(decision: any) {
   doc.rect(14, y, 182, 16, "F");
   setFont(doc, 5.5, "normal", C.grey500);
   const disc = doc.splitTextToSize(
-    "Ce mémorandum est préparé par Accor Development et contient une analyse préliminaire basée sur les données disponibles. " +
-    "Toutes les projections sont des estimations sujettes à révision. Document strictement confidentiel à usage interne du Comité d'Investissement.",
+    "This memorandum is prepared by Accor Development and contains a preliminary analysis based on available data. " +
+    "All projections are estimates subject to revision. Strictly confidential — for internal use by the Investment Committee only.",
     176,
   );
   doc.text(disc, 17, y + 5);
@@ -650,9 +650,9 @@ export function generateICMemo(
 
   // ── DECISION BADGE ──────────────────────────────────────────────────────────
   const decisionLabel = icDecision?.decision === "go" ? "GO"
-    : icDecision?.decision === "go_with_conditions" ? "GO – AVEC CONDITIONS"
+    : icDecision?.decision === "go_with_conditions" ? "GO — WITH CONDITIONS"
     : icDecision?.decision === "no_go" ? "NO-GO"
-    : "NON ÉVALUÉ";
+    : "NOT EVALUATED";
   const decisionColor: [number, number, number] = icDecision?.decision === "go" ? [22, 163, 74]
     : icDecision?.decision === "go_with_conditions" ? [202, 138, 4]
     : [220, 38, 38];
@@ -686,7 +686,7 @@ export function generateICMemo(
   setFont(doc, 6.5, "normal", C.grey500);
   doc.text(`${STAGE_LABELS[deal.stage] || ""}  ·  ${SEGMENT_LABELS[deal.segment] || ""}  ·  ${deal.rooms_min || "?"}–${deal.rooms_max || "?"} keys`, 14, 51);
   setFont(doc, 6, "normal", C.grey500);
-  doc.text(`Émis le ${now}  ·  CONFIDENTIEL – Usage interne`, PW - 14, 55, { align: "right" });
+  doc.text(`Issued ${now}  ·  CONFIDENTIAL — Internal use only`, PW - 14, 55, { align: "right" });
 
   let y = 68;
 
@@ -710,7 +710,7 @@ export function generateICMemo(
   }
 
   // ── KEY KPIs GRID ────────────────────────────────────────────────────────────
-  y = sectionTitle(doc, "KPIs Clés", y);
+  y = sectionTitle(doc, "Key KPIs", y);
   const y5 = outputs.years[4];
   const totalCapex = outputs.totalCapex;
   const yoc = y5 && totalCapex > 0 ? (y5.noi / totalCapex * 100).toFixed(1) + "%" : "—";
@@ -843,8 +843,8 @@ export function generateICMemo(
   doc.rect(14, y, 182, 16, "F");
   setFont(doc, 5.5, "normal", C.grey500);
   const disc = doc.splitTextToSize(
-    "Ce mémorandum est préparé par Accor Development et contient des projections financières prospectives basées sur des hypothèses de marché. " +
-    "Toutes les données sont des estimations sujettes à révision. Document confidentiel à usage interne exclusivement.",
+    "This memorandum is prepared by Accor Development and contains forward-looking financial projections based on market assumptions. " +
+    "All data are estimates subject to revision. Confidential — for internal use only.",
     176
   );
   doc.text(disc, 17, y + 5);

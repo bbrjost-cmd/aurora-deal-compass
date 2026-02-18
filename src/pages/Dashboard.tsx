@@ -50,9 +50,9 @@ export default function Dashboard() {
       const { data, error } = await supabase.functions.invoke("seed-deals", { body: { org_id: orgId } });
       if (error) throw error;
       if (data?.message) {
-        toast({ title: "Pipeline déjà chargé", description: `${data.count} deals existants.` });
+        toast({ title: "Pipeline already loaded", description: `${data.count} existing deals.` });
       } else {
-        toast({ title: `${data.inserted} deals créés`, description: "Pipeline Mexico complet." });
+        toast({ title: `${data.inserted} deals created`, description: "Mexico pipeline loaded." });
         loadData();
       }
     } catch (err: any) {
@@ -150,10 +150,10 @@ export default function Dashboard() {
       {/* ── KPI row ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Total Deals", value: totalDeals, sub: `${recentDeals.length} cette semaine`, icon: Target },
-          { label: "Score IC moyen", value: avgScore, sub: "Sur 100", icon: BarChart3 },
-          { label: "Tâches actives", value: tasks.length, sub: "En attente", icon: Clock },
-          { label: "Décisions IC", value: decisions.length, sub: `${icSummary.go} GO`, icon: TrendingUp },
+          { label: "Total Deals", value: totalDeals, sub: `${recentDeals.length} this week`, icon: Target },
+          { label: "Avg IC Score", value: avgScore, sub: "Out of 100", icon: BarChart3 },
+          { label: "Active Tasks", value: tasks.length, sub: "Pending", icon: Clock },
+          { label: "IC Decisions", value: decisions.length, sub: `${icSummary.go} GO`, icon: TrendingUp },
         ].map((kpi) => (
           <div key={kpi.label} className="bg-card border border-border rounded-2xl p-5 space-y-3">
             <div className="flex items-center justify-between">
@@ -179,9 +179,9 @@ export default function Dashboard() {
         </div>
         {totalDeals === 0 ? (
           <div className="flex flex-col items-center py-10 gap-3">
-            <p className="text-sm text-muted-foreground">Aucun deal pour l'instant.</p>
+            <p className="text-sm text-muted-foreground">No deals yet.</p>
             <Button variant="outline" size="sm" onClick={seedDeals} className="gap-2 rounded-xl">
-              <Sparkles className="h-3.5 w-3.5" /> Charger 50 deals test
+              <Sparkles className="h-3.5 w-3.5" /> Load 50 sample deals
             </Button>
           </div>
         ) : (
@@ -211,8 +211,8 @@ export default function Dashboard() {
         <div className="bg-card border border-border rounded-2xl p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-base font-semibold">Localisation</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">Top 5 deals — couleur selon décision IC</p>
+              <h2 className="text-base font-semibold">Locations</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">Top 5 deals — color by IC decision</p>
             </div>
             <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-medium">
               <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#22c55e] inline-block" />GO</span>
@@ -246,7 +246,7 @@ export default function Dashboard() {
             </button>
           </div>
           {topDeals.length === 0 ? (
-            <p className="text-xs text-muted-foreground py-6 text-center">Aucun deal scoré.</p>
+            <p className="text-xs text-muted-foreground py-6 text-center">No scored deals yet.</p>
           ) : (
             <div className="divide-y divide-border">
               {topDeals.map((deal, i) => (
@@ -284,7 +284,7 @@ export default function Dashboard() {
             </button>
           </div>
           {decisions.length === 0 ? (
-            <p className="text-xs text-muted-foreground py-6 text-center">Aucune décision IC.<br />Lancez la faisabilité.</p>
+            <p className="text-xs text-muted-foreground py-6 text-center">No IC decisions yet.<br />Run a feasibility analysis.</p>
           ) : (
             <>
               {/* Summary chips */}
@@ -324,7 +324,7 @@ export default function Dashboard() {
       {/* ── Tasks ── */}
       {tasks.length > 0 && (
         <div className="bg-card border border-border rounded-2xl p-6">
-          <h2 className="text-base font-semibold mb-5">Tâches à venir</h2>
+          <h2 className="text-base font-semibold mb-5">Upcoming Tasks</h2>
           <div className="divide-y divide-border">
             {tasks.map((task) => (
               <div key={task.id} className="flex items-center gap-4 py-3">
