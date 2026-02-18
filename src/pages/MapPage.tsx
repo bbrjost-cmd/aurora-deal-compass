@@ -213,12 +213,13 @@ export default function MapPage() {
   ];
 
   return (
-    <div className="flex flex-col" style={{ height: "calc(100vh - 3.5rem)" }}>
-      {/* Controls Bar */}
-      <div className="p-3 border-b border-border flex flex-wrap items-center gap-3 bg-background shrink-0">
+    <div className="flex flex-col" style={{ height: "calc(100vh - 6.5rem)" }}>
+      {/* Controls Bar — compact on mobile */}
+      <div className="px-2 py-2 border-b border-border flex flex-wrap items-center gap-2 bg-background shrink-0">
+        {/* Destination + radius */}
         <Select onValueChange={handleDestination}>
-          <SelectTrigger className="w-48 h-8 text-xs">
-            <SelectValue placeholder="Go to destination…" />
+          <SelectTrigger className="w-36 sm:w-44 h-8 text-xs">
+            <SelectValue placeholder="Destination…" />
           </SelectTrigger>
           <SelectContent>
             {DESTINATIONS.map((d, i) => (
@@ -228,7 +229,7 @@ export default function MapPage() {
         </Select>
 
         <Select value={radius.toString()} onValueChange={(v) => setRadius(Number(v))}>
-          <SelectTrigger className="w-24 h-8 text-xs">
+          <SelectTrigger className="w-16 sm:w-20 h-8 text-xs">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -239,55 +240,48 @@ export default function MapPage() {
           </SelectContent>
         </Select>
 
-        {/* Layer toggles */}
-        <div className="flex items-center gap-3 border border-border rounded-lg px-3 py-1.5">
-          <span className="text-xs font-medium text-muted-foreground"><Layers className="h-3 w-3 inline mr-1" />Layers</span>
-          
-          <label className="flex items-center gap-1.5 text-xs cursor-pointer">
+        {/* Layer toggles — horizontally scrollable on mobile */}
+        <div className="flex items-center gap-2 overflow-x-auto flex-1 min-w-0">
+          <span className="text-xs text-muted-foreground shrink-0 hidden sm:block">
+            <Layers className="h-3 w-3 inline mr-1" />
+          </span>
+
+          <label className="flex items-center gap-1 text-xs cursor-pointer shrink-0">
             <Switch checked={showDeals} onCheckedChange={setShowDeals} className="scale-75" />
             <MapPin className="h-3 w-3 text-destructive" />
-            <span>Deals</span>
+            <span className="hidden sm:inline">Deals</span>
             <Badge variant="secondary" className="text-xs px-1 py-0 h-4">{deals.filter(d => d.lat && d.lon).length}</Badge>
           </label>
 
-          <label className="flex items-center gap-1.5 text-xs cursor-pointer">
+          <label className="flex items-center gap-1 text-xs cursor-pointer shrink-0">
             <Switch checked={showHotels} onCheckedChange={setShowHotels} className="scale-75" />
             <Hotel className="h-3 w-3 text-[hsl(var(--hotel-chain))]" />
-            <span>Comp Hotels</span>
-            <Badge variant="secondary" className="text-xs px-1 py-0 h-4">{hotels.length}</Badge>
+            <span className="hidden sm:inline">Hotels</span>
           </label>
 
-          <label className="flex items-center gap-1.5 text-xs cursor-pointer">
+          <label className="flex items-center gap-1 text-xs cursor-pointer shrink-0">
             <Switch checked={showAirports} onCheckedChange={setShowAirports} className="scale-75" />
             <Plane className="h-3 w-3 text-[hsl(var(--success))]" />
-            <span>Airports</span>
+            <span className="hidden sm:inline">Airports</span>
           </label>
 
-          <label className="flex items-center gap-1.5 text-xs cursor-pointer">
-            <Switch
-              checked={showIndependent}
-              onCheckedChange={setShowIndependent}
-              className="scale-75"
-            />
+          <label className="flex items-center gap-1 text-xs cursor-pointer shrink-0">
+            <Switch checked={showIndependent} onCheckedChange={setShowIndependent} className="scale-75" />
             <Building2 className="h-3 w-3 text-[hsl(var(--hotel-independent))]" />
-            <span className="font-medium">Independent Hotels</span>
+            <span className="font-medium text-xs">Indep.</span>
             {loadingIndep ? (
-              <span className="text-xs text-muted-foreground animate-pulse">loading…</span>
+              <span className="text-[10px] text-muted-foreground animate-pulse">…</span>
             ) : (
-              <Badge className="text-xs px-1 py-0 h-4 bg-[hsl(var(--hotel-independent))] text-background">
+              <Badge className="text-[10px] px-1 py-0 h-4 bg-[hsl(var(--hotel-independent))] text-background">
                 {indepCounts.all}
               </Badge>
             )}
           </label>
         </div>
 
-        <Button size="sm" className="h-8 text-xs" onClick={handleSearch} disabled={loading}>
-          {loading ? "Loading…" : "Search Area"}
+        <Button size="sm" className="h-8 text-xs shrink-0" onClick={handleSearch} disabled={loading}>
+          {loading ? "…" : "Search"}
         </Button>
-
-        <span className="text-xs text-muted-foreground ml-auto hidden lg:block">
-          Click map to add deal
-        </span>
       </div>
 
       {/* Filter chips for independent hotels */}
