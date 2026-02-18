@@ -101,35 +101,56 @@ function computeFeasibility(inputs: FeasibilityInputs): FeasibilityOutputs {
   };
 }
 
-// ─── IC Engine (inlined core logic) ─────────────────────────────────────────
+// ─── IC Engine (inlined core logic) — PMS&E ONLY ────────────────────────────
+// Economy / Midscale / Premium — NO Luxury / Lifestyle
 const SEGMENT_PRESETS: Record<string, any> = {
-  luxury: { adrLow: 6000, adrHigh: 20000, occLow: 0.55, occHigh: 0.72, gopLow: 0.35, gopHigh: 0.50, fnbCapture: 0.35, otherRevPct: 0.10, capexPerKeyLow: 4000000, capexPerKeyHigh: 10000000, ffePerKeyLow: 800000, ffePerKeyHigh: 2000000, baseFeeTypical: 0.03, incentiveFeeTypical: 0.08, minYoC: 0.07, label: "Luxury" },
-  luxury_lifestyle: { adrLow: 3500, adrHigh: 8000, occLow: 0.60, occHigh: 0.78, gopLow: 0.32, gopHigh: 0.45, fnbCapture: 0.30, otherRevPct: 0.08, capexPerKeyLow: 3000000, capexPerKeyHigh: 7000000, ffePerKeyLow: 600000, ffePerKeyHigh: 1500000, baseFeeTypical: 0.03, incentiveFeeTypical: 0.08, minYoC: 0.075, label: "Luxury Lifestyle" },
-  upper_upscale: { adrLow: 2000, adrHigh: 5000, occLow: 0.62, occHigh: 0.80, gopLow: 0.30, gopHigh: 0.42, fnbCapture: 0.22, otherRevPct: 0.05, capexPerKeyLow: 1500000, capexPerKeyHigh: 4000000, ffePerKeyLow: 350000, ffePerKeyHigh: 800000, baseFeeTypical: 0.03, incentiveFeeTypical: 0.08, minYoC: 0.08, label: "Upper Upscale" },
-  midscale: { adrLow: 900, adrHigh: 2200, occLow: 0.65, occHigh: 0.82, gopLow: 0.28, gopHigh: 0.38, fnbCapture: 0.10, otherRevPct: 0.03, capexPerKeyLow: 700000, capexPerKeyHigh: 2000000, ffePerKeyLow: 150000, ffePerKeyHigh: 350000, baseFeeTypical: 0.04, incentiveFeeTypical: 0.10, minYoC: 0.08, label: "Midscale" },
+  economy: {
+    adrLow: 500, adrHigh: 1200, occLow: 0.68, occHigh: 0.84,
+    gopLow: 0.34, gopHigh: 0.46, fnbCapture: 0.03, otherRevPct: 0.02,
+    capexPerKey: 600000, ffePerKey: 90000,
+    royaltyPct: 0.050, marketingPct: 0.020, distributionPct: 0.015,
+    baseFeeTypical: 0.005, incentiveFeeTypical: 0.05,
+    minYoC: 0.08, minRooms: 50, label: "Economy",
+  },
+  midscale: {
+    adrLow: 900, adrHigh: 2200, occLow: 0.65, occHigh: 0.82,
+    gopLow: 0.28, gopHigh: 0.38, fnbCapture: 0.10, otherRevPct: 0.03,
+    capexPerKey: 1200000, ffePerKey: 220000,
+    royaltyPct: 0.045, marketingPct: 0.018, distributionPct: 0.012,
+    baseFeeTypical: 0.005, incentiveFeeTypical: 0.05,
+    minYoC: 0.08, minRooms: 80, label: "Midscale",
+  },
+  premium: {
+    adrLow: 1800, adrHigh: 4500, occLow: 0.62, occHigh: 0.80,
+    gopLow: 0.30, gopHigh: 0.42, fnbCapture: 0.18, otherRevPct: 0.05,
+    capexPerKey: 2200000, ffePerKey: 420000,
+    royaltyPct: 0.040, marketingPct: 0.015, distributionPct: 0.010,
+    baseFeeTypical: 0.025, incentiveFeeTypical: 0.08,
+    minYoC: 0.07, minRooms: 120, label: "Premium",
+  },
 };
 
 function buildInputs(deal: any): FeasibilityInputs {
-  const preset = SEGMENT_PRESETS[deal.segment] || SEGMENT_PRESETS.upper_upscale;
+  // Normalize segment to PMS&E only
+  const seg = ["economy", "midscale", "premium"].includes(deal.segment)
+    ? deal.segment
+    : "midscale";
+  const preset = SEGMENT_PRESETS[seg];
   const rooms = Math.round(((deal.rooms_min || 100) + (deal.rooms_max || 200)) / 2);
-  // Use midpoint ADR between low/high for the segment, scaled by deal score
   const scoreNorm = (deal.score_total || 60) / 100;
   const adr = Math.round(preset.adrLow + scoreNorm * (preset.adrHigh - preset.adrLow));
   const occupancy = preset.occLow + scoreNorm * (preset.occHigh - preset.occLow);
-  const isLuxury = ["luxury", "luxury_lifestyle"].includes(deal.segment);
-  const capexPerKey = isLuxury ? 5500000 : 2500000;
-  const ffePerKey = isLuxury ? 1200000 : 450000;
   return {
     rooms,
-    segment: deal.segment || "upper_upscale",
-    openingType: deal.opening_type || "new_build",
+    segment: seg,
+    openingType: deal.opening_type || "conversion",
     adr,
     occupancy: Math.round(occupancy * 100) / 100,
     fnbRevenuePct: preset.fnbCapture,
     otherRevenuePct: preset.otherRevPct,
     rampUpYears: deal.opening_type === "conversion" ? 1 : 2,
-    capexPerKey,
-    ffePerKey,
+    capexPerKey: preset.capexPerKey,
+    ffePerKey: preset.ffePerKey,
     baseFee: preset.baseFeeTypical,
     incentiveFee: preset.incentiveFeeTypical,
     gopMargin: (preset.gopLow + preset.gopHigh) / 2,
@@ -166,18 +187,16 @@ function computeSimpleIRR(investment: number, cashFlows: number[], exitValue: nu
 }
 
 function runICEngine(deal: any, inputs: FeasibilityInputs, outputs: FeasibilityOutputs) {
-  const MIN_NET_FEES_USD = 350000;
-  const MIN_YOC_LUXURY = 0.07;
-  const MIN_YOC_UPSCALE = 0.08;
-  const MAX_PAYBACK = 6;
-  const MIN_ROOMS_UPSCALE = 70;
+  // PMS&E thresholds — NO luxury/lifestyle references
+  const MIN_NET_FEES_USD = 120000; // PMS&E minimum viability
+  const MAX_PAYBACK = 8;
 
-  const isLuxury = ["luxury", "luxury_lifestyle"].includes(deal.segment || inputs.segment);
-  const isUpscalePlus = ["luxury", "luxury_lifestyle", "upper_upscale"].includes(deal.segment || inputs.segment);
-  const preset = SEGMENT_PRESETS[inputs.segment] || SEGMENT_PRESETS.upper_upscale;
-  const minYoC = isLuxury ? MIN_YOC_LUXURY : MIN_YOC_UPSCALE;
+  const seg = ["economy", "midscale", "premium"].includes(inputs.segment) ? inputs.segment : "midscale";
+  const preset = SEGMENT_PRESETS[seg];
+  const minYoC = preset.minYoC; // 8% economy/midscale, 7% premium
+  const minRooms = preset.minRooms;
 
-  // Brand economics
+  // Brand economics (franchise model primary)
   const stabYear = outputs.years[2] || outputs.years[outputs.years.length - 1];
   const totalRevStab = stabYear.totalRevenue;
   const baseFeeAnnual = totalRevStab * inputs.baseFee;
@@ -192,67 +211,65 @@ function runICEngine(deal: any, inputs: FeasibilityInputs, outputs: FeasibilityO
   const totalCapex = outputs.totalCapex;
   const yieldOnCost = totalCapex > 0 ? ebitdaY5 / totalCapex : 0;
   const exitValue = inputs.capRate! > 0 ? ebitdaY5 / inputs.capRate! : 0;
-  const unleveragedIRR = computeSimpleIRR(totalCapex, outputs.years.map(y => y.noi), exitValue);
 
-  // Completeness (simplified: deal has rooms/segment/location = ~65%)
-  const completenessScore = Math.min(85, 40 + // base
+  // Data completeness
+  const completenessScore = Math.min(85, 40 +
     (deal.rooms_min ? 8 : 0) +
     (deal.segment ? 8 : 0) +
     (deal.city && deal.state ? 10 : 0) +
     (deal.lat && deal.lon ? 5 : 0) +
     (deal.address ? 5 : 0) +
     (deal.score_total ? 8 : 0) +
-    15 // feasibility inputs provided (we're computing them now)
+    15
   );
 
-  // Hard gates
+  // Hard gates — PMS&E logic
   const roomsMax = deal.rooms_max || inputs.rooms;
   const hardGates = {
-    completeness: { passed: completenessScore >= 55, name: "Data Completeness ≥ 55" },
-    minRooms: { passed: !isUpscalePlus || roomsMax >= MIN_ROOMS_UPSCALE, name: `Min Rooms (${MIN_ROOMS_UPSCALE})` },
-    netFees: { passed: netFeesUSD >= MIN_NET_FEES_USD, name: "Net Fees USD ≥ Threshold" },
+    completeness: { passed: completenessScore >= 55, name: "Data Completeness ≥ 55%" },
+    minRooms: { passed: roomsMax >= minRooms, name: `Min Rooms ≥ ${minRooms} for ${preset.label}` },
+    netFees: { passed: netFeesUSD >= MIN_NET_FEES_USD, name: `Net Fees ≥ $${MIN_NET_FEES_USD.toLocaleString()} USD` },
   };
   const hardGateFailed = Object.values(hardGates).some(g => !g.passed);
 
-  // Scoring
-  const netFeesRatio = netFeesUSD / MIN_NET_FEES_USD;
-  const brandScore = Math.min(35, Math.round(Math.min(20, 20 * Math.min(netFeesRatio, 2) / 2) + 15));
+  // Scoring — aligned with PMS&E scoring model
+  const locationScore = Math.min(25, Math.round(((deal.score_total || 60) / 100) * 25));
+  const demandScore = Math.min(25, Math.round((netFeesUSD / MIN_NET_FEES_USD) * 15 + 5));
+  const conversionScore = Math.min(20, deal.opening_type === "conversion" ? 18 :
+    deal.opening_type === "franchise_takeover" ? 16 :
+    deal.opening_type === "rebranding" ? 14 : 10);
   const yocRatio = yieldOnCost / minYoC;
-  const ownerScore = Math.min(25, Math.round(
-    Math.min(15, 15 * Math.min(yocRatio, 1.5) / 1.5) +
-    5 + // no debt
-    Math.min(5, 5 * (exitValue > totalCapex * 1.5 ? 1 : Math.max(0, (exitValue - totalCapex) / (totalCapex * 0.5))))
-  ));
-  const locationScore = Math.min(20, Math.round(((deal.score_total || 60) / 100) * 20));
-  const executionScore = Math.min(20, deal.opening_type === "conversion" ? 15 : 12);
+  const ownerScore = Math.min(15, Math.round(Math.min(15, 15 * Math.min(yocRatio, 1.5) / 1.5)));
+  const executionScore = Math.min(15, deal.opening_type === "conversion" ? 13 : 10);
 
-  const icScore = brandScore + ownerScore + locationScore + executionScore;
+  const icScore = Math.min(100, locationScore + demandScore + conversionScore + ownerScore + executionScore);
 
   let decision: "go" | "go_with_conditions" | "no_go";
-  if (hardGateFailed || icScore < 60) decision = "no_go";
-  else if (icScore >= 75) decision = "go";
+  if (hardGateFailed || icScore < 55) decision = "no_go";
+  else if (icScore >= 72) decision = "go";
   else decision = "go_with_conditions";
 
   const confidence = completenessScore >= 80 ? "high" : completenessScore >= 60 ? "medium" : "low";
 
-  // Conditions
+  // Conditions — PMS&E specific
   const conditions: string[] = [];
   if (netFeesUSD < MIN_NET_FEES_USD) conditions.push(`Increase net fees to ≥ $${MIN_NET_FEES_USD.toLocaleString()} USD — currently $${Math.round(netFeesUSD).toLocaleString()} USD.`);
-  if (yieldOnCost < minYoC) conditions.push(`Improve YoC to ≥ ${(minYoC * 100).toFixed(0)}% (currently ${(yieldOnCost * 100).toFixed(1)}%).`);
-  if (completenessScore < 70) conditions.push(`Complete underwriting data (currently ${completenessScore}%). Add full feasibility study, contact info.`);
+  if (yieldOnCost < minYoC) conditions.push(`Improve YoC to ≥ ${(minYoC * 100).toFixed(0)}% (currently ${(yieldOnCost * 100).toFixed(1)}%) — reduce CAPEX/key or reposition ADR.`);
+  if (completenessScore < 70) conditions.push(`Complete underwriting data (currently ${completenessScore}%).`);
+  if (deal.opening_type === "new_build" && seg === "economy") conditions.push("Consider conversion vs new build — stronger CAPEX efficiency for Economy segment.");
 
   // Red flags
   const redFlags: string[] = [];
-  if (roomsMax < 50 && isUpscalePlus) redFlags.push(`${roomsMax} rooms below viable threshold for brand economics.`);
-  if (outputs.simplePayback > 15) redFlags.push(`Simple payback ${outputs.simplePayback} years — marginal capital efficiency.`);
-  if (yieldOnCost < minYoC * 0.75) redFlags.push(`YoC ${(yieldOnCost * 100).toFixed(1)}% significantly below owner threshold.`);
+  if (roomsMax < minRooms) redFlags.push(`${roomsMax} rooms below ${preset.label} minimum (${minRooms} keys).`);
+  if (outputs.simplePayback > MAX_PAYBACK) redFlags.push(`Simple payback ${outputs.simplePayback} yrs exceeds ${MAX_PAYBACK}-yr threshold.`);
+  if (yieldOnCost < minYoC * 0.75) redFlags.push(`YoC ${(yieldOnCost * 100).toFixed(1)}% significantly below ${preset.label} threshold (${(minYoC * 100).toFixed(0)}%).`);
   for (const g of Object.values(hardGates).filter(g => !g.passed)) {
     redFlags.push(`Hard gate failed: ${g.name}`);
   }
 
-  // Narrative
+  // Narrative — PMS&E tone
   const decisionLabel = decision === "go" ? "GO" : decision === "go_with_conditions" ? "GO WITH CONDITIONS" : "NO-GO";
-  const narrative = `The Investment Committee has evaluated ${deal.name} as a ${preset.label} hotel project in ${deal.city}. IC Score: ${icScore}/100 → ${decisionLabel} (${confidence} confidence).\n\nBrand economics: stabilized net fees ~$${Math.round(netFeesUSD).toLocaleString()} USD/yr. ${netFeesUSD >= MIN_NET_FEES_USD ? "Exceeds minimum threshold." : "Below minimum threshold — corrective action required."}\n\nOwner economics: YoC ${(yieldOnCost * 100).toFixed(1)}% on MXN ${totalCapex.toLocaleString()} total CAPEX, simple payback ${outputs.simplePayback} yrs. ${yieldOnCost >= minYoC ? "Owner threshold met." : "Below owner threshold — deal requires restructuring."}\n\n${redFlags.length > 0 ? `Key concerns: ${redFlags.slice(0, 2).join("; ")}.` : "No critical red flags."} ${conditions.length > 0 ? `Conditions to advance: ${conditions.slice(0, 2).join("; ")}.` : "Recommend advance to LOI."}`;
+  const narrative = `IC evaluation of ${deal.name} — ${preset.label} ${deal.opening_type?.replace(/_/g, " ") || "conversion"} in ${deal.city}. Score: ${icScore}/100 → ${decisionLabel} (${confidence} confidence).\n\nAccor fees: stabilised net fees ~$${Math.round(netFeesUSD).toLocaleString()} USD/yr. ${netFeesUSD >= MIN_NET_FEES_USD ? "Meets PMS&E minimum." : "Below PMS&E minimum — corrective action required."}\n\nOwner returns: YoC ${(yieldOnCost * 100).toFixed(1)}% vs ${(minYoC * 100).toFixed(0)}% threshold. CAPEX: MXN ${totalCapex.toLocaleString()}, payback ${outputs.simplePayback} yrs.\n\n${redFlags.length > 0 ? `Key issues: ${redFlags.slice(0, 2).join("; ")}.` : "No critical red flags."} ${conditions.length > 0 ? `Conditions: ${conditions.slice(0, 2).join("; ")}.` : "Recommend advance to LOI."}`;
 
   return {
     decision,
@@ -261,10 +278,9 @@ function runICEngine(deal: any, inputs: FeasibilityInputs, outputs: FeasibilityO
     hard_gates_json: hardGates,
     conditions_json: conditions,
     red_flags_json: redFlags,
-    thresholds_json: { MIN_NET_FEES_USD, MIN_YOC_LUXURY, MIN_YOC_UPSCALE, MAX_PAYBACK, MIN_ROOMS_UPSCALE },
+    thresholds_json: { MIN_NET_FEES_USD, minYoC, MAX_PAYBACK, minRooms, segment: seg },
     data_completeness: completenessScore,
     narrative_text: narrative,
-    // Extra data for saving to other tables
     _inputs: inputs,
     _outputs: outputs,
     _netFeesUSD: netFeesUSD,
