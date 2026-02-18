@@ -10,9 +10,11 @@ import { DealCreateDialog } from "@/components/DealCreateDialog";
 import { DealDetailDrawer } from "@/components/DealDetailDrawer";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { useSearchParams } from "react-router-dom";
 
 export default function Pipeline() {
   const { orgId } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [deals, setDeals] = useState<any[]>([]);
   const [createOpen, setCreateOpen] = useState(false);
   const [selectedDeal, setSelectedDeal] = useState<any>(null);
@@ -22,7 +24,14 @@ export default function Pipeline() {
   const loadDeals = () => {
     if (!orgId) return;
     supabase.from("deals").select("*").eq("org_id", orgId).order("updated_at", { ascending: false }).then(({ data }) => {
-      setDeals(data || []);
+      const dealsList = data || [];
+      setDeals(dealsList);
+      // Auto-open deal from URL param
+      const dealId = searchParams.get("deal");
+      if (dealId) {
+        const found = dealsList.find(d => d.id === dealId);
+        if (found) setSelectedDeal(found);
+      }
     });
   };
 
@@ -127,7 +136,14 @@ export default function Pipeline() {
       </div>
 
       <DealCreateDialog open={createOpen} onOpenChange={setCreateOpen} onCreated={loadDeals} />
-      <DealDetailDrawer deal={selectedDeal} onClose={() => setSelectedDeal(null)} onUpdate={loadDeals} />
+      <DealDetailDrawer
+        deal={selectedDeal}
+        onClose={() => {
+          setSelectedDeal(null);
+          setSearchParams({});
+        }}
+        onUpdate={loadDeals}
+      />
     </div>
   );
 }
