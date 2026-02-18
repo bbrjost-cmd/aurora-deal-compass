@@ -11,6 +11,7 @@ import Pipeline from "./pages/Pipeline";
 import FeasibilityPage from "./pages/FeasibilityPage";
 import DataSourcesPage from "./pages/DataSourcesPage";
 import AdminPage from "./pages/AdminPage";
+import ICPage from "./pages/ICPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ function AppContent() {
         <Route path="/map" element={<MapPage />} />
         <Route path="/pipeline" element={<Pipeline />} />
         <Route path="/feasibility" element={<FeasibilityPage />} />
+        <Route path="/ic" element={<ICPage />} />
         <Route path="/data-sources" element={<DataSourcesPage />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path="*" element={<NotFound />} />

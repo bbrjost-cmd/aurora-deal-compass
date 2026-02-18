@@ -1,16 +1,18 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard, Map, Kanban, Calculator, Database, Settings, Menu, X,
+  LayoutDashboard, Map, Kanban, Calculator, Database, Settings, Menu, X, BarChart3, Search,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { CommandBar } from "@/components/CommandBar";
 
 const NAV_ITEMS = [
   { path: "/", label: "Dashboard", icon: LayoutDashboard },
   { path: "/map", label: "Map", icon: Map },
   { path: "/pipeline", label: "Pipeline", icon: Kanban },
   { path: "/feasibility", label: "Feasibility", icon: Calculator },
+  { path: "/ic", label: "IC Decision", icon: BarChart3 },
   { path: "/data-sources", label: "Data Sources", icon: Database },
   { path: "/admin", label: "Admin", icon: Settings },
 ];
@@ -18,6 +20,19 @@ const NAV_ITEMS = [
 export function AppLayout({ children }: { children: ReactNode }) {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [cmdOpen, setCmdOpen] = useState(false);
+
+  // ⌘K / Ctrl+K shortcut
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setCmdOpen(prev => !prev);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
@@ -65,6 +80,18 @@ export function AppLayout({ children }: { children: ReactNode }) {
           })}
         </nav>
 
+        {/* ⌘K hint */}
+        <div className="px-3 pb-3">
+          <button
+            onClick={() => setCmdOpen(true)}
+            className="w-full flex items-center gap-2 px-3 py-2 rounded-md border border-border/60 text-xs text-muted-foreground hover:bg-sidebar-accent/50 transition-colors"
+          >
+            <Search className="h-3.5 w-3.5" />
+            <span>Rechercher...</span>
+            <kbd className="ml-auto text-[10px] bg-muted px-1.5 py-0.5 rounded font-mono">⌘K</kbd>
+          </button>
+        </div>
+
         {/* Footer */}
         <div className="p-4 border-t border-border">
           <p className="text-[10px] text-muted-foreground text-center tracking-wider">Accor Development Tools</p>
@@ -84,7 +111,17 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <Menu className="h-5 w-5" />
           </Button>
           <div className="ml-auto flex items-center gap-2">
-            <span className="text-xs text-muted-foreground tracking-widest uppercase">Accor Development</span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCmdOpen(true)}
+              className="hidden sm:flex items-center gap-2 text-xs text-muted-foreground h-8"
+            >
+              <Search className="h-3.5 w-3.5" />
+              Rechercher
+              <kbd className="text-[10px] bg-muted px-1.5 py-0.5 rounded font-mono ml-1">⌘K</kbd>
+            </Button>
+            <span className="text-xs text-muted-foreground tracking-widest uppercase hidden md:block">Accor Development</span>
             <div className="h-2 w-2 rounded-full bg-primary" title="Connected" />
           </div>
         </header>
@@ -94,6 +131,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
           {children}
         </main>
       </div>
+
+      {/* Command Bar */}
+      <CommandBar open={cmdOpen} onOpenChange={setCmdOpen} />
     </div>
   );
 }

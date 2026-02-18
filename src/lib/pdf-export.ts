@@ -391,15 +391,229 @@ export function generateDealPDF(deal: any, tasks: any[], feasibilityOutputs?: an
   doc.save(`${safeName}_Memo.pdf`);
 }
 
-// ─── IC Memo (alias for IC-grade deal memo) ───────────────────────────────────
+// ─── IC Memo (IC-grade, full version) ────────────────────────────────────────
 export function generateICMemo(
   deal: any,
   tasks: any[],
   inputs: FeasibilityInputs,
   outputs: FeasibilityOutputs,
+  icDecision?: any,
   brands?: string[],
-  contacts?: any[],
 ) {
-  generateFeasibilityPDF(deal, inputs, outputs, brands);
+  const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+  const PW = 210;
+  const now = new Date().toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" });
+
+  // ── DECISION BADGE ──────────────────────────────────────────────────────────
+  const decisionLabel = icDecision?.decision === "go" ? "GO"
+    : icDecision?.decision === "go_with_conditions" ? "GO – AVEC CONDITIONS"
+    : icDecision?.decision === "no_go" ? "NO-GO"
+    : "NON ÉVALUÉ";
+  const decisionColor: [number, number, number] = icDecision?.decision === "go" ? [22, 163, 74]
+    : icDecision?.decision === "go_with_conditions" ? [202, 138, 4]
+    : [220, 38, 38];
+
+  // ── HEADER ──────────────────────────────────────────────────────────────────
+  doc.setFillColor(...C.black);
+  doc.rect(0, 0, PW, 58, "F");
+  doc.setFillColor(...C.gold);
+  doc.rect(0, 58, PW, 1.5, "F");
+
+  setFont(doc, 20, "bold", C.white);
+  doc.text("AURORA", 14, 17);
+  setFont(doc, 6.5, "normal", C.gold);
+  doc.text("ACCOR DEVELOPMENT PLATFORM  ·  INVESTMENT COMMITTEE MEMORANDUM", 14, 24);
+
+  // Decision badge (right)
+  doc.setFillColor(...decisionColor);
+  doc.roundedRect(PW - 68, 10, 54, 14, 2, 2, "F");
+  setFont(doc, 9, "bold", C.white);
+  doc.text(decisionLabel, PW - 41, 19.5, { align: "center" });
+  if (icDecision?.ic_score !== undefined) {
+    setFont(doc, 6, "normal", C.white);
+    doc.text(`IC Score: ${icDecision.ic_score} / 100  ·  ${icDecision.confidence?.toUpperCase() || ""}`, PW - 41, 25, { align: "center" });
+  }
+
+  setFont(doc, 13, "bold", C.white);
+  doc.text(deal.name || "Deal", 14, 38);
+  setFont(doc, 7.5, "normal", C.grey300);
+  const sub = [deal.city, deal.state].filter(Boolean).join(", ");
+  if (sub) doc.text(sub, 14, 45);
+  setFont(doc, 6.5, "normal", C.grey500);
+  doc.text(`${STAGE_LABELS[deal.stage] || ""}  ·  ${SEGMENT_LABELS[deal.segment] || ""}  ·  ${deal.rooms_min || "?"}–${deal.rooms_max || "?"} keys`, 14, 51);
+  setFont(doc, 6, "normal", C.grey500);
+  doc.text(`Émis le ${now}  ·  CONFIDENTIEL – Usage interne`, PW - 14, 55, { align: "right" });
+
+  let y = 68;
+
+  // ── DEAL THESIS ──────────────────────────────────────────────────────────────
+  if (brands && brands.length > 0) {
+    y = sectionTitle(doc, "Deal Thesis", y);
+    const thesis = [
+      `Asset ${OPENING_TYPE_LABELS[deal.opening_type] || "new build"} positionné en ${SEGMENT_LABELS[deal.segment] || deal.segment} à ${deal.city}, ${deal.state}.`,
+      `Marques recommandées: ${brands.slice(0, 3).join(" / ")}. Potentiel ADR stabilisé: ${formatMXN(inputs.adr)} / ${formatMXN(inputs.adr / inputs.fxRate)} USD.`,
+      `NOI Année 5 estimé: ${formatMXN(outputs.years[4]?.noi || 0)} — Payback: ${outputs.simplePayback} ans — YoC: ${((outputs.years[4]?.noi || 0) / outputs.totalCapex * 100).toFixed(1)}%.`,
+    ];
+    thesis.forEach((line, i) => {
+      if (i === 0) doc.setFillColor(...C.gold); else doc.setFillColor(...C.grey300);
+      doc.circle(17, y - 1, 1, "F");
+      setFont(doc, 7.5, "normal", C.black);
+      const split = doc.splitTextToSize(line, 170);
+      doc.text(split, 21, y);
+      y += split.length * 5;
+    });
+    y += 4;
+  }
+
+  // ── KEY KPIs GRID ────────────────────────────────────────────────────────────
+  y = sectionTitle(doc, "KPIs Clés", y);
+  const y5 = outputs.years[4];
+  const totalCapex = outputs.totalCapex;
+  const yoc = y5 && totalCapex > 0 ? (y5.noi / totalCapex * 100).toFixed(1) + "%" : "—";
+  const revPar = y5 ? formatMXN(y5.roomsRevenue / (inputs.rooms * 365)) : "—";
+
+  const kpiW = 30; const kpiH = 20; const kpiGap = 1.5; const kpiX0 = 14;
+  const kpis: [string, string, string?][] = [
+    ["Rooms", `${inputs.rooms}`, "keys"],
+    ["ADR", formatMXN(inputs.adr), "MXN"],
+    ["Occ.", `${(inputs.occupancy * 100).toFixed(0)}%`, "stabilisée"],
+    ["RevPAR", revPar, "MXN"],
+    ["GOP%", `${(inputs.gopMargin * 100).toFixed(0)}%`, "marge"],
+    ["NOI Y5", formatMXN(y5?.noi || 0), "MXN"],
+  ];
+  kpis.forEach((k, i) => kpiBox(doc, kpiX0 + i * (kpiW + kpiGap), y, kpiW, kpiH, k[0], k[1], k[2]));
+  y += kpiH + 3;
+
+  const kpis2: [string, string, string?][] = [
+    ["CAPEX/Key", formatMXN(inputs.capexPerKey), "MXN"],
+    ["CAPEX Total", formatMXN(totalCapex), "MXN"],
+    ["Fees Bruts", formatMXN(y5?.fees || 0), "MXN/an"],
+    ["YoC", yoc, "vs CAPEX"],
+    ["Payback", `${outputs.simplePayback} ans`, "simple"],
+    ["IC Score", `${icDecision?.ic_score ?? "—"}`, "/100"],
+  ];
+  kpis2.forEach((k, i) => kpiBox(doc, kpiX0 + i * (kpiW + kpiGap), y, kpiW, kpiH, k[0], k[1], k[2]));
+  y += kpiH + 8;
+
+  // ── IC DECISION SECTION ──────────────────────────────────────────────────────
+  if (icDecision) {
+    y = sectionTitle(doc, "Recommandation IC", y);
+
+    // Hard Gates
+    const hg = (icDecision.hard_gates_json || []) as any[];
+    if (hg.length > 0) {
+      autoTable(doc, {
+        startY: y,
+        head: [["Gate", "Statut"]],
+        body: hg.map((g: any) => [g.name, g.passed ? "✓ PASSÉ" : "✗ ÉCHOUÉ"]),
+        theme: "plain",
+        headStyles: { fillColor: C.grey100 as any, fontSize: 7, fontStyle: "bold", textColor: C.grey700 as any },
+        styles: { fontSize: 7, cellPadding: 2 },
+        columnStyles: {
+          0: { cellWidth: 130 },
+          1: { cellWidth: 46, halign: "center", fontStyle: "bold" },
+        },
+        bodyStyles: { lineColor: C.grey100 as any, lineWidth: 0.1 },
+        didDrawCell: (data: any) => {
+          if (data.column.index === 1 && data.row.raw[1]?.includes("ÉCHOUÉ")) {
+            doc.setTextColor(...([220, 38, 38] as [number, number, number]));
+          }
+        },
+        margin: { left: 14, right: 14 },
+      });
+      y = (doc as any).lastAutoTable.finalY + 5;
+    }
+
+    // Conditions
+    const conditions = (icDecision.conditions_json || []) as string[];
+    if (conditions.length > 0) {
+      setFont(doc, 7.5, "bold", C.grey700);
+      doc.text("Conditions de GO :", 14, y); y += 5;
+      conditions.forEach((c: string) => {
+        setFont(doc, 7, "normal", C.black);
+        const lines = doc.splitTextToSize(`→  ${c}`, 176);
+        doc.text(lines, 16, y);
+        y += lines.length * 4.5;
+      });
+      y += 3;
+    }
+
+    // Red flags
+    const redFlags = (icDecision.red_flags_json || []) as string[];
+    if (redFlags.length > 0) {
+      setFont(doc, 7.5, "bold", C.grey700);
+      doc.text("Red Flags :", 14, y); y += 5;
+      redFlags.slice(0, 3).forEach((rf: string) => {
+        doc.setTextColor(220, 38, 38);
+        setFont(doc, 7, "normal", [220, 38, 38] as any);
+        const lines = doc.splitTextToSize(`⚠  ${rf}`, 176);
+        doc.text(lines, 16, y);
+        y += lines.length * 4.5;
+      });
+      y += 3;
+    }
+  }
+
+  // ── SENSITIVITIES MINI TABLE ──────────────────────────────────────────────────
+  if (y > 210) { doc.addPage(); y = 20; }
+  y = sectionTitle(doc, "Analyse de Sensibilité", y);
+  const baseNoi = outputs.years[4]?.noi || 0;
+  autoTable(doc, {
+    startY: y,
+    head: [["Scénario", "NOI Y5 (MXN)", "NOI Y5 (USD)", "Variation"]],
+    body: [
+      ["Base", formatMXN(baseNoi), formatUSD(baseNoi, inputs.fxRate), "—"],
+      ["Occ. −10%", formatMXN(outputs.sensitivities.occDown10[4]?.noi || 0), formatUSD(outputs.sensitivities.occDown10[4]?.noi || 0, inputs.fxRate),
+        baseNoi > 0 ? `${(((outputs.sensitivities.occDown10[4]?.noi || 0) - baseNoi) / baseNoi * 100).toFixed(1)}%` : "—"],
+      ["ADR −10%", formatMXN(outputs.sensitivities.adrDown10[4]?.noi || 0), formatUSD(outputs.sensitivities.adrDown10[4]?.noi || 0, inputs.fxRate),
+        baseNoi > 0 ? `${(((outputs.sensitivities.adrDown10[4]?.noi || 0) - baseNoi) / baseNoi * 100).toFixed(1)}%` : "—"],
+      ["FX +15%", formatMXN(outputs.sensitivities.fxShock[4]?.noi || 0), formatUSD(outputs.sensitivities.fxShock[4]?.noi || 0, inputs.fxRate * 1.15),
+        baseNoi > 0 ? `${(((outputs.sensitivities.fxShock[4]?.noi || 0) - baseNoi) / baseNoi * 100).toFixed(1)}%` : "—"],
+      ["CAPEX +15%", formatMXN(baseNoi), "—", `Payback → ${outputs.sensitivities.capexUp15.simplePayback} ans`],
+    ],
+    theme: "striped",
+    headStyles: { fillColor: C.black as any, textColor: C.white as any, fontSize: 7, fontStyle: "bold" },
+    styles: { fontSize: 7, cellPadding: 2 },
+    alternateRowStyles: { fillColor: C.grey50 as any },
+    columnStyles: { 0: { fontStyle: "bold", cellWidth: 30 }, 3: { halign: "center", cellWidth: 28 } },
+    margin: { left: 14, right: 14 },
+  });
+  y = (doc as any).lastAutoTable.finalY + 8;
+
+  // ── NEXT ACTIONS ──────────────────────────────────────────────────────────────
+  const pending = (tasks || []).filter(t => t.status !== "done").slice(0, 3);
+  if (pending.length > 0) {
+    if (y > 240) { doc.addPage(); y = 20; }
+    y = sectionTitle(doc, "Prochaines Actions", y);
+    pending.forEach((t, i) => {
+      setFont(doc, 7.5, "normal", C.black);
+      doc.text(`${i + 1}.  ${t.title}${t.due_date ? `  (échéance: ${new Date(t.due_date).toLocaleDateString("fr-FR")})` : ""}`, 16, y);
+      y += 5.5;
+    });
+    y += 4;
+  }
+
+  // ── DISCLAIMER ──────────────────────────────────────────────────────────────
+  if (y > 255) { doc.addPage(); y = 20; }
+  doc.setFillColor(...C.grey100);
+  doc.rect(14, y, 182, 16, "F");
+  setFont(doc, 5.5, "normal", C.grey500);
+  const disc = doc.splitTextToSize(
+    "Ce mémorandum est préparé par Accor Development et contient des projections financières prospectives basées sur des hypothèses de marché. " +
+    "Toutes les données sont des estimations sujettes à révision. Document confidentiel à usage interne exclusivement.",
+    176
+  );
+  doc.text(disc, 17, y + 5);
+
+  // ── FOOTER ──────────────────────────────────────────────────────────────────
+  const pageCount = (doc as any).internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    addPageFooter(doc, i, pageCount);
+  }
+
+  const safeName = (deal.name || "Deal").replace(/[^a-zA-Z0-9]/g, "_");
+  doc.save(`${safeName}_IC_Memo.pdf`);
 }
+
 
