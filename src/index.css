@@ -4,129 +4,146 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 6.7%;
+    /* ── Core surfaces ── */
+    --background: 0 0% 98%;
+    --foreground: 0 0% 8%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 6.7%;
+    --card-foreground: 0 0% 8%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 6.7%;
+    --popover-foreground: 0 0% 8%;
 
-    --primary: 0 0% 6.7%;
+    /* ── Brand ── */
+    --primary: 0 0% 8%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 6.7%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 8%;
 
-    --muted: 0 0% 91.8%;
-    --muted-foreground: 0 0% 40%;
+    --muted: 0 0% 93%;
+    --muted-foreground: 0 0% 45%;
 
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 6.7%;
+    --accent: 0 0% 94%;
+    --accent-foreground: 0 0% 8%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 91.8%;
-    --input: 0 0% 91.8%;
-    --ring: 0 0% 6.7%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 0 0% 8%;
 
-    --radius: 0.5rem;
+    /* Radius — Apple-style gentle curves */
+    --radius: 0.75rem;
 
-    --aurora-red: 0 100% 40.8%;
+    /* ── Accor brand accent ── */
+    --aurora-red: 1 82% 44%;
     --aurora-red-foreground: 0 0% 100%;
-    --aurora-gold: 43 73% 47.1%;
-    --aurora-gold-foreground: 0 0% 6.7%;
+    --aurora-gold: 38 65% 42%;
+    --aurora-gold-foreground: 0 0% 100%;
 
-    /* IC Decision Status tokens */
-    --ic-go: 142 72% 29%;
+    /* ── IC Decision tokens ── */
+    --ic-go: 150 60% 32%;
     --ic-go-foreground: 0 0% 100%;
-    --ic-go-muted: 142 76% 97%;
-    --ic-go-border: 142 72% 70%;
+    --ic-go-muted: 150 50% 96%;
+    --ic-go-border: 150 50% 75%;
 
-    --ic-conditions: 38 92% 40%;
+    --ic-conditions: 35 85% 38%;
     --ic-conditions-foreground: 0 0% 100%;
-    --ic-conditions-muted: 48 100% 96%;
-    --ic-conditions-border: 38 92% 70%;
+    --ic-conditions-muted: 40 100% 96%;
+    --ic-conditions-border: 35 80% 72%;
 
-    --ic-nogo: 0 72% 42%;
+    --ic-nogo: 0 65% 44%;
     --ic-nogo-foreground: 0 0% 100%;
-    --ic-nogo-muted: 0 86% 97%;
-    --ic-nogo-border: 0 72% 70%;
+    --ic-nogo-muted: 0 80% 97%;
+    --ic-nogo-border: 0 65% 74%;
 
-    /* Semantic status tokens */
-    --warning: 38 92% 40%;
+    /* ── Status ── */
+    --warning: 35 85% 38%;
     --warning-foreground: 0 0% 100%;
-    --warning-muted: 48 100% 96%;
-    --success: 142 72% 29%;
+    --warning-muted: 40 100% 96%;
+    --success: 150 60% 32%;
     --success-foreground: 0 0% 100%;
-    --success-muted: 142 76% 97%;
+    --success-muted: 150 50% 96%;
 
-    /* Hotel layer tokens */
-    --hotel-independent: 43 73% 47.1%;
-    --hotel-chain: 217 91% 60%;
-    --hotel-unknown: 38 92% 40%;
+    /* ── Map hotel layers ── */
+    --hotel-independent: 38 65% 42%;
+    --hotel-chain: 215 80% 52%;
+    --hotel-unknown: 35 85% 38%;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 0 0% 26.1%;
-    --sidebar-primary: 0 0% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 0 0% 95.9%;
-    --sidebar-accent-foreground: 0 0% 10%;
-    --sidebar-border: 0 0% 91%;
-    --sidebar-ring: 0 0% 6.7%;
+    /* ── Sidebar ── */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 0 0% 30%;
+    --sidebar-primary: 0 0% 8%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 96%;
+    --sidebar-accent-foreground: 0 0% 8%;
+    --sidebar-border: 0 0% 92%;
+    --sidebar-ring: 0 0% 8%;
   }
 
   .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
+    --background: 0 0% 6%;
+    --foreground: 0 0% 96%;
 
-    --card: 0 0% 6.7%;
-    --card-foreground: 0 0% 98%;
+    --card: 0 0% 9%;
+    --card-foreground: 0 0% 96%;
 
-    --popover: 0 0% 6.7%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 0 0% 9%;
+    --popover-foreground: 0 0% 96%;
 
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 6.7%;
+    --primary: 0 0% 96%;
+    --primary-foreground: 0 0% 6%;
 
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 0 0% 13%;
+    --secondary-foreground: 0 0% 96%;
 
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 55%;
 
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 0 0% 14%;
+    --accent-foreground: 0 0% 96%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 62% 40%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
+    --border: 0 0% 16%;
+    --input: 0 0% 16%;
+    --ring: 0 0% 80%;
 
-    --aurora-red: 0 84% 60%;
-    --aurora-gold: 43 73% 47.1%;
+    --aurora-red: 0 75% 58%;
+    --aurora-gold: 38 65% 52%;
 
-    --warning: 38 92% 60%;
-    --warning-muted: 38 30% 15%;
-    --success: 142 60% 45%;
-    --success-muted: 142 30% 12%;
+    --ic-go: 150 55% 45%;
+    --ic-go-muted: 150 35% 12%;
+    --ic-go-border: 150 50% 35%;
 
-    --hotel-independent: 43 73% 55%;
-    --hotel-chain: 217 91% 65%;
-    --hotel-unknown: 38 92% 55%;
+    --ic-conditions: 35 80% 52%;
+    --ic-conditions-muted: 35 30% 13%;
+    --ic-conditions-border: 35 70% 40%;
 
-    --sidebar-background: 0 0% 5.9%;
-    --sidebar-foreground: 0 0% 95.9%;
-    --sidebar-primary: 0 0% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 15.9%;
-    --sidebar-accent-foreground: 0 0% 95.9%;
-    --sidebar-border: 0 0% 15.9%;
-    --sidebar-ring: 0 0% 59.8%;
+    --ic-nogo: 0 60% 55%;
+    --ic-nogo-muted: 0 40% 12%;
+    --ic-nogo-border: 0 60% 42%;
+
+    --warning: 35 80% 52%;
+    --warning-muted: 35 30% 13%;
+    --success: 150 55% 45%;
+    --success-muted: 150 35% 12%;
+
+    --hotel-independent: 38 65% 55%;
+    --hotel-chain: 215 75% 62%;
+    --hotel-unknown: 35 80% 52%;
+
+    --sidebar-background: 0 0% 7%;
+    --sidebar-foreground: 0 0% 70%;
+    --sidebar-primary: 0 0% 92%;
+    --sidebar-primary-foreground: 0 0% 6%;
+    --sidebar-accent: 0 0% 13%;
+    --sidebar-accent-foreground: 0 0% 92%;
+    --sidebar-border: 0 0% 14%;
+    --sidebar-ring: 0 0% 60%;
   }
 }
 
@@ -136,7 +153,9 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
@@ -144,9 +163,22 @@
   .aurora-gradient {
     background: linear-gradient(135deg, hsl(var(--aurora-red)) 0%, hsl(var(--aurora-gold)) 100%);
   }
+
+  /* Subtle glass card effect */
+  .card-glass {
+    background: hsl(var(--card));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--border));
+  }
+
+  /* Thin separator */
+  .divider {
+    border-top: 1px solid hsl(var(--border));
+  }
 }
 
-/* Leaflet overrides */
+/* Leaflet */
 .leaflet-container {
   width: 100% !important;
   height: 100% !important;
