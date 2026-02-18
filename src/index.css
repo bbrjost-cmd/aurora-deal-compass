@@ -55,6 +55,19 @@
     --ic-nogo-muted: 0 86% 97%;
     --ic-nogo-border: 0 72% 70%;
 
+    /* Semantic status tokens */
+    --warning: 38 92% 40%;
+    --warning-foreground: 0 0% 100%;
+    --warning-muted: 48 100% 96%;
+    --success: 142 72% 29%;
+    --success-foreground: 0 0% 100%;
+    --success-muted: 142 76% 97%;
+
+    /* Hotel layer tokens */
+    --hotel-independent: 43 73% 47.1%;
+    --hotel-chain: 217 91% 60%;
+    --hotel-unknown: 38 92% 40%;
+
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 0 0% 26.1%;
     --sidebar-primary: 0 0% 10%;
@@ -96,6 +109,15 @@
 
     --aurora-red: 0 84% 60%;
     --aurora-gold: 43 73% 47.1%;
+
+    --warning: 38 92% 60%;
+    --warning-muted: 38 30% 15%;
+    --success: 142 60% 45%;
+    --success-muted: 142 30% 12%;
+
+    --hotel-independent: 43 73% 55%;
+    --hotel-chain: 217 91% 65%;
+    --hotel-unknown: 38 92% 55%;
 
     --sidebar-background: 0 0% 5.9%;
     --sidebar-foreground: 0 0% 95.9%;
