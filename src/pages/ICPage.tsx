@@ -75,16 +75,16 @@ export default function ICPage() {
       });
       if (error) throw error;
       if (data?.skipped > 0 && data?.processed === 0) {
-        toast({ title: "Déjà à jour", description: `${data.skipped} décisions IC existantes.` });
+        toast({ title: "Already up to date", description: `${data.skipped} existing IC decisions.` });
       } else {
         toast({
-          title: `✅ ${data.processed} décisions IC générées`,
+          title: `✅ ${data.processed} IC decisions generated`,
           description: data.results?.map((r: any) => `${r.deal}: ${r.decision.toUpperCase()} (${r.ic_score}/100)`).join(" · "),
         });
         loadData();
       }
     } catch (err: any) {
-      toast({ title: "Erreur", description: err.message, variant: "destructive" });
+      toast({ title: "Error", description: err.message, variant: "destructive" });
     }
     setSeeding(false);
   };
@@ -146,7 +146,7 @@ export default function ICPage() {
   };
 
   if (loading) {
-    return <div className="p-6 text-sm text-muted-foreground animate-pulse">Chargement...</div>;
+    return <div className="p-6 text-sm text-muted-foreground animate-pulse">Loading...</div>;
   }
 
   return (
@@ -156,19 +156,19 @@ export default function ICPage() {
         <div>
           <h1 className="text-xl lg:text-2xl font-semibold tracking-tight">IC Decision Center</h1>
           <p className="text-sm text-muted-foreground">
-            {enrichedDecisions.length} décision{enrichedDecisions.length !== 1 ? "s" : ""} IC enregistrée{enrichedDecisions.length !== 1 ? "s" : ""}
+            {enrichedDecisions.length} IC decision{enrichedDecisions.length !== 1 ? "s" : ""} recorded
           </p>
         </div>
         <div className="flex gap-2">
           {dealsWithoutDecision.length > 0 && (
             <Button size="sm" onClick={seedICDecisions} disabled={seeding} className="gap-2 h-8 text-xs">
               <Zap className="h-3.5 w-3.5" />
-              {seeding ? "Génération…" : `Générer IC (${Math.min(dealsWithoutDecision.length, 10)})`}
+              {seeding ? "Generating…" : `Generate IC (${Math.min(dealsWithoutDecision.length, 10)})`}
             </Button>
           )}
           <Button variant="outline" size="sm" onClick={loadData} className="gap-2 h-8 text-xs">
             <RefreshCw className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Rafraîchir</span>
+            <span className="hidden sm:inline">Refresh</span>
           </Button>
         </div>
       </div>
@@ -200,7 +200,7 @@ export default function ICPage() {
       {enrichedDecisions.length > 0 && (
         <Card className="border-border/60">
           <CardHeader className="pb-2 px-4 pt-4">
-            <CardTitle className="text-sm lg:text-base">Distribution IC Score</CardTitle>
+            <CardTitle className="text-sm lg:text-base">IC Score Distribution</CardTitle>
           </CardHeader>
           <CardContent className="pt-0 px-4 pb-4">
             <div className="flex gap-2 h-16 lg:h-20 items-end">
@@ -249,7 +249,7 @@ export default function ICPage() {
             ))}
           </SelectContent>
         </Select>
-        <span className="text-xs text-muted-foreground ml-auto">{filtered.length} résultat{filtered.length !== 1 ? "s" : ""}</span>
+        <span className="text-xs text-muted-foreground ml-auto">{filtered.length} result{filtered.length !== 1 ? "s" : ""}</span>
       </div>
 
       {/* Main content: list + desktop detail */}
@@ -323,7 +323,7 @@ export default function ICPage() {
             <Card className="border-border/60 h-full flex items-center justify-center min-h-64">
               <CardContent className="text-center text-muted-foreground p-10">
                 <BarChart3 className="h-12 w-12 mx-auto mb-3 opacity-20" />
-                <p className="text-sm">Sélectionnez un deal pour voir le détail IC</p>
+                <p className="text-sm">Select a deal to view its IC details</p>
               </CardContent>
             </Card>
           ) : (
@@ -337,7 +337,7 @@ export default function ICPage() {
         <SheetContent side="bottom" className="h-[92vh] overflow-y-auto rounded-t-2xl px-4 pb-8 lg:hidden">
           <SheetHeader className="pb-3">
             <SheetTitle className="text-sm text-left">
-              {selectedDecision?.deal?.name ?? "Détail IC"}
+              {selectedDecision?.deal?.name ?? "IC Detail"}
             </SheetTitle>
           </SheetHeader>
           {selectedDecision && <ICDetailPanel decision={selectedDecision} />}
@@ -357,10 +357,10 @@ function ICDetailPanel({ decision }: { decision: any }) {
   const redFlags = Array.isArray(decision.red_flags_json) ? decision.red_flags_json as string[] : [];
 
   const scoreSegments = [
-    { label: "Brand Écon.", value: Math.round((decision.ic_score || 0) * 0.35), max: 35, color: "bg-primary" },
-    { label: "Owner Écon.", value: Math.round((decision.ic_score || 0) * 0.25), max: 25, color: "bg-chart-2" },
-    { label: "Localisation", value: Math.round((decision.ic_score || 0) * 0.20), max: 20, color: "bg-chart-3" },
-    { label: "Exécution", value: Math.round((decision.ic_score || 0) * 0.20), max: 20, color: "bg-chart-4" },
+    { label: "Brand Econ.", value: Math.round((decision.ic_score || 0) * 0.35), max: 35, color: "bg-primary" },
+    { label: "Owner Econ.", value: Math.round((decision.ic_score || 0) * 0.25), max: 25, color: "bg-chart-2" },
+    { label: "Location", value: Math.round((decision.ic_score || 0) * 0.20), max: 20, color: "bg-chart-3" },
+    { label: "Execution", value: Math.round((decision.ic_score || 0) * 0.20), max: 20, color: "bg-chart-4" },
   ];
 
   const handleExport = async () => {
@@ -368,11 +368,11 @@ function ICDetailPanel({ decision }: { decision: any }) {
     try {
       generateICDecisionMemoPDF(decision);
       toast({
-        title: "✅ Mémo IC exporté",
+        title: "✅ IC Memo exported",
         description: `${decision.deal?.name} — ${decision.ic_score}/100 ${(decision.decision ?? "").toUpperCase()}`,
       });
     } catch (err: any) {
-      toast({ title: "Erreur export PDF", description: err.message, variant: "destructive" });
+      toast({ title: "PDF export error", description: err.message, variant: "destructive" });
     } finally {
       setExporting(false);
     }
@@ -412,7 +412,7 @@ function ICDetailPanel({ decision }: { decision: any }) {
         <Progress value={decision.ic_score} className="h-2 mt-3" />
         <div className="flex gap-2 mt-2 flex-wrap">
           <Badge variant="outline" className={cn("text-xs", CONFIDENCE_COLORS[decision.confidence as keyof typeof CONFIDENCE_COLORS])}>
-            Confiance: {decision.confidence}
+            Confidence: {decision.confidence}
           </Badge>
           <Badge variant="outline" className="text-xs">
             Completeness: {Math.round(decision.data_completeness || 0)}%
@@ -497,7 +497,7 @@ function ICDetailPanel({ decision }: { decision: any }) {
         {/* IC Narrative */}
         {decision.narrative_text && (
           <div>
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-2">Narrative IC</p>
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-2">IC Narrative</p>
             <div className="text-xs text-foreground/80 leading-relaxed bg-secondary/40 rounded-lg p-3.5 whitespace-pre-line border border-border/40">
               {decision.narrative_text}
             </div>
@@ -505,7 +505,7 @@ function ICDetailPanel({ decision }: { decision: any }) {
         )}
 
         <p className="text-[10px] text-muted-foreground pt-2 border-t border-border/50">
-          Généré le {new Date(decision.created_at).toLocaleDateString("fr-MX", {
+          Generated on {new Date(decision.created_at).toLocaleDateString("en-US", {
             day: "numeric", month: "long", year: "numeric",
             hour: "2-digit", minute: "2-digit"
           })}

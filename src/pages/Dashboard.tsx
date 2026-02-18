@@ -56,7 +56,7 @@ export default function Dashboard() {
         loadData();
       }
     } catch (err: any) {
-      toast({ title: "Erreur", description: err.message, variant: "destructive" });
+      toast({ title: "Error", description: err.message, variant: "destructive" });
     }
     setSeeding(false);
   };
@@ -174,7 +174,7 @@ export default function Dashboard() {
             onClick={() => navigate("/pipeline")}
             className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
-            Voir tout <ArrowRight className="h-3.5 w-3.5" />
+            View all <ArrowRight className="h-3.5 w-3.5" />
           </button>
         </div>
         {totalDeals === 0 ? (
@@ -335,7 +335,7 @@ export default function Dashboard() {
                 </div>
                 {task.due_date && (
                   <span className="text-xs text-muted-foreground shrink-0">
-                    {new Date(task.due_date).toLocaleDateString("fr-MX", { day: "numeric", month: "short" })}
+                    {new Date(task.due_date).toLocaleDateString("en-US", { day: "numeric", month: "short" })}
                   </span>
                 )}
               </div>
