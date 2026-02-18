@@ -8,7 +8,7 @@ export { ALL_BRANDS as ACCOR_BRANDS };
 export const BRAND_STRATEGY_NOTES: Record<string, string> = {
   // Economy
   'ibis': 'High-volume economy flag. Conversion-friendly, strong RCP distribution.',
-  'ibis Styles': 'Design-led economy, lifestyle angle, franchise model.',
+  'ibis Styles': 'Design-led economy, distinctive aesthetic, franchise model.',
   'ibis Budget': 'Budget flag for high-demand urban/suburban corridors.',
   'greet': 'Eco-responsible economy soft brand. Conversion-first.',
   // Midscale

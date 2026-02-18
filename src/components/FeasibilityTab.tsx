@@ -375,7 +375,7 @@ export function FeasibilityTab({ dealId, deal, onInputsChange }: Props) {
               brandMgmt.netFees >= brandFran.netFees
                 ? "Management generates higher net fees for Accor due to operational control and incentive fee upside."
                 : "Franchise generates competitive net income with lower support costs and complexity.",
-              "Management provides full brand standard enforcement, critical for Luxury/Upper-Upscale positioning.",
+              "Management provides full brand standard enforcement, suited for Premium segment positioning.",
               "Franchise offers owner more operational flexibility and typically faster deal closure.",
             ].map((b, i) => (
               <div key={i} className="flex gap-2 text-xs">

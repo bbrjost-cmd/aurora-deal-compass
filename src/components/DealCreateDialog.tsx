@@ -26,7 +26,7 @@ export function DealCreateDialog({ open, onOpenChange, onCreated, defaultLat, de
     address: "",
     lat: defaultLat?.toString() || "",
     lon: defaultLon?.toString() || "",
-    segment: "luxury",
+    segment: "midscale",
     opening_type: "conversion",
     rooms_min: "",
     rooms_max: "",
