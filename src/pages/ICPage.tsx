@@ -179,7 +179,7 @@ export default function ICPage() {
           { label: "GO", value: stats.go, color: "text-ic-go", icon: CheckCircle2 },
           { label: "CONDITIONS", value: stats.conditions, color: "text-ic-conditions", icon: AlertTriangle },
           { label: "NO-GO", value: stats.nogo, color: "text-ic-nogo", icon: XCircle },
-          { label: "Score Moyen", value: stats.avgScore, color: "text-foreground", icon: BarChart3 },
+          { label: "Avg Score", value: stats.avgScore, color: "text-foreground", icon: BarChart3 },
         ].map(s => {
           const Icon = s.icon;
           return (
@@ -232,7 +232,7 @@ export default function ICPage() {
             <SelectValue placeholder="Décision" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Toutes décisions</SelectItem>
+            <SelectItem value="all">All decisions</SelectItem>
             <SelectItem value="go">GO</SelectItem>
             <SelectItem value="go_with_conditions">CONDITIONS</SelectItem>
             <SelectItem value="no_go">NO-GO</SelectItem>
@@ -243,7 +243,7 @@ export default function ICPage() {
             <SelectValue placeholder="Stage" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Tous les stages</SelectItem>
+            <SelectItem value="all">All stages</SelectItem>
             {["lead","qualified","underwriting","loi","negotiation","signed"].map(s => (
               <SelectItem key={s} value={s}>{STAGE_LABELS[s]}</SelectItem>
             ))}
@@ -260,8 +260,8 @@ export default function ICPage() {
             <Card className="border-border/60">
               <CardContent className="p-6 text-center text-sm text-muted-foreground">
                 <BarChart3 className="h-10 w-10 mx-auto mb-2 opacity-20" />
-                <p>Aucune décision IC.</p>
-                <p className="text-xs mt-1">Lancez une analyse de faisabilité pour générer des décisions.</p>
+                <p>No IC decisions yet.</p>
+                <p className="text-xs mt-1">Run a feasibility analysis to generate decisions.</p>
               </CardContent>
             </Card>
           )}
@@ -303,7 +303,7 @@ export default function ICPage() {
 
           {dealsWithoutDecision.length > 0 && (
             <div className="pt-2">
-              <p className="text-xs text-muted-foreground px-1 mb-2 font-medium">Sans décision ({dealsWithoutDecision.length})</p>
+              <p className="text-xs text-muted-foreground px-1 mb-2 font-medium">No decision ({dealsWithoutDecision.length})</p>
               {dealsWithoutDecision.slice(0, 5).map(deal => (
                 <div key={deal.id} className="flex items-center gap-2 py-2 px-3 border border-dashed border-border/60 rounded-lg mb-1.5 text-xs text-muted-foreground">
                   <BarChart3 className="h-3.5 w-3.5" />
@@ -415,7 +415,7 @@ function ICDetailPanel({ decision }: { decision: any }) {
             Confiance: {decision.confidence}
           </Badge>
           <Badge variant="outline" className="text-xs">
-            Complétude: {Math.round(decision.data_completeness || 0)}%
+            Completeness: {Math.round(decision.data_completeness || 0)}%
           </Badge>
         </div>
       </CardHeader>

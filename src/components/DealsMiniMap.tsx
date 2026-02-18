@@ -122,7 +122,7 @@ export default function DealsMiniMap({ deals, decisionMap, onDealClick }: DealsM
   if (geoDeals.length === 0) {
     return (
       <div className="flex items-center justify-center h-full text-xs text-muted-foreground">
-        Aucune coordonnée disponible
+        No coordinates available
       </div>
     );
   }

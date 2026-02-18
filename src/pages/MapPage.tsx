@@ -390,7 +390,7 @@ export default function MapPage() {
             <div className="flex items-center justify-between mb-3">
               <div>
                 <p className="text-sm font-semibold">Deals ({panelDeals.length})</p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">{geoDeals.length} géolocalisés</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">{geoDeals.length} geolocated</p>
               </div>
             </div>
             {/* Filters */}
@@ -400,7 +400,7 @@ export default function MapPage() {
                   <SelectValue placeholder="Segment" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Tous segments</SelectItem>
+                  <SelectItem value="all">All segments</SelectItem>
                   {availableSegments.map(s => (
                     <SelectItem key={s} value={s}>{SEGMENT_LABELS[s] || s}</SelectItem>
                   ))}
@@ -411,7 +411,7 @@ export default function MapPage() {
                   <SelectValue placeholder="Stage" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Tous stages</SelectItem>
+                  <SelectItem value="all">All stages</SelectItem>
                   {availableStages.map(s => (
                     <SelectItem key={s} value={s}>{STAGE_LABELS[s] || s}</SelectItem>
                   ))}
@@ -419,14 +419,14 @@ export default function MapPage() {
               </Select>
               <Select value={filterDecision} onValueChange={setFilterDecision}>
                 <SelectTrigger className="h-7 text-xs">
-                  <SelectValue placeholder="Décision IC" />
+                  <SelectValue placeholder="IC Decision" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Toutes décisions</SelectItem>
+                  <SelectItem value="all">All decisions</SelectItem>
                   <SelectItem value="go">✅ GO</SelectItem>
                   <SelectItem value="go_with_conditions">🟡 Conditions</SelectItem>
                   <SelectItem value="no_go">❌ NO-GO</SelectItem>
-                  <SelectItem value="none">— Sans décision</SelectItem>
+                  <SelectItem value="none">— No decision</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -437,7 +437,7 @@ export default function MapPage() {
             {panelDeals.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-24 text-xs text-muted-foreground gap-1">
                 <MapPin className="h-4 w-4 opacity-30" />
-                Aucun deal correspondant
+                No matching deals
               </div>
             ) : (
               panelDeals.map(deal => {

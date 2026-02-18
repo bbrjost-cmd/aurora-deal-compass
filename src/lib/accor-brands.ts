@@ -153,13 +153,13 @@ function scoreBrand(brand: AccorBrand, deal: any): { fitScore: number; successRa
   let roomsPts = 0;
   if (rooms >= rIdealMin && rooms <= rIdealMax) {
     roomsPts = 20;
-    reasons.push(`${Math.round(rooms)} keys dans la fenêtre idéale`);
+    reasons.push(`${Math.round(rooms)} keys within ideal range`);
   } else if (rooms >= rMin && rooms < rIdealMin) {
     roomsPts = Math.round(20 * ((rooms - rMin) / (rIdealMin - rMin)));
     reasons.push(`${Math.round(rooms)} keys, légèrement sous le seuil optimal`);
   } else if (rooms > rIdealMax && rooms <= rMax) {
     roomsPts = Math.round(20 * (1 - (rooms - rIdealMax) / (rMax - rIdealMax)));
-    reasons.push(`${Math.round(rooms)} keys, au-dessus de la fenêtre optimale`);
+    reasons.push(`${Math.round(rooms)} keys, above optimal range`);
   } else {
     roomsPts = 0;
   }
@@ -168,7 +168,7 @@ function scoreBrand(brand: AccorBrand, deal: any): { fitScore: number; successRa
   // 3. Opening type fit (0–30 pts)
   const typePts = criteria.openingTypes[openingType] ?? 10;
   score += typePts;
-  if (typePts >= 28) reasons.push(`${openingType.replace(/_/g, " ")} fortement préféré par cette marque`);
+  if (typePts >= 28) reasons.push(`${openingType.replace(/_/g, " ")} strongly preferred by this brand`);
   else if (typePts >= 20) reasons.push(`${openingType.replace(/_/g, " ")} compatible`);
 
   // 4. IC score bonus (0–10 pts)

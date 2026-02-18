@@ -70,7 +70,7 @@ export function CommandBar({ open, onOpenChange }: CommandBarProps) {
           className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5"
         >
           <CommandInput
-            placeholder="Rechercher deals, pages, actions..."
+            placeholder="Search deals, pages, actions..."
             value={query}
             onValueChange={setQuery}
           />
@@ -78,7 +78,7 @@ export function CommandBar({ open, onOpenChange }: CommandBarProps) {
             <CommandEmpty>
               <div className="flex flex-col items-center gap-2 py-4">
                 <Search className="h-8 w-8 text-muted-foreground" />
-                <p className="text-sm">Aucun résultat pour « {query} »</p>
+                <p className="text-sm">No results for « {query} »</p>
               </div>
             </CommandEmpty>
 
@@ -124,14 +124,14 @@ export function CommandBar({ open, onOpenChange }: CommandBarProps) {
 
             <CommandSeparator />
 
-            <CommandGroup heading="Actions rapides">
+            <CommandGroup heading="Quick actions">
               <CommandItem
                 value="action-new-deal"
                 onSelect={() => run(() => navigate("/pipeline"))}
                 className="gap-3"
               >
                 <Plus className="h-4 w-4 text-muted-foreground" />
-                <span>Nouveau deal</span>
+                <span>New deal</span>
               </CommandItem>
               <CommandItem
                 value="action-export-pdf"
@@ -139,7 +139,7 @@ export function CommandBar({ open, onOpenChange }: CommandBarProps) {
                 className="gap-3"
               >
                 <FileText className="h-4 w-4 text-muted-foreground" />
-                <span>Exporter mémo PDF</span>
+                <span>Export IC memo PDF</span>
               </CommandItem>
               <CommandItem
                 value="action-ic-compare"
@@ -147,7 +147,7 @@ export function CommandBar({ open, onOpenChange }: CommandBarProps) {
                 className="gap-3"
               >
                 <BarChart3 className="h-4 w-4 text-muted-foreground" />
-                <span>Comparer deals IC</span>
+                <span>Compare IC deals</span>
               </CommandItem>
             </CommandGroup>
           </CommandList>
