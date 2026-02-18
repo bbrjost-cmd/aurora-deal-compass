@@ -2,10 +2,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { AppLayout } from "@/components/AppLayout";
-import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import MapPage from "./pages/MapPage";
 import Pipeline from "./pages/Pipeline";
@@ -16,18 +15,19 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-function ProtectedRoutes() {
-  const { user, loading } = useAuth();
+function AppContent() {
+  const { loading } = useAuth();
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="h-8 w-8 rounded-md aurora-gradient animate-pulse" />
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-10 w-10 rounded-lg aurora-gradient animate-pulse" />
+          <p className="text-xs tracking-widest text-muted-foreground uppercase">Aurora DevOS</p>
+        </div>
       </div>
     );
   }
-
-  if (!user) return <Navigate to="/auth" replace />;
 
   return (
     <AppLayout>
@@ -44,13 +44,6 @@ function ProtectedRoutes() {
   );
 }
 
-function AuthRoute() {
-  const { user, loading } = useAuth();
-  if (loading) return null;
-  if (user) return <Navigate to="/" replace />;
-  return <Auth />;
-}
-
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -58,10 +51,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            <Route path="/auth" element={<AuthRoute />} />
-            <Route path="/*" element={<ProtectedRoutes />} />
-          </Routes>
+          <AppContent />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

@@ -1,13 +1,12 @@
 import { useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { toast } from "@/hooks/use-toast";
 import { DEFAULT_INPUTS, computeFeasibility, formatMXN, type FeasibilityInputs } from "@/lib/feasibility";
 import { SEGMENTS, SEGMENT_LABELS, OPENING_TYPES, OPENING_TYPE_LABELS } from "@/lib/constants";
+import { generateFeasibilityPDF } from "@/lib/pdf-export";
+import { FileDown } from "lucide-react";
 
 export default function FeasibilityPage() {
   const [inputs, setInputs] = useState<FeasibilityInputs>(DEFAULT_INPUTS);
@@ -31,9 +30,14 @@ export default function FeasibilityPage() {
 
   return (
     <div className="p-6 space-y-6 max-w-5xl">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Feasibility Builder</h1>
-        <p className="text-sm text-muted-foreground">Quick underwriting model for hotel developments</p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Feasibility Builder</h1>
+          <p className="text-sm text-muted-foreground">Quick underwriting model — 5-year hotel P&L projection</p>
+        </div>
+        <Button onClick={() => generateFeasibilityPDF({ name: "Standalone Analysis" }, inputs, outputs)} className="gap-2">
+          <FileDown className="h-4 w-4" /> Export PDF
+        </Button>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">

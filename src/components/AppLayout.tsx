@@ -1,12 +1,9 @@
 import { ReactNode, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
 import {
-  LayoutDashboard, Map, Kanban, Calculator, Database, Settings,
-  LogOut, Menu, X, Search
+  LayoutDashboard, Map, Kanban, Calculator, Database, Settings, Menu, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
@@ -19,7 +16,6 @@ const NAV_ITEMS = [
 ];
 
 export function AppLayout({ children }: { children: ReactNode }) {
-  const { signOut, user } = useAuth();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -28,18 +24,18 @@ export function AppLayout({ children }: { children: ReactNode }) {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-60 border-r border-border bg-sidebar flex flex-col transition-transform lg:relative lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 w-56 border-r border-border bg-sidebar flex flex-col transition-transform lg:relative lg:translate-x-0",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         {/* Brand */}
         <div className="flex items-center gap-2 px-5 py-4 border-b border-border">
-          <div className="h-8 w-8 rounded-md aurora-gradient flex items-center justify-center">
+          <div className="h-8 w-8 rounded-md aurora-gradient flex items-center justify-center shrink-0">
             <span className="text-sm font-bold text-white">A</span>
           </div>
           <div>
             <h1 className="text-sm font-semibold tracking-tight text-foreground">AURORA</h1>
-            <p className="text-[10px] tracking-[0.2em] text-muted-foreground">DEVOS MX</p>
+            <p className="text-[9px] tracking-[0.25em] text-muted-foreground uppercase">DevOS MX</p>
           </div>
           <Button variant="ghost" size="icon" className="ml-auto lg:hidden" onClick={() => setSidebarOpen(false)}>
             <X className="h-4 w-4" />
@@ -47,7 +43,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-3 py-4 space-y-1">
+        <nav className="flex-1 px-3 py-4 space-y-0.5">
           {NAV_ITEMS.map((item) => {
             const isActive = location.pathname === item.path;
             return (
@@ -62,24 +58,16 @@ export function AppLayout({ children }: { children: ReactNode }) {
                     : "text-sidebar-foreground hover:bg-sidebar-accent/50"
                 )}
               >
-                <item.icon className="h-4 w-4" />
+                <item.icon className="h-4 w-4 shrink-0" />
                 {item.label}
               </Link>
             );
           })}
         </nav>
 
-        {/* User */}
-        <div className="p-3 border-t border-border">
-          <div className="flex items-center gap-2 px-2">
-            <div className="h-7 w-7 rounded-full bg-muted flex items-center justify-center text-xs font-medium text-muted-foreground">
-              {user?.email?.[0]?.toUpperCase() || "U"}
-            </div>
-            <span className="text-xs text-muted-foreground truncate flex-1">{user?.email}</span>
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={signOut}>
-              <LogOut className="h-3.5 w-3.5" />
-            </Button>
-          </div>
+        {/* Footer */}
+        <div className="p-4 border-t border-border">
+          <p className="text-[10px] text-muted-foreground text-center tracking-wider">Accor Development Tools</p>
         </div>
       </aside>
 
@@ -95,9 +83,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
           <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setSidebarOpen(true)}>
             <Menu className="h-5 w-5" />
           </Button>
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search deals, contacts..." className="pl-9 h-9 bg-secondary border-0" />
+          <div className="ml-auto flex items-center gap-2">
+            <span className="text-xs text-muted-foreground tracking-widest uppercase">Accor Development</span>
+            <div className="h-2 w-2 rounded-full bg-primary" title="Connected" />
           </div>
         </header>
 
