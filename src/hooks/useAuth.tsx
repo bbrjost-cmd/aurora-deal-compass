@@ -7,7 +7,6 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   orgId: string | null;
-  signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -15,7 +14,6 @@ const AuthContext = createContext<AuthContextType>({
   session: null,
   loading: true,
   orgId: null,
-  signOut: async () => {},
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -25,42 +23,58 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [orgId, setOrgId] = useState<string | null>(null);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
+    // Listen for auth state changes first
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, sess) => {
+      setSession(sess);
+      setUser(sess?.user ?? null);
       setLoading(false);
     });
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
+    // Then get existing session or sign in anonymously
+    supabase.auth.getSession().then(async ({ data: { session: existingSession } }) => {
+      if (existingSession) {
+        setSession(existingSession);
+        setUser(existingSession.user);
+        setLoading(false);
+      } else {
+        // Auto sign-in anonymously — no login page needed
+        const { data, error } = await supabase.auth.signInAnonymously();
+        if (error) {
+          console.error("Anonymous sign-in failed:", error);
+          setLoading(false);
+        } else {
+          setSession(data.session);
+          setUser(data.user);
+          setLoading(false);
+        }
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
-    if (user) {
-      supabase
+    if (!user) { setOrgId(null); return; }
+    // Fetch org_id from profile, retry a few times if trigger hasn't run yet
+    let attempts = 0;
+    const fetch = async () => {
+      const { data } = await supabase
         .from("profiles")
         .select("org_id")
         .eq("id", user.id)
-        .maybeSingle()
-        .then(({ data }) => {
-          setOrgId(data?.org_id ?? null);
-        });
-    } else {
-      setOrgId(null);
-    }
+        .maybeSingle();
+      if (data?.org_id) {
+        setOrgId(data.org_id);
+      } else if (attempts < 5) {
+        attempts++;
+        setTimeout(fetch, 800);
+      }
+    };
+    fetch();
   }, [user]);
 
-  const signOut = async () => {
-    await supabase.auth.signOut();
-  };
-
   return (
-    <AuthContext.Provider value={{ user, session, loading, orgId, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, orgId }}>
       {children}
     </AuthContext.Provider>
   );
