@@ -378,11 +378,11 @@ export default function MapPage() {
       )}
 
       {/* Map + Panel layout */}
-      <div className="flex-1 relative flex min-h-0">
+      <div className="flex-1 flex min-h-0 overflow-hidden">
 
         {/* ── Deals Panel (left) ── */}
         <div className={cn(
-          "relative flex flex-col bg-background border-r border-border shrink-0 transition-all duration-300 z-[500]",
+          "flex flex-col bg-background border-r border-border shrink-0 transition-all duration-300",
           panelOpen ? "w-72" : "w-0 overflow-hidden"
         )}>
           {/* Panel header */}
@@ -501,11 +501,11 @@ export default function MapPage() {
           </div>
         </div>
 
-        {/* Toggle panel button */}
+        {/* Toggle panel button — flex sibling, always visible */}
         <button
           onClick={() => setPanelOpen(p => !p)}
-          className="absolute top-1/2 -translate-y-1/2 z-[600] flex items-center justify-center w-5 h-12 bg-background border border-border rounded-r-lg shadow-sm hover:bg-accent transition-colors"
-          style={{ left: panelOpen ? "288px" : "0px" }}
+          className="z-[600] flex items-center justify-center w-5 self-center bg-background border border-l-0 border-border rounded-r-lg shadow-sm hover:bg-accent transition-colors shrink-0"
+          style={{ height: "48px" }}
         >
           {panelOpen
             ? <ChevronLeft className="h-3 w-3 text-muted-foreground" />
@@ -514,7 +514,7 @@ export default function MapPage() {
         </button>
 
         {/* Map */}
-        <div className={cn("flex-1 relative", selectedHotel ? "mr-[420px]" : "")}>
+        <div className="flex-1 relative min-w-0">
           <div className="absolute inset-0">
             <MapContainer
               center={center}
@@ -620,6 +620,25 @@ export default function MapPage() {
           </div>
         </div>
 
+        {/* Legend */}
+        {showIndependent && independentHotels.length > 0 && (
+          <div className="absolute bottom-4 left-4 z-[400] bg-background/95 border border-border rounded-lg p-3 shadow-lg text-xs space-y-1.5 pointer-events-none">
+            <p className="font-semibold text-xs mb-2">Independent Hotels</p>
+            <div className="flex items-center gap-2">
+              <span className="inline-block w-3 h-3 rounded-full bg-[#B8860B]" />
+              <span>Likely Independent ({indepCounts.likely_independent})</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="inline-block w-3 h-3 rounded-full bg-[#D97706]" />
+              <span>Unknown ({indepCounts.unknown})</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="inline-block w-3 h-3 rounded-full bg-[#3B82F6]" />
+              <span>Likely Chain ({indepCounts.likely_chain})</span>
+            </div>
+          </div>
+        )}
+
         {/* Hotel Intelligence Drawer */}
         {selectedHotel && (
           <HotelIntelligenceDrawer
@@ -631,26 +650,6 @@ export default function MapPage() {
           />
         )}
       </div>
-
-      {/* Legend */}
-      {showIndependent && (
-        <div className="absolute bottom-4 z-[400] bg-background/95 border border-border rounded-lg p-3 shadow-lg text-xs space-y-1.5 pointer-events-none"
-          style={{ left: panelOpen ? "292px" : "8px" }}>
-          <p className="font-semibold text-xs mb-2">Independent Hotels</p>
-          <div className="flex items-center gap-2">
-            <span className="inline-block w-3 h-3 rounded-full bg-[#B8860B]" />
-            <span>Likely Independent ({indepCounts.likely_independent})</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="inline-block w-3 h-3 rounded-full bg-[#D97706]" />
-            <span>Unknown ({indepCounts.unknown})</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="inline-block w-3 h-3 rounded-full bg-[#3B82F6]" />
-            <span>Likely Chain ({indepCounts.likely_chain})</span>
-          </div>
-        </div>
-      )}
 
       <DealCreateDialog
         open={createOpen}
