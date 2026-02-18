@@ -8,6 +8,7 @@ import { Plus, TrendingUp, Target, Clock, BarChart3, CheckCircle2, XCircle, Aler
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import DealsMiniMap from "@/components/DealsMiniMap";
 
 const STAGE_ORDER = ['lead', 'qualified', 'underwriting', 'loi', 'negotiation', 'signed'];
 
@@ -84,6 +85,18 @@ export default function Dashboard() {
     go_with_conditions: decisions.filter(d => d.decision === "go_with_conditions").length,
     no_go: decisions.filter(d => d.decision === "no_go").length,
   }), [decisions]);
+
+  // Map: dealId → latest decision
+  const decisionMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    // decisions are ordered desc by created_at, so first occurrence = latest
+    decisions.forEach(dec => {
+      if (dec.deal_id && !map[dec.deal_id]) {
+        map[dec.deal_id] = dec.decision;
+      }
+    });
+    return map;
+  }, [decisions]);
 
   const topDeals = useMemo(() =>
     [...deals].sort((a, b) => (b.score_total || 0) - (a.score_total || 0)).slice(0, 5),
@@ -192,6 +205,31 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+
+      {/* ── Deals Map ── */}
+      {topDeals.some(d => d.lat && d.lon) && (
+        <div className="bg-card border border-border rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-base font-semibold">Localisation</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">Top 5 deals — couleur selon décision IC</p>
+            </div>
+            <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-medium">
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#22c55e] inline-block" />GO</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#f59e0b] inline-block" />Conditions</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#ef4444] inline-block" />NO-GO</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#6b7280] inline-block" />—</span>
+            </div>
+          </div>
+          <div className="h-56 rounded-xl overflow-hidden border border-border">
+            <DealsMiniMap
+              deals={topDeals}
+              decisionMap={decisionMap}
+              onDealClick={(deal) => navigate(`/pipeline?deal=${deal.id}`)}
+            />
+          </div>
+        </div>
+      )}
 
       {/* ── Bottom row ── */}
       <div className="grid lg:grid-cols-2 gap-4">
