@@ -6,9 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import {
   CheckCircle2, XCircle, AlertTriangle, TrendingUp, BarChart3,
-  Filter, RefreshCw, Zap
+  Filter, RefreshCw, Zap, ChevronRight
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -21,10 +22,25 @@ const DECISION_CONFIG = {
 };
 
 const CONFIDENCE_COLORS = {
-  high: "bg-green-500/20 text-green-700",
-  medium: "bg-yellow-500/20 text-yellow-700",
-  low: "bg-red-500/20 text-red-700",
+  high: "bg-green-500/20 text-green-700 dark:text-green-400",
+  medium: "bg-yellow-500/20 text-yellow-700 dark:text-yellow-400",
+  low: "bg-red-500/20 text-red-700 dark:text-red-400",
 };
+
+/** Normalise hard_gates_json: accepte objet {key: {name, passed}} ou tableau [{name, passed}] */
+function normalizeHardGates(raw: any): Array<{ name: string; passed: boolean; reason?: string }> {
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw;
+  // Objet keyed: {completeness: {name, passed}, minRooms: {name, passed}, ...}
+  if (typeof raw === "object") {
+    return Object.values(raw).map((v: any) => ({
+      name: v?.name ?? String(v),
+      passed: Boolean(v?.passed),
+      reason: v?.reason,
+    }));
+  }
+  return [];
+}
 
 export default function ICPage() {
   const { orgId } = useAuth();
@@ -35,6 +51,7 @@ export default function ICPage() {
   const [filterDecision, setFilterDecision] = useState<string>("all");
   const [filterStage, setFilterStage] = useState<string>("all");
   const [selectedDealId, setSelectedDealId] = useState<string | null>(null);
+  const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
 
   const loadData = () => {
     if (!orgId) return;
@@ -73,7 +90,6 @@ export default function ICPage() {
 
   useEffect(loadData, [orgId]);
 
-  // Join decisions with their latest deal data
   const enrichedDecisions = useMemo(() => {
     return decisions.map(dec => ({
       ...dec,
@@ -81,7 +97,6 @@ export default function ICPage() {
     })).filter(dec => dec.deal);
   }, [decisions, deals]);
 
-  // Deals with no decision yet
   const dealsWithoutDecision = useMemo(() =>
     deals.filter(d => !decisions.find(dec => dec.deal_id === d.id)),
     [deals, decisions]
@@ -95,7 +110,6 @@ export default function ICPage() {
     });
   }, [enrichedDecisions, filterDecision, filterStage]);
 
-  // IC Score distribution
   const scoreDistribution = useMemo(() => {
     const bins = [
       { label: "0-40", min: 0, max: 40, count: 0 },
@@ -125,12 +139,17 @@ export default function ICPage() {
       : 0,
   };
 
+  const handleSelectDeal = (dealId: string) => {
+    setSelectedDealId(dealId);
+    setMobileSheetOpen(true);
+  };
+
   if (loading) {
     return <div className="p-6 text-sm text-muted-foreground animate-pulse">Chargement...</div>;
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 lg:p-6 space-y-4 lg:space-y-6">
       {/* Header */}
       <div className="flex items-start justify-between gap-2 flex-wrap">
         <div>
@@ -154,7 +173,7 @@ export default function ICPage() {
       </div>
 
       {/* Summary Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
           { label: "GO", value: stats.go, color: "text-ic-go", icon: CheckCircle2 },
           { label: "CONDITIONS", value: stats.conditions, color: "text-ic-conditions", icon: AlertTriangle },
@@ -164,11 +183,11 @@ export default function ICPage() {
           const Icon = s.icon;
           return (
             <Card key={s.label} className="border-border/60">
-              <CardContent className="p-4 flex items-center gap-3">
-                <Icon className={cn("h-8 w-8 shrink-0", s.color)} />
+              <CardContent className="p-3 lg:p-4 flex items-center gap-3">
+                <Icon className={cn("h-7 w-7 lg:h-8 lg:w-8 shrink-0", s.color)} />
                 <div>
-                  <p className="text-2xl font-semibold">{s.value}</p>
-                  <p className="text-xs text-muted-foreground font-medium">{s.label}</p>
+                  <p className="text-xl lg:text-2xl font-semibold">{s.value}</p>
+                  <p className="text-[10px] lg:text-xs text-muted-foreground font-medium">{s.label}</p>
                 </div>
               </CardContent>
             </Card>
@@ -179,23 +198,23 @@ export default function ICPage() {
       {/* Score Distribution */}
       {enrichedDecisions.length > 0 && (
         <Card className="border-border/60">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Distribution IC Score</CardTitle>
+          <CardHeader className="pb-2 px-4 pt-4">
+            <CardTitle className="text-sm lg:text-base">Distribution IC Score</CardTitle>
           </CardHeader>
-          <CardContent className="pt-0">
-            <div className="flex gap-2 h-20 items-end">
+          <CardContent className="pt-0 px-4 pb-4">
+            <div className="flex gap-2 h-16 lg:h-20 items-end">
               {scoreDistribution.map((bin) => {
                 const max = Math.max(...scoreDistribution.map(b => b.count), 1);
                 const pct = (bin.count / max) * 100;
                 const color = bin.min >= 75 ? "bg-ic-go" : bin.min >= 60 ? "bg-ic-conditions" : "bg-ic-nogo";
                 return (
                   <div key={bin.label} className="flex-1 flex flex-col items-center gap-1">
-                    <span className="text-[10px] text-muted-foreground">{bin.count}</span>
+                    <span className="text-[9px] lg:text-[10px] text-muted-foreground">{bin.count}</span>
                     <div
                       className={cn("w-full rounded-t transition-all", color, "opacity-80")}
                       style={{ height: `${Math.max(pct, 4)}%` }}
                     />
-                    <span className="text-[9px] text-muted-foreground">{bin.label}</span>
+                    <span className="text-[8px] lg:text-[9px] text-muted-foreground">{bin.label}</span>
                   </div>
                 );
               })}
@@ -204,11 +223,11 @@ export default function ICPage() {
         </Card>
       )}
 
-      {/* Filters + Table */}
-      <div className="flex gap-3 items-center">
-        <Filter className="h-4 w-4 text-muted-foreground" />
+      {/* Filters */}
+      <div className="flex gap-2 items-center flex-wrap">
+        <Filter className="h-4 w-4 text-muted-foreground shrink-0" />
         <Select value={filterDecision} onValueChange={setFilterDecision}>
-          <SelectTrigger className="w-40 h-8 text-xs">
+          <SelectTrigger className="w-36 h-8 text-xs">
             <SelectValue placeholder="Décision" />
           </SelectTrigger>
           <SelectContent>
@@ -219,7 +238,7 @@ export default function ICPage() {
           </SelectContent>
         </Select>
         <Select value={filterStage} onValueChange={setFilterStage}>
-          <SelectTrigger className="w-40 h-8 text-xs">
+          <SelectTrigger className="w-36 h-8 text-xs">
             <SelectValue placeholder="Stage" />
           </SelectTrigger>
           <SelectContent>
@@ -232,6 +251,7 @@ export default function ICPage() {
         <span className="text-xs text-muted-foreground ml-auto">{filtered.length} résultat{filtered.length !== 1 ? "s" : ""}</span>
       </div>
 
+      {/* Main content: list + desktop detail */}
       <div className="grid lg:grid-cols-5 gap-4">
         {/* Deal list */}
         <div className="lg:col-span-2 space-y-2">
@@ -251,7 +271,7 @@ export default function ICPage() {
             return (
               <Card
                 key={dec.id}
-                onClick={() => setSelectedDealId(dec.deal_id)}
+                onClick={() => handleSelectDeal(dec.deal_id)}
                 className={cn(
                   "border cursor-pointer transition-all",
                   isSelected ? "border-primary shadow-sm" : "border-border/60 hover:border-border"
@@ -273,6 +293,7 @@ export default function ICPage() {
                         <span className="text-[10px] text-muted-foreground ml-auto font-mono">{dec.ic_score}/100</span>
                       </div>
                     </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground/50 shrink-0 lg:hidden" />
                   </div>
                 </CardContent>
               </Card>
@@ -295,10 +316,10 @@ export default function ICPage() {
           )}
         </div>
 
-        {/* Detail panel */}
-        <div className="lg:col-span-3">
+        {/* Desktop detail panel */}
+        <div className="lg:col-span-3 hidden lg:block">
           {!selectedDecision ? (
-            <Card className="border-border/60 h-full flex items-center justify-center">
+            <Card className="border-border/60 h-full flex items-center justify-center min-h-64">
               <CardContent className="text-center text-muted-foreground p-10">
                 <BarChart3 className="h-12 w-12 mx-auto mb-3 opacity-20" />
                 <p className="text-sm">Sélectionnez un deal pour voir le détail IC</p>
@@ -309,6 +330,18 @@ export default function ICPage() {
           )}
         </div>
       </div>
+
+      {/* Mobile detail sheet */}
+      <Sheet open={mobileSheetOpen} onOpenChange={setMobileSheetOpen}>
+        <SheetContent side="bottom" className="h-[92vh] overflow-y-auto rounded-t-2xl px-4 pb-8 lg:hidden">
+          <SheetHeader className="pb-3">
+            <SheetTitle className="text-sm text-left">
+              {selectedDecision?.deal?.name ?? "Détail IC"}
+            </SheetTitle>
+          </SheetHeader>
+          {selectedDecision && <ICDetailPanel decision={selectedDecision} />}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
@@ -316,37 +349,40 @@ export default function ICPage() {
 function ICDetailPanel({ decision }: { decision: any }) {
   const cfg = DECISION_CONFIG[decision.decision as keyof typeof DECISION_CONFIG];
   const Icon = cfg?.icon || BarChart3;
-  const hardGates = (decision.hard_gates_json as any[]) || [];
-  const conditions = (decision.conditions_json as string[]) || [];
-  const redFlags = (decision.red_flags_json as string[]) || [];
+
+  // Handle both array and object formats from DB
+  const hardGates = normalizeHardGates(decision.hard_gates_json);
+  const conditions = Array.isArray(decision.conditions_json) ? decision.conditions_json as string[] : [];
+  const redFlags = Array.isArray(decision.red_flags_json) ? decision.red_flags_json as string[] : [];
 
   const scoreSegments = [
-    { label: "Brand Econ", value: Math.round((decision.ic_score || 0) * 0.35), max: 35, color: "bg-primary" },
-    { label: "Owner Econ", value: Math.round((decision.ic_score || 0) * 0.25), max: 25, color: "bg-chart-2" },
-    { label: "Location", value: Math.round((decision.ic_score || 0) * 0.20), max: 20, color: "bg-chart-3" },
-    { label: "Execution", value: Math.round((decision.ic_score || 0) * 0.20), max: 20, color: "bg-chart-4" },
+    { label: "Brand Écon.", value: Math.round((decision.ic_score || 0) * 0.35), max: 35, color: "bg-primary" },
+    { label: "Owner Écon.", value: Math.round((decision.ic_score || 0) * 0.25), max: 25, color: "bg-chart-2" },
+    { label: "Localisation", value: Math.round((decision.ic_score || 0) * 0.20), max: 20, color: "bg-chart-3" },
+    { label: "Exécution", value: Math.round((decision.ic_score || 0) * 0.20), max: 20, color: "bg-chart-4" },
   ];
 
   return (
     <Card className="border-border/60">
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-3 px-4 pt-4">
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-xs text-muted-foreground mb-1">{decision.deal?.name}</p>
-            <div className="flex items-center gap-2">
+            <p className="text-[11px] text-muted-foreground">{decision.deal?.city} · {decision.deal?.segment}</p>
+            <div className="flex items-center gap-2 mt-1">
               <Icon className={cn("h-6 w-6", cfg?.color)} />
               <h2 className={cn("text-xl font-bold", cfg?.color)}>{cfg?.label}</h2>
             </div>
           </div>
-          <div className="text-right">
-            <p className="text-3xl font-bold font-mono">{decision.ic_score}</p>
+          <div className="text-right shrink-0">
+            <p className="text-4xl font-bold font-mono leading-none">{decision.ic_score}</p>
             <p className="text-xs text-muted-foreground">/ 100</p>
           </div>
         </div>
-        <Progress value={decision.ic_score} className="h-2 mt-2" />
+        <Progress value={decision.ic_score} className="h-2 mt-3" />
         <div className="flex gap-2 mt-2 flex-wrap">
-          <Badge variant="outline" className={CONFIDENCE_COLORS[decision.confidence as keyof typeof CONFIDENCE_COLORS]}>
-            Confidence: {decision.confidence}
+          <Badge variant="outline" className={cn("text-xs", CONFIDENCE_COLORS[decision.confidence as keyof typeof CONFIDENCE_COLORS])}>
+            Confiance: {decision.confidence}
           </Badge>
           <Badge variant="outline" className="text-xs">
             Complétude: {Math.round(decision.data_completeness || 0)}%
@@ -354,21 +390,21 @@ function ICDetailPanel({ decision }: { decision: any }) {
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-5 px-4 pb-4">
         {/* Score breakdown */}
         <div>
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Score Breakdown</p>
-          <div className="space-y-2">
+          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-3">Score Breakdown</p>
+          <div className="space-y-2.5">
             {scoreSegments.map(seg => (
               <div key={seg.label} className="flex items-center gap-2.5">
-                <span className="text-[11px] text-muted-foreground w-20 shrink-0">{seg.label}</span>
-                <div className="flex-1 bg-secondary rounded-full h-3 overflow-hidden">
+                <span className="text-[11px] text-muted-foreground w-24 shrink-0">{seg.label}</span>
+                <div className="flex-1 bg-secondary rounded-full h-2.5 overflow-hidden">
                   <div
                     className={cn("h-full rounded-full transition-all", seg.color)}
                     style={{ width: `${(seg.value / seg.max) * 100}%` }}
                   />
                 </div>
-                <span className="text-[11px] font-mono w-10 text-right">{seg.value}/{seg.max}</span>
+                <span className="text-[11px] font-mono w-10 text-right tabular-nums">{seg.value}/{seg.max}</span>
               </div>
             ))}
           </div>
@@ -377,17 +413,20 @@ function ICDetailPanel({ decision }: { decision: any }) {
         {/* Hard Gates */}
         {hardGates.length > 0 && (
           <div>
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Hard Gates</p>
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-2">Hard Gates</p>
             <div className="space-y-1.5">
-              {hardGates.map((gate: any, i: number) => (
+              {hardGates.map((gate, i) => (
                 <div key={i} className={cn(
-                  "flex items-start gap-2 text-xs p-2 rounded-md",
+                  "flex items-start gap-2 text-xs p-2.5 rounded-md",
                   gate.passed ? "bg-ic-go/10 text-ic-go" : "bg-ic-nogo/10 text-ic-nogo"
                 )}>
-                  {gate.passed ? <CheckCircle2 className="h-3.5 w-3.5 shrink-0 mt-0.5" /> : <XCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />}
+                  {gate.passed
+                    ? <CheckCircle2 className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                    : <XCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                  }
                   <div>
                     <p className="font-medium">{gate.name}</p>
-                    {gate.reason && <p className="opacity-80 mt-0.5">{gate.reason}</p>}
+                    {gate.reason && <p className="opacity-75 mt-0.5">{gate.reason}</p>}
                   </div>
                 </div>
               ))}
@@ -398,10 +437,10 @@ function ICDetailPanel({ decision }: { decision: any }) {
         {/* Conditions */}
         {conditions.length > 0 && (
           <div>
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Conditions to GO</p>
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-2">Conditions to GO</p>
             <div className="space-y-1.5">
               {conditions.map((c: string, i: number) => (
-                <div key={i} className="flex items-start gap-2 text-xs p-2 rounded-md bg-ic-conditions/10 text-ic-conditions">
+                <div key={i} className="flex items-start gap-2 text-xs p-2.5 rounded-md bg-ic-conditions/10 text-ic-conditions">
                   <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
                   <p>{c}</p>
                 </div>
@@ -413,10 +452,10 @@ function ICDetailPanel({ decision }: { decision: any }) {
         {/* Red Flags */}
         {redFlags.length > 0 && (
           <div>
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Red Flags</p>
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-2">Red Flags</p>
             <div className="space-y-1.5">
               {redFlags.map((rf: string, i: number) => (
-                <div key={i} className="flex items-start gap-2 text-xs p-2 rounded-md bg-ic-nogo/10 text-ic-nogo">
+                <div key={i} className="flex items-start gap-2 text-xs p-2.5 rounded-md bg-ic-nogo/10 text-ic-nogo">
                   <XCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
                   <p>{rf}</p>
                 </div>
@@ -428,15 +467,18 @@ function ICDetailPanel({ decision }: { decision: any }) {
         {/* IC Narrative */}
         {decision.narrative_text && (
           <div>
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Narrative IC</p>
-            <div className="text-xs text-foreground/80 leading-relaxed bg-secondary/40 rounded-lg p-3 whitespace-pre-line">
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-2">Narrative IC</p>
+            <div className="text-xs text-foreground/80 leading-relaxed bg-secondary/40 rounded-lg p-3.5 whitespace-pre-line border border-border/40">
               {decision.narrative_text}
             </div>
           </div>
         )}
 
         <p className="text-[10px] text-muted-foreground pt-2 border-t border-border/50">
-          Généré le {new Date(decision.created_at).toLocaleDateString("fr-MX", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+          Généré le {new Date(decision.created_at).toLocaleDateString("fr-MX", {
+            day: "numeric", month: "long", year: "numeric",
+            hour: "2-digit", minute: "2-digit"
+          })}
           {decision.override_reason && ` · Override: ${decision.override_reason}`}
         </p>
       </CardContent>
