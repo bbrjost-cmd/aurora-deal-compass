@@ -58,10 +58,11 @@ const CONFIDENCE_CONFIG = {
 };
 
 const SCORE_COLORS = [
-  { color: "bg-primary", label: "Brand Econ" },
-  { color: "bg-aurora-gold", label: "Owner Econ" },
-  { color: "bg-muted-foreground", label: "Location" },
-  { color: "bg-secondary-foreground", label: "Execution" },
+  { color: "bg-primary", label: "Location" },
+  { color: "bg-aurora-gold", label: "Demand" },
+  { color: "bg-chart-3", label: "Conversion" },
+  { color: "bg-chart-4", label: "Owner" },
+  { color: "bg-muted-foreground", label: "Execution" },
 ];
 
 export function ICDecisionPanel({ deal, feasInputs, contactCount = 0, onSave }: Props) {
