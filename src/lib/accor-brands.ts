@@ -43,6 +43,174 @@ export const BRAND_STRATEGY_NOTES: Record<string, string> = {
   "SLS": "Premium lifestyle, F&B driven",
 };
 
+// Brand fit criteria for scoring engine
+// Each brand defines its ideal positioning parameters
+interface BrandCriteria {
+  // Segment fit: which segments score high
+  segments: { [key: string]: number }; // 0-40 pts
+  // Rooms range fit: [min, ideal_min, ideal_max, max]
+  roomsRange: [number, number, number, number];
+  // Opening type preference
+  openingTypes: { [key: string]: number }; // 0-20 pts
+  // Base success rate (historical win rate proxy for Mexico market)
+  baseSuccessRate: number; // 50-95
+}
+
+const BRAND_CRITERIA: Record<AccorBrand, BrandCriteria> = {
+  "Raffles": {
+    segments: { luxury: 40, luxury_lifestyle: 20, upper_upscale: 5 },
+    roomsRange: [60, 80, 200, 350],
+    openingTypes: { conversion: 30, new_build: 25, renovation: 20 },
+    baseSuccessRate: 72,
+  },
+  "Fairmont": {
+    segments: { luxury: 38, luxury_lifestyle: 22, upper_upscale: 8 },
+    roomsRange: [80, 120, 300, 500],
+    openingTypes: { new_build: 28, conversion: 28, renovation: 18 },
+    baseSuccessRate: 76,
+  },
+  "Sofitel": {
+    segments: { luxury: 30, luxury_lifestyle: 30, upper_upscale: 20 },
+    roomsRange: [80, 120, 350, 600],
+    openingTypes: { new_build: 25, conversion: 25, renovation: 20 },
+    baseSuccessRate: 78,
+  },
+  "Sofitel Legend": {
+    segments: { luxury: 40, luxury_lifestyle: 10, upper_upscale: 0 },
+    roomsRange: [50, 60, 150, 250],
+    openingTypes: { conversion: 35, renovation: 30, new_build: 5 },
+    baseSuccessRate: 58,
+  },
+  "Orient Express": {
+    segments: { luxury: 40, luxury_lifestyle: 15, upper_upscale: 0 },
+    roomsRange: [30, 40, 100, 150],
+    openingTypes: { conversion: 30, new_build: 25, renovation: 20 },
+    baseSuccessRate: 55,
+  },
+  "Emblems Collection": {
+    segments: { luxury: 40, luxury_lifestyle: 25, upper_upscale: 5 },
+    roomsRange: [25, 35, 120, 200],
+    openingTypes: { conversion: 30, new_build: 28, renovation: 22 },
+    baseSuccessRate: 65,
+  },
+  "MGallery": {
+    segments: { luxury_lifestyle: 38, luxury: 28, upper_upscale: 22 },
+    roomsRange: [40, 60, 200, 350],
+    openingTypes: { conversion: 32, renovation: 28, new_build: 18 },
+    baseSuccessRate: 82,
+  },
+  "Delano": {
+    segments: { luxury_lifestyle: 40, luxury: 20, upper_upscale: 20 },
+    roomsRange: [80, 120, 280, 400],
+    openingTypes: { new_build: 30, conversion: 25, renovation: 20 },
+    baseSuccessRate: 68,
+  },
+  "Mondrian": {
+    segments: { luxury_lifestyle: 40, luxury: 18, upper_upscale: 18 },
+    roomsRange: [80, 100, 250, 400],
+    openingTypes: { new_build: 28, conversion: 28, renovation: 18 },
+    baseSuccessRate: 70,
+  },
+  "SLS": {
+    segments: { luxury_lifestyle: 40, upper_upscale: 25, luxury: 15 },
+    roomsRange: [100, 150, 350, 600],
+    openingTypes: { new_build: 30, conversion: 22, renovation: 18 },
+    baseSuccessRate: 73,
+  },
+};
+
+export interface BrandRecommendation {
+  brand: AccorBrand;
+  fitScore: number;       // 0–100 brand-deal alignment score
+  successRate: number;    // % success rate for this brand in this context
+  note: string;
+  reasons: string[];      // Why this brand fits
+}
+
+/**
+ * Score a brand against deal metrics.
+ * Returns a 0–100 fit score and a contextual success rate.
+ */
+function scoreBrand(brand: AccorBrand, deal: any): { fitScore: number; successRate: number; reasons: string[] } {
+  const criteria = BRAND_CRITERIA[brand];
+  const rooms = ((deal.rooms_min || 80) + (deal.rooms_max || 150)) / 2;
+  const segment = deal.segment || "upper_upscale";
+  const openingType = deal.opening_type || "new_build";
+  const icScore = deal.score_total || 0;
+
+  const reasons: string[] = [];
+  let score = 0;
+
+  // 1. Segment fit (0–40 pts)
+  const segPts = criteria.segments[segment] ?? 0;
+  score += segPts;
+  if (segPts >= 35) reasons.push(`Segment ${segment.replace(/_/g, " ")} idéal`);
+  else if (segPts >= 20) reasons.push(`Segment compatible`);
+  else if (segPts > 0) reasons.push(`Segment acceptable`);
+
+  // 2. Rooms fit (0–20 pts)
+  const [rMin, rIdealMin, rIdealMax, rMax] = criteria.roomsRange;
+  let roomsPts = 0;
+  if (rooms >= rIdealMin && rooms <= rIdealMax) {
+    roomsPts = 20;
+    reasons.push(`${Math.round(rooms)} keys dans la fenêtre idéale`);
+  } else if (rooms >= rMin && rooms < rIdealMin) {
+    roomsPts = Math.round(20 * ((rooms - rMin) / (rIdealMin - rMin)));
+    reasons.push(`${Math.round(rooms)} keys, légèrement sous le seuil optimal`);
+  } else if (rooms > rIdealMax && rooms <= rMax) {
+    roomsPts = Math.round(20 * (1 - (rooms - rIdealMax) / (rMax - rIdealMax)));
+    reasons.push(`${Math.round(rooms)} keys, au-dessus de la fenêtre optimale`);
+  } else {
+    roomsPts = 0;
+  }
+  score += roomsPts;
+
+  // 3. Opening type fit (0–30 pts)
+  const typePts = criteria.openingTypes[openingType] ?? 10;
+  score += typePts;
+  if (typePts >= 28) reasons.push(`${openingType.replace(/_/g, " ")} fortement préféré par cette marque`);
+  else if (typePts >= 20) reasons.push(`${openingType.replace(/_/g, " ")} compatible`);
+
+  // 4. IC score bonus (0–10 pts)
+  const icBonus = Math.round((icScore / 100) * 10);
+  score += icBonus;
+  if (icScore >= 75) reasons.push(`Score IC ${icScore}/100 renforce la crédibilité`);
+
+  // Clamp to 0–100
+  const fitScore = Math.min(100, Math.max(0, score));
+
+  // Success rate = base ± adjustment based on fit
+  // If fit is 100%, success rate approaches base + 15
+  // If fit is 0%, success rate = base - 20
+  const delta = ((fitScore - 50) / 50) * 18;
+  const successRate = Math.min(95, Math.max(30, Math.round(criteria.baseSuccessRate + delta)));
+
+  return { fitScore, successRate, reasons };
+}
+
+/**
+ * Main brand recommender.
+ * Returns top brands sorted by fit score, all with >0 fit.
+ */
+export function recommendBrands(deal: any): BrandRecommendation[] {
+  const results: BrandRecommendation[] = ACCOR_BRANDS.map((brand) => {
+    const { fitScore, successRate, reasons } = scoreBrand(brand, deal);
+    return {
+      brand,
+      fitScore,
+      successRate,
+      note: BRAND_STRATEGY_NOTES[brand],
+      reasons,
+    };
+  });
+
+  // Sort by fit score desc, return top 5 with fitScore > 10
+  return results
+    .filter((r) => r.fitScore > 10)
+    .sort((a, b) => b.fitScore - a.fitScore)
+    .slice(0, 5);
+}
+
 export const DESTINATION_BRANDS: Record<string, AccorBrand[]> = {
   "Tulum": ["Emblems Collection", "MGallery", "Mondrian", "Delano"],
   "Riviera Maya": ["Raffles", "Fairmont", "Emblems Collection", "Sofitel"],

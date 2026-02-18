@@ -16,8 +16,8 @@ import { LOITab } from "@/components/LOITab";
 import { generateICMemo } from "@/lib/pdf-export";
 import { computeFeasibility, DEFAULT_INPUTS, type FeasibilityInputs } from "@/lib/feasibility";
 import { computeCompleteness } from "@/lib/ic-engine";
-import { DESTINATION_BRANDS, LUXURY_PROSPECTS, BRAND_STRATEGY_NOTES, LUXURY_PITCH_POINTS } from "@/lib/accor-brands";
-import { FileDown, Star, CheckSquare, Gauge } from "lucide-react";
+import { recommendBrands, LUXURY_PITCH_POINTS, type BrandRecommendation } from "@/lib/accor-brands";
+import { FileDown, Star, CheckSquare, Gauge, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -27,17 +27,6 @@ interface Props {
   initialTab?: string;
 }
 
-function getBrandsForDeal(deal: any): string[] {
-  for (const [dest, brands] of Object.entries(DESTINATION_BRANDS)) {
-    if (deal.city?.toLowerCase().includes(dest.toLowerCase()) ||
-      deal.name?.toLowerCase().includes(dest.toLowerCase())) return brands;
-  }
-  const prospect = LUXURY_PROSPECTS.find(p =>
-    deal.name?.toLowerCase().includes(p.name.toLowerCase().split("—")[0].trim())
-  );
-  if (prospect) return prospect.brands;
-  return ["Emblems Collection", "Sofitel", "MGallery"];
-}
 
 const COMPLETENESS_COLOR = (score: number) =>
   score >= 80 ? "text-ic-go" : score >= 55 ? "text-ic-conditions" : "text-ic-nogo";
@@ -97,12 +86,12 @@ export function DealDetailDrawer({ deal, onClose, onUpdate, initialTab }: Props)
     if (!deal) return;
     const inputs = feasInputs || DEFAULT_INPUTS;
     const outputs = computeFeasibility(inputs);
-    const brands = getBrandsForDeal(deal);
-    generateICMemo(deal, tasks, inputs, outputs, brands, contacts);
+    const brandRecs = deal ? recommendBrands(deal) : [];
+    generateICMemo(deal, tasks, inputs, outputs, brandRecs.map(r => r.brand), contacts);
     toast({ title: "IC Memo exported", description: "Investment memo PDF downloaded." });
   };
 
-  const brands = deal ? getBrandsForDeal(deal) : [];
+  const brandRecs: BrandRecommendation[] = deal ? recommendBrands(deal) : [];
 
   return (
     <Sheet open={!!deal} onOpenChange={(open) => !open && onClose()}>
@@ -203,12 +192,57 @@ export function DealDetailDrawer({ deal, onClose, onUpdate, initialTab }: Props)
                       <Star className="h-3.5 w-3.5 text-aurora-gold" /> Recommended Accor Brands
                     </h3>
                     <div className="space-y-2">
-                      {brands.map((brand) => (
-                        <div key={brand} className="p-2.5 bg-secondary rounded-lg border border-border">
-                          <p className="text-sm font-semibold">{brand}</p>
-                          <p className="text-xs text-muted-foreground mt-0.5">{BRAND_STRATEGY_NOTES[brand]}</p>
-                        </div>
-                      ))}
+                      {brandRecs.map((rec, idx) => {
+                        const successColor =
+                          rec.successRate >= 75 ? "text-ic-go" :
+                          rec.successRate >= 60 ? "text-ic-conditions" :
+                          "text-ic-nogo";
+                        const fitBarColor =
+                          rec.fitScore >= 75 ? "bg-ic-go" :
+                          rec.fitScore >= 50 ? "bg-ic-conditions" :
+                          "bg-ic-nogo";
+                        return (
+                          <div key={rec.brand} className="p-3 bg-secondary rounded-lg border border-border space-y-2">
+                            {/* Header row */}
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                {idx === 0 && <span className="text-aurora-gold text-[10px] font-bold shrink-0">#1</span>}
+                                <p className="text-sm font-semibold truncate">{rec.brand}</p>
+                              </div>
+                              <div className="flex items-center gap-1 shrink-0">
+                                <TrendingUp className={cn("h-3 w-3", successColor)} />
+                                <span className={cn("text-xs font-bold tabular-nums", successColor)}>
+                                  {rec.successRate}%
+                                </span>
+                              </div>
+                            </div>
+                            {/* Fit bar */}
+                            <div className="flex items-center gap-2">
+                              <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
+                                <div
+                                  className={cn("h-full rounded-full transition-all", fitBarColor)}
+                                  style={{ width: `${rec.fitScore}%` }}
+                                />
+                              </div>
+                              <span className="text-[10px] text-muted-foreground tabular-nums shrink-0">
+                                Fit {rec.fitScore}/100
+                              </span>
+                            </div>
+                            {/* Strategy note */}
+                            <p className="text-xs text-muted-foreground">{rec.note}</p>
+                            {/* Reasons */}
+                            {rec.reasons.length > 0 && (
+                              <div className="flex flex-wrap gap-1">
+                                {rec.reasons.map((r) => (
+                                  <span key={r} className="text-[10px] px-1.5 py-0.5 rounded bg-background border border-border text-muted-foreground">
+                                    {r}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                   <div className="pt-2 border-t border-border">
