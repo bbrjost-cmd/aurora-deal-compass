@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  CommandDialog,
+  Command,
   CommandEmpty,
   CommandGroup,
   CommandInput,
@@ -9,6 +9,7 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   LayoutDashboard, Map, Kanban, Calculator, Database, Settings,
   Building2, Search, FileText, Plus, BarChart3,
@@ -62,89 +63,96 @@ export function CommandBar({ open, onOpenChange }: CommandBarProps) {
   ];
 
   return (
-    <CommandDialog open={open} onOpenChange={onOpenChange}>
-      <CommandInput
-        placeholder="Rechercher deals, pages, actions..."
-        value={query}
-        onValueChange={setQuery}
-      />
-      <CommandList>
-        <CommandEmpty>
-          <div className="flex flex-col items-center gap-2 py-4">
-            <Search className="h-8 w-8 text-muted-foreground" />
-            <p className="text-sm">Aucun résultat pour « {query} »</p>
-          </div>
-        </CommandEmpty>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="overflow-hidden p-0 shadow-lg">
+        <Command
+          shouldFilter={false}
+          className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5"
+        >
+          <CommandInput
+            placeholder="Rechercher deals, pages, actions..."
+            value={query}
+            onValueChange={setQuery}
+          />
+          <CommandList>
+            <CommandEmpty>
+              <div className="flex flex-col items-center gap-2 py-4">
+                <Search className="h-8 w-8 text-muted-foreground" />
+                <p className="text-sm">Aucun résultat pour « {query} »</p>
+              </div>
+            </CommandEmpty>
 
-        {filteredDeals.length > 0 && (
-          <CommandGroup heading="Deals">
-            {filteredDeals.map((deal) => (
+            {filteredDeals.length > 0 && (
+              <CommandGroup heading="Deals">
+                {filteredDeals.map((deal) => (
+                  <CommandItem
+                    key={deal.id}
+                    value={`deal-${deal.id}`}
+                    onSelect={() => run(() => navigate(`/pipeline?deal=${deal.id}`))}
+                    className="gap-3"
+                  >
+                    <div className="h-7 w-7 rounded-md bg-secondary flex items-center justify-center shrink-0">
+                      <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{deal.name}</p>
+                      <p className="text-xs text-muted-foreground">{deal.city}, {deal.state} · {STAGE_LABELS[deal.stage] || deal.stage}</p>
+                    </div>
+                    {deal.score_total > 0 && (
+                      <span className="text-xs text-muted-foreground font-mono">{deal.score_total}pts</span>
+                    )}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
+
+            <CommandSeparator />
+
+            <CommandGroup heading="Navigation">
+              {NAV_ACTIONS.map((item) => (
+                <CommandItem
+                  key={item.path}
+                  value={`nav-${item.label}`}
+                  onSelect={() => run(() => navigate(item.path))}
+                  className="gap-3"
+                >
+                  <item.icon className="h-4 w-4 text-muted-foreground" />
+                  <span>{item.label}</span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+
+            <CommandSeparator />
+
+            <CommandGroup heading="Actions rapides">
               <CommandItem
-                key={deal.id}
-                value={`deal-${deal.id}`}
-                onSelect={() => run(() => navigate(`/pipeline?deal=${deal.id}`))}
+                value="action-new-deal"
+                onSelect={() => run(() => navigate("/pipeline"))}
                 className="gap-3"
               >
-                <div className="h-7 w-7 rounded-md bg-secondary flex items-center justify-center shrink-0">
-                  <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{deal.name}</p>
-                  <p className="text-xs text-muted-foreground">{deal.city}, {deal.state} · {STAGE_LABELS[deal.stage] || deal.stage}</p>
-                </div>
-                {deal.score_total > 0 && (
-                  <span className="text-xs text-muted-foreground font-mono">{deal.score_total}pts</span>
-                )}
+                <Plus className="h-4 w-4 text-muted-foreground" />
+                <span>Nouveau deal</span>
               </CommandItem>
-            ))}
-          </CommandGroup>
-        )}
-
-        <CommandSeparator />
-
-        <CommandGroup heading="Navigation">
-          {NAV_ACTIONS.map((item) => (
-            <CommandItem
-              key={item.path}
-              value={`nav-${item.label}`}
-              onSelect={() => run(() => navigate(item.path))}
-              className="gap-3"
-            >
-              <item.icon className="h-4 w-4 text-muted-foreground" />
-              <span>{item.label}</span>
-            </CommandItem>
-          ))}
-        </CommandGroup>
-
-        <CommandSeparator />
-
-        <CommandGroup heading="Actions rapides">
-          <CommandItem
-            value="action-new-deal"
-            onSelect={() => run(() => navigate("/pipeline"))}
-            className="gap-3"
-          >
-            <Plus className="h-4 w-4 text-muted-foreground" />
-            <span>Nouveau deal</span>
-          </CommandItem>
-          <CommandItem
-            value="action-export-pdf"
-            onSelect={() => run(() => navigate("/feasibility"))}
-            className="gap-3"
-          >
-            <FileText className="h-4 w-4 text-muted-foreground" />
-            <span>Exporter mémo PDF</span>
-          </CommandItem>
-          <CommandItem
-            value="action-ic-compare"
-            onSelect={() => run(() => navigate("/ic"))}
-            className="gap-3"
-          >
-            <BarChart3 className="h-4 w-4 text-muted-foreground" />
-            <span>Comparer deals IC</span>
-          </CommandItem>
-        </CommandGroup>
-      </CommandList>
-    </CommandDialog>
+              <CommandItem
+                value="action-export-pdf"
+                onSelect={() => run(() => navigate("/feasibility"))}
+                className="gap-3"
+              >
+                <FileText className="h-4 w-4 text-muted-foreground" />
+                <span>Exporter mémo PDF</span>
+              </CommandItem>
+              <CommandItem
+                value="action-ic-compare"
+                onSelect={() => run(() => navigate("/ic"))}
+                className="gap-3"
+              >
+                <BarChart3 className="h-4 w-4 text-muted-foreground" />
+                <span>Comparer deals IC</span>
+              </CommandItem>
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </DialogContent>
+    </Dialog>
   );
 }
