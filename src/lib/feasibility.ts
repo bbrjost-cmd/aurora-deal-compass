@@ -1,3 +1,8 @@
+/**
+ * AURORA DevOS MX — Extended Feasibility Model
+ * Enhanced with brand/owner economics
+ */
+
 export interface FeasibilityInputs {
   rooms: number;
   segment: string;
@@ -13,6 +18,15 @@ export interface FeasibilityInputs {
   incentiveFee: number;
   gopMargin: number;
   fxRate: number;
+  // Extended
+  keyMoney?: number;
+  debtEnabled?: boolean;
+  ltv?: number;
+  interestRate?: number;
+  capRate?: number;
+  perspective?: "brand" | "owner";
+  waterRisk?: "low" | "medium" | "high";
+  permittingRisk?: "low" | "medium" | "high";
 }
 
 export interface FeasibilityYear {
@@ -34,6 +48,7 @@ export interface FeasibilityOutputs {
     adrDown10: FeasibilityYear[];
     capexUp15: { totalCapex: number; simplePayback: number };
     fxShock: FeasibilityYear[];
+    severe: FeasibilityYear[]; // occ -15% + adr -10%
   };
 }
 
@@ -52,13 +67,25 @@ export const DEFAULT_INPUTS: FeasibilityInputs = {
   incentiveFee: 0.08,
   gopMargin: 0.38,
   fxRate: 17.5,
+  keyMoney: 0,
+  debtEnabled: false,
+  ltv: 0.55,
+  interestRate: 0.09,
+  capRate: 0.08,
+  perspective: 'brand',
+  waterRisk: 'low',
+  permittingRisk: 'low',
 };
 
-function computeYears(inputs: FeasibilityInputs, adrOverride?: number, occOverride?: number, fxOverride?: number): FeasibilityYear[] {
+function computeYears(
+  inputs: FeasibilityInputs,
+  adrOverride?: number,
+  occOverride?: number,
+  fxOverride?: number,
+): FeasibilityYear[] {
   const years: FeasibilityYear[] = [];
   const adr = adrOverride ?? inputs.adr;
   const baseOcc = occOverride ?? inputs.occupancy;
-  const fx = fxOverride ?? inputs.fxRate;
 
   for (let y = 1; y <= 5; y++) {
     const rampFactor = y <= inputs.rampUpYears ? (0.6 + (0.4 * y / inputs.rampUpYears)) : 1;
@@ -67,7 +94,7 @@ function computeYears(inputs: FeasibilityInputs, adrOverride?: number, occOverri
     const roomsRevenue = roomNights * adr;
     const totalRevenue = roomsRevenue * (1 + inputs.fnbRevenuePct + inputs.otherRevenuePct);
     const gop = totalRevenue * inputs.gopMargin;
-    const fees = totalRevenue * (inputs.baseFee + inputs.incentiveFee);
+    const fees = totalRevenue * inputs.baseFee + gop * inputs.incentiveFee;
     const noi = gop - fees;
 
     years.push({
@@ -89,6 +116,9 @@ export function computeFeasibility(inputs: FeasibilityInputs): FeasibilityOutput
   const avgNoi = years.reduce((sum, y) => sum + y.noi, 0) / years.length;
   const simplePayback = avgNoi > 0 ? totalCapex / avgNoi : Infinity;
 
+  // Severe downside: occ -15% + adr -10%
+  const severe = computeYears(inputs, inputs.adr * 0.90, inputs.occupancy * 0.85);
+
   return {
     years,
     totalCapex,
@@ -101,6 +131,7 @@ export function computeFeasibility(inputs: FeasibilityInputs): FeasibilityOutput
         simplePayback: Math.round((totalCapex * 1.15 / avgNoi) * 10) / 10,
       },
       fxShock: computeYears(inputs, undefined, undefined, inputs.fxRate * 1.15),
+      severe,
     },
   };
 }
@@ -111,4 +142,9 @@ export function formatMXN(value: number): string {
 
 export function formatUSD(value: number, fxRate: number): string {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value / fxRate);
+}
+
+export function formatMillions(value: number, currency: string = 'MXN'): string {
+  const m = value / 1000000;
+  return `${m.toFixed(1)}M ${currency}`;
 }

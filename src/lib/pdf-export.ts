@@ -390,3 +390,16 @@ export function generateDealPDF(deal: any, tasks: any[], feasibilityOutputs?: an
   const safeName = (deal.name || "Deal").replace(/[^a-zA-Z0-9]/g, "_");
   doc.save(`${safeName}_Memo.pdf`);
 }
+
+// ─── IC Memo (alias for IC-grade deal memo) ───────────────────────────────────
+export function generateICMemo(
+  deal: any,
+  tasks: any[],
+  inputs: FeasibilityInputs,
+  outputs: FeasibilityOutputs,
+  brands?: string[],
+  contacts?: any[],
+) {
+  generateFeasibilityPDF(deal, inputs, outputs, brands);
+}
+
