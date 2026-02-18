@@ -1,20 +1,29 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { STAGE_LABELS, STAGE_COLORS } from "@/lib/constants";
-import { Plus, TrendingUp, Target, Clock, BarChart3, Sparkles } from "lucide-react";
+import { Plus, TrendingUp, Target, Clock, BarChart3, CheckCircle2, XCircle, AlertTriangle, ArrowRight, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { LUXURY_PROSPECTS } from "@/lib/accor-brands";
 import { toast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
+
+const STAGE_ORDER = ['lead', 'qualified', 'underwriting', 'loi', 'negotiation', 'signed'];
+
+const IC_DECISION_STYLES: Record<string, { label: string; color: string; icon: any }> = {
+  go: { label: "GO", color: "text-ic-go", icon: CheckCircle2 },
+  go_with_conditions: { label: "CONDITIONS", color: "text-ic-conditions", icon: AlertTriangle },
+  no_go: { label: "NO-GO", color: "text-ic-nogo", icon: XCircle },
+};
 
 export default function Dashboard() {
   const { orgId } = useAuth();
   const navigate = useNavigate();
   const [deals, setDeals] = useState<any[]>([]);
   const [tasks, setTasks] = useState<any[]>([]);
+  const [decisions, setDecisions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [seeding, setSeeding] = useState(false);
 
@@ -23,64 +32,46 @@ export default function Dashboard() {
     Promise.all([
       supabase.from("deals").select("*").eq("org_id", orgId).order("updated_at", { ascending: false }),
       supabase.from("tasks").select("*, deals(name)").eq("org_id", orgId).eq("status", "pending").order("due_date", { ascending: true }).limit(5),
-    ]).then(([dealsRes, tasksRes]) => {
+      supabase.from("decision_history").select("*").eq("org_id", orgId).order("created_at", { ascending: false }).limit(20),
+    ]).then(([dealsRes, tasksRes, decisionsRes]) => {
       setDeals(dealsRes.data || []);
       setTasks(tasksRes.data || []);
+      setDecisions(decisionsRes.data || []);
       setLoading(false);
     });
   };
 
   useEffect(loadData, [orgId]);
 
-  const seedProspects = async () => {
+  const seedDeals = async () => {
     if (!orgId) return;
     setSeeding(true);
     try {
-      const inserts = LUXURY_PROSPECTS.map(p => ({
-        org_id: orgId,
-        name: p.name,
-        city: p.city,
-        state: p.state,
-        lat: p.lat,
-        lon: p.lon,
-        segment: p.segment,
-        opening_type: p.opening_type,
-        rooms_min: p.rooms_min,
-        rooms_max: p.rooms_max,
-        stage: "lead" as const,
-      }));
-      const { error } = await supabase.from("deals").insert(inserts);
+      const { data, error } = await supabase.functions.invoke("seed-deals", { body: { org_id: orgId } });
       if (error) throw error;
-
-      // Add notes for each prospect
-      const { data: newDeals } = await supabase.from("deals").select("id, name").eq("org_id", orgId).order("created_at", { ascending: false }).limit(10);
-      if (newDeals) {
-        const noteInserts = newDeals.map(d => {
-          const prospect = LUXURY_PROSPECTS.find(p => p.name === d.name);
-          return prospect ? {
-            org_id: orgId,
-            deal_id: d.id,
-            content: `${prospect.notes}\n\nOwner: ${prospect.owner}\nDestination: ${prospect.destination}\nRecommended brands: ${prospect.brands.join(", ")}`,
-          } : null;
-        }).filter(Boolean);
-        if (noteInserts.length > 0) {
-          await supabase.from("deal_notes").insert(noteInserts as any);
-        }
+      if (data?.message) {
+        toast({ title: "Pipeline déjà chargé", description: `${data.count} deals existants.` });
+      } else {
+        toast({ title: `✅ ${data.inserted} deals Mexico créés`, description: "Pipeline de test complet avec tâches et benchmarks" });
+        loadData();
       }
-
-      toast({ title: "10 luxury prospects seeded", description: "Riviera Maya, Tulum, Los Cabos, CDMX, Nayarit" });
-      loadData();
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast({ title: "Erreur", description: err.message, variant: "destructive" });
     }
     setSeeding(false);
   };
 
   const totalDeals = deals.length;
-  const dealsByStage = deals.reduce((acc, d) => {
-    acc[d.stage] = (acc[d.stage] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+
+  const dealsByStage = useMemo(() =>
+    STAGE_ORDER.reduce((acc, s) => {
+      acc[s] = deals.filter(d => d.stage === s).length;
+      return acc;
+    }, {} as Record<string, number>),
+    [deals]
+  );
+
+  const maxStageCount = Math.max(...Object.values(dealsByStage), 1);
 
   const avgScore = totalDeals > 0
     ? Math.round(deals.reduce((sum, d) => sum + (d.score_total || 0), 0) / totalDeals)
@@ -89,33 +80,52 @@ export default function Dashboard() {
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
   const recentDeals = deals.filter((d) => d.updated_at >= sevenDaysAgo);
 
+  const icSummary = useMemo(() => ({
+    go: decisions.filter(d => d.decision === "go").length,
+    go_with_conditions: decisions.filter(d => d.decision === "go_with_conditions").length,
+    no_go: decisions.filter(d => d.decision === "no_go").length,
+  }), [decisions]);
+
+  const topDeals = useMemo(() =>
+    [...deals].sort((a, b) => (b.score_total || 0) - (a.score_total || 0)).slice(0, 5),
+    [deals]
+  );
+
   const kpis = [
-    { label: "Total Deals", value: totalDeals, icon: Target },
-    { label: "Avg Score", value: avgScore, icon: BarChart3 },
-    { label: "Updated (7d)", value: recentDeals.length, icon: TrendingUp },
-    { label: "Pending Tasks", value: tasks.length, icon: Clock },
+    { label: "Total Deals", value: totalDeals, icon: Target, sub: `${recentDeals.length} updated this week` },
+    { label: "Avg IC Score", value: avgScore, icon: BarChart3, sub: "Qualification score" },
+    { label: "Active Tasks", value: tasks.length, icon: Clock, sub: "Pending actions" },
+    { label: "IC Decisions", value: decisions.length, icon: TrendingUp, sub: `${icSummary.go} GO · ${icSummary.go_with_conditions} CONDITIONS` },
   ];
 
   if (loading) {
-    return <div className="p-6 text-sm text-muted-foreground">Loading...</div>;
+    return (
+      <div className="p-6 space-y-4 animate-pulse">
+        <div className="h-8 w-48 bg-muted rounded" />
+        <div className="grid grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => <div key={i} className="h-24 bg-muted rounded-lg" />)}
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="p-6 space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-          <p className="text-sm text-muted-foreground">Accor Luxury & Lifestyle — Mexico Pipeline</p>
+          <h1 className="text-2xl font-semibold tracking-tight">Deal Engine</h1>
+          <p className="text-sm text-muted-foreground">Accor Luxury &amp; Lifestyle — Mexico Pipeline</p>
         </div>
         <div className="flex gap-2">
-          {totalDeals === 0 && (
-            <Button variant="outline" onClick={seedProspects} disabled={seeding} className="gap-2">
+          {totalDeals < 10 && (
+            <Button variant="outline" onClick={seedDeals} disabled={seeding} className="gap-2">
               <Sparkles className="h-4 w-4" />
-              {seeding ? "Seeding..." : "Load Luxury Prospects"}
+              {seeding ? "Génération..." : "Charger 50 deals test"}
             </Button>
           )}
           <Button onClick={() => navigate("/pipeline")} className="gap-2">
-            <Plus className="h-4 w-4" /> Quick Add Deal
+            <Plus className="h-4 w-4" /> New Deal
           </Button>
         </div>
       </div>
@@ -123,88 +133,201 @@ export default function Dashboard() {
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {kpis.map((kpi) => (
-          <Card key={kpi.label}>
-            <CardContent className="p-4 flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-secondary flex items-center justify-center">
-                <kpi.icon className="h-5 w-5 text-muted-foreground" />
-              </div>
-              <div>
+          <Card key={kpi.label} className="border-border/60">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="h-9 w-9 rounded-lg bg-secondary flex items-center justify-center shrink-0">
+                  <kpi.icon className="h-4 w-4 text-muted-foreground" />
+                </div>
                 <p className="text-2xl font-semibold">{kpi.value}</p>
-                <p className="text-xs text-muted-foreground">{kpi.label}</p>
               </div>
+              <p className="text-xs font-medium text-foreground">{kpi.label}</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">{kpi.sub}</p>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* Pipeline summary */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Pipeline by Stage</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-2">
-            {Object.entries(dealsByStage).map(([stage, count]) => (
-              <Badge key={stage} variant="secondary" className={STAGE_COLORS[stage]}>
-                {STAGE_LABELS[stage] || stage}: {count as number}
-              </Badge>
-            ))}
-            {totalDeals === 0 && (
-              <p className="text-sm text-muted-foreground">No deals yet. Click "Load Luxury Prospects" to seed 10 high-priority targets.</p>
-            )}
+      {/* Pipeline Bar Chart */}
+      <Card className="border-border/60">
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base">Pipeline by Stage</CardTitle>
+            <Button variant="ghost" size="sm" className="text-xs gap-1" onClick={() => navigate("/pipeline")}>
+              View all <ArrowRight className="h-3 w-3" />
+            </Button>
           </div>
+        </CardHeader>
+        <CardContent className="pt-2">
+          {totalDeals === 0 ? (
+            <div className="flex flex-col items-center justify-center py-8 gap-3">
+              <p className="text-sm text-muted-foreground">No deals yet.</p>
+              <Button variant="outline" size="sm" onClick={() => navigate("/pipeline")} className="gap-2">
+                <Plus className="h-3.5 w-3.5" /> Create your first deal
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-2.5">
+              {STAGE_ORDER.map((stage) => {
+                const count = dealsByStage[stage] || 0;
+                const pct = maxStageCount > 0 ? (count / maxStageCount) * 100 : 0;
+                return (
+                  <div key={stage} className="flex items-center gap-3">
+                    <span className="text-xs text-muted-foreground w-24 shrink-0">{STAGE_LABELS[stage]}</span>
+                    <div className="flex-1 bg-secondary rounded-full h-5 relative overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-primary/80 transition-all duration-500"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    <span className="text-xs font-medium w-6 text-right">{count}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      <div className="grid lg:grid-cols-2 gap-4">
-        {/* Recent Activity */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Recent Activity</CardTitle>
+      <div className="grid lg:grid-cols-3 gap-4">
+        {/* IC Decision Summary */}
+        <Card className="border-border/60">
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base">IC Decisions</CardTitle>
+              <Button variant="ghost" size="sm" className="text-xs gap-1" onClick={() => navigate("/ic")}>
+                Compare <ArrowRight className="h-3 w-3" />
+              </Button>
+            </div>
           </CardHeader>
-          <CardContent className="space-y-2">
-            {recentDeals.slice(0, 5).map((deal) => (
-              <div key={deal.id} className="flex items-center justify-between py-1.5 border-b border-border last:border-0">
-                <div>
-                  <p className="text-sm font-medium">{deal.name}</p>
-                  <p className="text-xs text-muted-foreground">{deal.city}, {deal.state}</p>
+          <CardContent className="space-y-3 pt-2">
+            {decisions.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 text-center">No IC decisions yet.<br />Run feasibility analysis to generate decisions.</p>
+            ) : (
+              <>
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  {(["go", "go_with_conditions", "no_go"] as const).map((d) => {
+                    const s = IC_DECISION_STYLES[d];
+                    const Icon = s.icon;
+                    return (
+                      <div key={d} className="bg-secondary/40 rounded-lg p-3">
+                        <Icon className={cn("h-5 w-5 mx-auto mb-1", s.color)} />
+                        <p className="text-xl font-semibold">{icSummary[d]}</p>
+                        <p className={cn("text-[10px] font-bold tracking-wide", s.color)}>{s.label}</p>
+                      </div>
+                    );
+                  })}
                 </div>
-                <Badge variant="secondary" className={STAGE_COLORS[deal.stage]}>
-                  {STAGE_LABELS[deal.stage]}
-                </Badge>
-              </div>
-            ))}
-            {recentDeals.length === 0 && (
-              <p className="text-sm text-muted-foreground">No recent activity.</p>
+                <div className="space-y-1.5 mt-2">
+                  {decisions.slice(0, 4).map((dec) => {
+                    const s = IC_DECISION_STYLES[dec.decision];
+                    const Icon = s.icon;
+                    const deal = deals.find(d => d.id === dec.deal_id);
+                    return (
+                      <div key={dec.id} className="flex items-center gap-2 py-1 border-b border-border/50 last:border-0">
+                        <Icon className={cn("h-3.5 w-3.5 shrink-0", s.color)} />
+                        <span className="text-xs flex-1 truncate">{deal?.name || "Deal"}</span>
+                        <span className="text-[10px] text-muted-foreground">Score {dec.ic_score}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
             )}
           </CardContent>
         </Card>
 
-        {/* Upcoming Tasks */}
-        <Card>
-          <CardHeader className="pb-3">
+        {/* Top Deals by Score */}
+        <Card className="border-border/60">
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base">Top Deals</CardTitle>
+              <Button variant="ghost" size="sm" className="text-xs gap-1" onClick={() => navigate("/pipeline")}>
+                Pipeline <ArrowRight className="h-3 w-3" />
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-2 space-y-2">
+            {topDeals.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 text-center">No scored deals.</p>
+            ) : topDeals.map((deal, i) => (
+              <div key={deal.id} className="flex items-center gap-2.5 py-1.5 border-b border-border/50 last:border-0">
+                <span className="text-[11px] text-muted-foreground font-mono w-4">{i + 1}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium truncate">{deal.name}</p>
+                  <p className="text-[10px] text-muted-foreground">{deal.city}, {deal.state}</p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-sm font-semibold">{deal.score_total || 0}</p>
+                  <Badge variant="secondary" className={cn("text-[9px] py-0", STAGE_COLORS[deal.stage])}>
+                    {STAGE_LABELS[deal.stage]}
+                  </Badge>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        {/* Pending Tasks */}
+        <Card className="border-border/60">
+          <CardHeader className="pb-2">
             <CardTitle className="text-base">Upcoming Tasks</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
-            {tasks.map((task) => (
-              <div key={task.id} className="flex items-center justify-between py-1.5 border-b border-border last:border-0">
-                <div>
-                  <p className="text-sm font-medium">{task.title}</p>
-                  <p className="text-xs text-muted-foreground">{(task as any).deals?.name}</p>
+          <CardContent className="pt-2 space-y-2">
+            {tasks.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 text-center">No pending tasks.</p>
+            ) : tasks.map((task) => (
+              <div key={task.id} className="flex items-start gap-2.5 py-1.5 border-b border-border/50 last:border-0">
+                <Clock className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium truncate">{task.title}</p>
+                  <p className="text-[10px] text-muted-foreground truncate">{(task as any).deals?.name}</p>
                 </div>
                 {task.due_date && (
-                  <span className="text-xs text-muted-foreground">
-                    {new Date(task.due_date).toLocaleDateString()}
+                  <span className="text-[10px] text-muted-foreground shrink-0">
+                    {new Date(task.due_date).toLocaleDateString("fr-MX", { day: "numeric", month: "short" })}
                   </span>
                 )}
               </div>
             ))}
-            {tasks.length === 0 && (
-              <p className="text-sm text-muted-foreground">No pending tasks.</p>
-            )}
           </CardContent>
         </Card>
       </div>
+
+      {/* Recent Activity */}
+      <Card className="border-border/60">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Recent Activity</CardTitle>
+        </CardHeader>
+        <CardContent className="pt-2">
+          <div className="divide-y divide-border/50">
+            {recentDeals.slice(0, 6).map((deal) => (
+              <div key={deal.id} className="flex items-center justify-between py-2.5">
+                <div className="flex items-center gap-3">
+                  <div className="h-7 w-7 rounded-md bg-secondary flex items-center justify-center shrink-0">
+                    <span className="text-[10px] font-bold text-muted-foreground">{deal.name.slice(0, 2).toUpperCase()}</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">{deal.name}</p>
+                    <p className="text-xs text-muted-foreground">{deal.city}, {deal.state} · {deal.segment}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {deal.score_total > 0 && (
+                    <span className="text-xs font-mono text-muted-foreground">{deal.score_total}pts</span>
+                  )}
+                  <Badge variant="secondary" className={cn("text-xs", STAGE_COLORS[deal.stage])}>
+                    {STAGE_LABELS[deal.stage]}
+                  </Badge>
+                </div>
+              </div>
+            ))}
+            {recentDeals.length === 0 && (
+              <p className="text-sm text-muted-foreground py-4 text-center">No recent activity.</p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
