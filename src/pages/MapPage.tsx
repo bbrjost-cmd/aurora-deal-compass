@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap, CircleMarker } from "react-leaflet";
 import L from "leaflet";
 import { useAuth } from "@/hooks/useAuth";
@@ -6,13 +6,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { queryOverpass, OverpassResult, OverpassLayer } from "@/lib/overpass";
 import { fetchIndependentHotels, CDMX_BBOX, BBox } from "@/lib/overpass-bbox";
 import { ClassifiedHotel, HotelClassification } from "@/lib/hotel-classifier";
-import { MEXICO_CENTER, CDMX_CENTER } from "@/lib/constants";
+import { MEXICO_CENTER, CDMX_CENTER, STAGE_LABELS, SEGMENT_LABELS } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
-import { Hotel, Plane, MapPin, Building2, Layers, Filter } from "lucide-react";
+import { Hotel, Plane, MapPin, Building2, Layers, Filter, ChevronLeft, ChevronRight, CheckCircle2, XCircle, AlertTriangle, Minus } from "lucide-react";
 import { DealCreateDialog } from "@/components/DealCreateDialog";
 import { DealDetailDrawer } from "@/components/DealDetailDrawer";
 import { HotelIntelligenceDrawer } from "@/components/HotelIntelligenceDrawer";
@@ -55,6 +55,19 @@ const INDEP_HOTEL_COLORS: Record<HotelClassification, string> = {
 
 type FilterChip = "all" | HotelClassification | "has_website" | "has_phone";
 
+const IC_STYLES: Record<string, { color: string; bg: string; icon: any; label: string }> = {
+  go:                 { color: "text-ic-go",         bg: "bg-ic-go-muted",         icon: CheckCircle2,   label: "GO" },
+  go_with_conditions: { color: "text-ic-conditions", bg: "bg-ic-conditions-muted", icon: AlertTriangle,  label: "Conditions" },
+  no_go:              { color: "text-ic-nogo",       bg: "bg-ic-nogo-muted",       icon: XCircle,        label: "NO-GO" },
+};
+
+const DECISION_PIN_COLORS: Record<string, { fill: string; stroke: string }> = {
+  go:                 { fill: "#22c55e", stroke: "#16a34a" },
+  go_with_conditions: { fill: "#f59e0b", stroke: "#d97706" },
+  no_go:              { fill: "#ef4444", stroke: "#dc2626" },
+  none:               { fill: "#111111", stroke: "#444444" },
+};
+
 function MapClickHandler({ onMapClick }: { onMapClick: (lat: number, lon: number) => void }) {
   useMapEvents({
     click(e) { onMapClick(e.latlng.lat, e.latlng.lng); },
@@ -83,6 +96,7 @@ function InvalidateSizeHandler() {
 export default function MapPage() {
   const { orgId } = useAuth();
   const [deals, setDeals] = useState<any[]>([]);
+  const [decisions, setDecisions] = useState<any[]>([]);
   const [hotels, setHotels] = useState<OverpassResult[]>([]);
   const [airports, setAirports] = useState<OverpassResult[]>([]);
   const [independentHotels, setIndependentHotels] = useState<ClassifiedHotel[]>([]);
@@ -92,6 +106,12 @@ export default function MapPage() {
   const [showHotels, setShowHotels] = useState(false);
   const [showAirports, setShowAirports] = useState(true);
   const [showIndependent, setShowIndependent] = useState(false);
+
+  // Deal panel filters
+  const [panelOpen, setPanelOpen] = useState(true);
+  const [filterSegment, setFilterSegment] = useState("all");
+  const [filterStage, setFilterStage] = useState("all");
+  const [filterDecision, setFilterDecision] = useState("all");
 
   // Filters
   const [indepFilter, setIndepFilter] = useState<FilterChip>("all");
@@ -110,7 +130,13 @@ export default function MapPage() {
 
   useEffect(() => {
     if (!orgId) return;
-    supabase.from("deals").select("*").eq("org_id", orgId).then(({ data }) => setDeals(data || []));
+    Promise.all([
+      supabase.from("deals").select("*").eq("org_id", orgId),
+      supabase.from("decision_history").select("deal_id, decision, ic_score, created_at").eq("org_id", orgId).order("created_at", { ascending: false }),
+    ]).then(([dealsRes, decisionsRes]) => {
+      setDeals(dealsRes.data || []);
+      setDecisions(decisionsRes.data || []);
+    });
   }, [orgId]);
 
   const loadOverpass = useCallback(async (lat: number, lon: number, r: number) => {
@@ -184,6 +210,51 @@ export default function MapPage() {
     setSelectedDeal(deal);
     setSelectedHotel(null);
     if (orgId) supabase.from("deals").select("*").eq("org_id", orgId).then(({ data }) => setDeals(data || []));
+  };
+
+  // IC Decision map: dealId → latest decision
+  const decisionMap = useMemo(() => {
+    const map: Record<string, { decision: string; ic_score: number }> = {};
+    decisions.forEach(dec => {
+      if (dec.deal_id && !map[dec.deal_id]) {
+        map[dec.deal_id] = { decision: dec.decision, ic_score: dec.ic_score };
+      }
+    });
+    return map;
+  }, [decisions]);
+
+  // Deals with geo + panel filters
+  const geoDeals = useMemo(() =>
+    deals.filter(d => d.lat && d.lon),
+    [deals]
+  );
+
+  const panelDeals = useMemo(() => {
+    return geoDeals.filter(d => {
+      if (filterSegment !== "all" && d.segment !== filterSegment) return false;
+      if (filterStage !== "all" && d.stage !== filterStage) return false;
+      if (filterDecision !== "all") {
+        const dec = decisionMap[d.id]?.decision || "none";
+        if (filterDecision !== dec) return false;
+      }
+      return true;
+    });
+  }, [geoDeals, filterSegment, filterStage, filterDecision, decisionMap]);
+
+  // Distinct segments/stages present in geo deals
+  const availableSegments = useMemo(() => [...new Set(geoDeals.map(d => d.segment).filter(Boolean))], [geoDeals]);
+  const availableStages   = useMemo(() => [...new Set(geoDeals.map(d => d.stage).filter(Boolean))],   [geoDeals]);
+
+  // Custom colored deal pin
+  const getDealIcon = (dealId: string) => {
+    const dec = decisionMap[dealId]?.decision || "none";
+    const c = DECISION_PIN_COLORS[dec] || DECISION_PIN_COLORS.none;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="28" viewBox="0 0 22 28">
+      <path d="M11 0C4.924 0 0 4.924 0 11c0 7.333 11 17 11 17S22 18.333 22 11C22 4.924 17.076 0 11 0z"
+        fill="${c.fill}" stroke="${c.stroke}" stroke-width="1.2"/>
+      <circle cx="11" cy="11" r="5" fill="white" opacity="0.9"/>
+    </svg>`;
+    return L.divIcon({ className: "", html: svg, iconSize: [22, 28], iconAnchor: [11, 28], popupAnchor: [0, -30] });
   };
 
   // Filtered independent hotels for display
@@ -306,8 +377,142 @@ export default function MapPage() {
         </div>
       )}
 
-      {/* Map + Drawer layout */}
+      {/* Map + Panel layout */}
       <div className="flex-1 relative flex min-h-0">
+
+        {/* ── Deals Panel (left) ── */}
+        <div className={cn(
+          "relative flex flex-col bg-background border-r border-border shrink-0 transition-all duration-300 z-[500]",
+          panelOpen ? "w-72" : "w-0 overflow-hidden"
+        )}>
+          {/* Panel header */}
+          <div className="px-4 pt-4 pb-3 border-b border-border shrink-0">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <p className="text-sm font-semibold">Deals ({panelDeals.length})</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">{geoDeals.length} géolocalisés</p>
+              </div>
+            </div>
+            {/* Filters */}
+            <div className="space-y-2">
+              <Select value={filterSegment} onValueChange={setFilterSegment}>
+                <SelectTrigger className="h-7 text-xs">
+                  <SelectValue placeholder="Segment" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tous segments</SelectItem>
+                  {availableSegments.map(s => (
+                    <SelectItem key={s} value={s}>{SEGMENT_LABELS[s] || s}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={filterStage} onValueChange={setFilterStage}>
+                <SelectTrigger className="h-7 text-xs">
+                  <SelectValue placeholder="Stage" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tous stages</SelectItem>
+                  {availableStages.map(s => (
+                    <SelectItem key={s} value={s}>{STAGE_LABELS[s] || s}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={filterDecision} onValueChange={setFilterDecision}>
+                <SelectTrigger className="h-7 text-xs">
+                  <SelectValue placeholder="Décision IC" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Toutes décisions</SelectItem>
+                  <SelectItem value="go">✅ GO</SelectItem>
+                  <SelectItem value="go_with_conditions">🟡 Conditions</SelectItem>
+                  <SelectItem value="no_go">❌ NO-GO</SelectItem>
+                  <SelectItem value="none">— Sans décision</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Deal list */}
+          <div className="flex-1 overflow-y-auto divide-y divide-border">
+            {panelDeals.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-24 text-xs text-muted-foreground gap-1">
+                <MapPin className="h-4 w-4 opacity-30" />
+                Aucun deal correspondant
+              </div>
+            ) : (
+              panelDeals.map(deal => {
+                const dec = decisionMap[deal.id];
+                const decKey = dec?.decision || "none";
+                const style = IC_STYLES[decKey];
+                const Icon = style?.icon;
+                const pinColor = DECISION_PIN_COLORS[decKey] || DECISION_PIN_COLORS.none;
+                const isSelected = selectedDeal?.id === deal.id;
+                return (
+                  <button
+                    key={deal.id}
+                    onClick={() => {
+                      setSelectedHotel(null);
+                      setSelectedDeal(deal);
+                      if (deal.lat && deal.lon) {
+                        setCenter([deal.lat, deal.lon]);
+                        setZoom(14);
+                      }
+                    }}
+                    className={cn(
+                      "w-full text-left px-4 py-3 transition-colors hover:bg-accent",
+                      isSelected && "bg-accent"
+                    )}
+                  >
+                    <div className="flex items-start gap-2.5">
+                      {/* colored dot */}
+                      <span
+                        className="mt-1 shrink-0 inline-block w-2.5 h-2.5 rounded-full"
+                        style={{ background: pinColor.fill, border: `1.5px solid ${pinColor.stroke}` }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium truncate leading-snug">{deal.name}</p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5 truncate">
+                          {deal.city}{deal.state ? `, ${deal.state}` : ""}
+                        </p>
+                        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                          {dec ? (
+                            <span className={cn("text-[9px] font-semibold flex items-center gap-0.5", style?.color)}>
+                              {Icon && <Icon className="h-2.5 w-2.5" />}
+                              {style?.label}
+                            </span>
+                          ) : (
+                            <span className="text-[9px] text-muted-foreground">—</span>
+                          )}
+                          {dec?.ic_score != null && (
+                            <span className="text-[9px] font-semibold tabular-nums">{dec.ic_score}</span>
+                          )}
+                          {deal.segment && (
+                            <Badge variant="secondary" className="text-[8px] px-1 py-0 h-3.5 capitalize">
+                              {(SEGMENT_LABELS[deal.segment] || deal.segment).split(" ")[0]}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })
+            )}
+          </div>
+        </div>
+
+        {/* Toggle panel button */}
+        <button
+          onClick={() => setPanelOpen(p => !p)}
+          className="absolute top-1/2 -translate-y-1/2 z-[600] flex items-center justify-center w-5 h-12 bg-background border border-border rounded-r-lg shadow-sm hover:bg-accent transition-colors"
+          style={{ left: panelOpen ? "288px" : "0px" }}
+        >
+          {panelOpen
+            ? <ChevronLeft className="h-3 w-3 text-muted-foreground" />
+            : <ChevronRight className="h-3 w-3 text-muted-foreground" />
+          }
+        </button>
+
         {/* Map */}
         <div className={cn("flex-1 relative", selectedHotel ? "mr-[420px]" : "")}>
           <div className="absolute inset-0">
@@ -324,16 +529,24 @@ export default function MapPage() {
               <InvalidateSizeHandler />
               <MapClickHandler onMapClick={handleMapClick} />
 
-              {/* Deal pins */}
-              {showDeals && deals.filter(d => d.lat && d.lon).map((deal) => (
-                <Marker key={deal.id} position={[deal.lat, deal.lon]} icon={dealIcon}
+              {/* Deal pins — colored by IC decision */}
+              {showDeals && geoDeals.map((deal) => (
+                <Marker
+                  key={deal.id}
+                  position={[deal.lat, deal.lon]}
+                  icon={getDealIcon(deal.id)}
                   eventHandlers={{ click: () => { setSelectedHotel(null); setSelectedDeal(deal); } }}
                 >
                   <Popup>
-                    <div className="text-sm">
+                    <div className="text-sm min-w-[150px]">
                       <p className="font-semibold">{deal.name}</p>
                       <p className="text-xs text-muted-foreground">{deal.city}, {deal.state}</p>
-                      <p className="text-xs">Stage: {deal.stage} · Score: {deal.score_total}</p>
+                      {decisionMap[deal.id] && (
+                        <p className="text-xs font-semibold mt-1">
+                          IC {decisionMap[deal.id].decision.replace(/_/g, " ")} · {decisionMap[deal.id].ic_score}
+                        </p>
+                      )}
+                      <p className="text-xs text-muted-foreground">Score: {deal.score_total} · {STAGE_LABELS[deal.stage]}</p>
                     </div>
                   </Popup>
                 </Marker>
@@ -364,7 +577,7 @@ export default function MapPage() {
                 </Marker>
               ))}
 
-              {/* Independent Hotels — rendered as CircleMarkers for performance */}
+              {/* Independent Hotels */}
               {showIndependent && filteredIndepHotels.map((h) => (
                 <CircleMarker
                   key={`ih-${h.id}`}
@@ -421,7 +634,8 @@ export default function MapPage() {
 
       {/* Legend */}
       {showIndependent && (
-        <div className="absolute bottom-4 left-4 z-[400] bg-background/95 border border-border rounded-lg p-3 shadow-lg text-xs space-y-1.5 pointer-events-none">
+        <div className="absolute bottom-4 z-[400] bg-background/95 border border-border rounded-lg p-3 shadow-lg text-xs space-y-1.5 pointer-events-none"
+          style={{ left: panelOpen ? "292px" : "8px" }}>
           <p className="font-semibold text-xs mb-2">Independent Hotels</p>
           <div className="flex items-center gap-2">
             <span className="inline-block w-3 h-3 rounded-full bg-[#B8860B]" />
