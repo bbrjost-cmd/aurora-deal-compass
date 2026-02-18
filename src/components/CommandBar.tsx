@@ -81,7 +81,7 @@ export function CommandBar({ open, onOpenChange }: CommandBarProps) {
             {filteredDeals.map((deal) => (
               <CommandItem
                 key={deal.id}
-                value={`deal-${deal.name}-${deal.city}`}
+                value={`deal-${deal.id}`}
                 onSelect={() => run(() => navigate(`/pipeline?deal=${deal.id}`))}
                 className="gap-3"
               >
