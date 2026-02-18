@@ -8,12 +8,13 @@ import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import {
-  CheckCircle2, XCircle, AlertTriangle, TrendingUp, BarChart3,
-  Filter, RefreshCw, Zap, ChevronRight
+  CheckCircle2, XCircle, AlertTriangle, BarChart3,
+  Filter, RefreshCw, Zap, ChevronRight, Download
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { STAGE_LABELS, STAGE_COLORS, SEGMENT_LABELS } from "@/lib/constants";
+import { generateICDecisionMemoPDF } from "@/lib/pdf-export";
 
 const DECISION_CONFIG = {
   go: { label: "GO", color: "text-ic-go", bg: "bg-ic-go/10 border-ic-go/30", icon: CheckCircle2 },
@@ -347,10 +348,10 @@ export default function ICPage() {
 }
 
 function ICDetailPanel({ decision }: { decision: any }) {
+  const [exporting, setExporting] = useState(false);
   const cfg = DECISION_CONFIG[decision.decision as keyof typeof DECISION_CONFIG];
   const Icon = cfg?.icon || BarChart3;
 
-  // Handle both array and object formats from DB
   const hardGates = normalizeHardGates(decision.hard_gates_json);
   const conditions = Array.isArray(decision.conditions_json) ? decision.conditions_json as string[] : [];
   const redFlags = Array.isArray(decision.red_flags_json) ? decision.red_flags_json as string[] : [];
@@ -361,6 +362,21 @@ function ICDetailPanel({ decision }: { decision: any }) {
     { label: "Localisation", value: Math.round((decision.ic_score || 0) * 0.20), max: 20, color: "bg-chart-3" },
     { label: "Exécution", value: Math.round((decision.ic_score || 0) * 0.20), max: 20, color: "bg-chart-4" },
   ];
+
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      generateICDecisionMemoPDF(decision);
+      toast({
+        title: "✅ Mémo IC exporté",
+        description: `${decision.deal?.name} — ${decision.ic_score}/100 ${(decision.decision ?? "").toUpperCase()}`,
+      });
+    } catch (err: any) {
+      toast({ title: "Erreur export PDF", description: err.message, variant: "destructive" });
+    } finally {
+      setExporting(false);
+    }
+  };
 
   return (
     <Card className="border-border/60">
@@ -374,9 +390,23 @@ function ICDetailPanel({ decision }: { decision: any }) {
               <h2 className={cn("text-xl font-bold", cfg?.color)}>{cfg?.label}</h2>
             </div>
           </div>
-          <div className="text-right shrink-0">
-            <p className="text-4xl font-bold font-mono leading-none">{decision.ic_score}</p>
-            <p className="text-xs text-muted-foreground">/ 100</p>
+          <div className="flex flex-col items-end gap-2">
+            <div className="text-right">
+              <p className="text-4xl font-bold font-mono leading-none">{decision.ic_score}</p>
+              <p className="text-xs text-muted-foreground">/ 100</p>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleExport}
+              disabled={exporting}
+              className="gap-1.5 h-7 text-xs px-2.5"
+            >
+              {exporting
+                ? <><span className="h-3 w-3 border border-current border-t-transparent rounded-full animate-spin" /> Export…</>
+                : <><Download className="h-3 w-3" /> PDF IC</>
+              }
+            </Button>
           </div>
         </div>
         <Progress value={decision.ic_score} className="h-2 mt-3" />
