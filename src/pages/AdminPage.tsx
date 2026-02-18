@@ -72,7 +72,7 @@ function OwnerIntelligencePanel() {
       knownAssets: [],
       city: newCity,
       state: "",
-      segment: "luxury",
+      segment: "midscale",
       notes: newNotes,
     }]);
     setNewCompany(""); setNewCity(""); setNewNotes("");
@@ -91,7 +91,7 @@ function OwnerIntelligencePanel() {
           <Users className="h-4 w-4" /> Owner Intelligence Library
         </CardTitle>
         <CardDescription>
-          Target owner entities for Accor luxury/lifestyle conversion pipeline. Demo data pre-loaded from internal prospect list.
+          Target owner entities for Accor Premium/Midscale/Economy conversion pipeline. Demo data pre-loaded from internal prospect list.
           <span className="block mt-1 text-xs text-muted-foreground/70 italic">
             ⚠ Demo data only — replace with proprietary research. Do not share externally.
           </span>

@@ -6,86 +6,43 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// PMS&E only — Economy / Midscale / Premium
 const MEXICO_DEALS = [
-  // QUINTANA ROO — Riviera Maya / Tulum / Cancún
-  { name: "Fairmont Riviera Maya", city: "Playa del Carmen", state: "Quintana Roo", lat: 20.6296, lon: -87.0739, segment: "luxury", opening_type: "new_build", rooms_min: 180, rooms_max: 260, stage: "underwriting", score: 82 },
-  { name: "Raffles Tulum Eco-Resort", city: "Tulum", state: "Quintana Roo", lat: 20.2114, lon: -87.4654, segment: "luxury", opening_type: "conversion", rooms_min: 60, rooms_max: 95, stage: "loi", score: 76 },
-  { name: "Emblems Collection Tulum", city: "Tulum", state: "Quintana Roo", lat: 20.2200, lon: -87.4600, segment: "luxury", opening_type: "new_build", rooms_min: 45, rooms_max: 75, stage: "qualified", score: 71 },
-  { name: "MGallery Cancún Zona Hotelera", city: "Cancún", state: "Quintana Roo", lat: 21.1619, lon: -86.8515, segment: "luxury_lifestyle", opening_type: "conversion", rooms_min: 120, rooms_max: 200, stage: "underwriting", score: 68 },
-  { name: "Mondrian Tulum Boutique", city: "Tulum", state: "Quintana Roo", lat: 20.2050, lon: -87.4500, segment: "luxury_lifestyle", opening_type: "new_build", rooms_min: 55, rooms_max: 90, stage: "lead", score: 55 },
-  { name: "SLS Cancún Lifestyle", city: "Cancún", state: "Quintana Roo", lat: 21.1750, lon: -86.8300, segment: "luxury_lifestyle", opening_type: "new_build", rooms_min: 200, rooms_max: 320, stage: "qualified", score: 63 },
-  { name: "Sofitel Holbox Island", city: "Holbox", state: "Quintana Roo", lat: 21.5200, lon: -87.3700, segment: "luxury", opening_type: "new_build", rooms_min: 70, rooms_max: 110, stage: "lead", score: 48 },
-  { name: "Grupo Xcaret MGallery", city: "Playa del Carmen", state: "Quintana Roo", lat: 20.5810, lon: -87.1180, segment: "luxury_lifestyle", opening_type: "new_build", rooms_min: 150, rooms_max: 280, stage: "negotiation", score: 79 },
-  { name: "Delano Bacalar Eco-Luxury", city: "Bacalar", state: "Quintana Roo", lat: 18.6751, lon: -88.3924, segment: "luxury", opening_type: "new_build", rooms_min: 40, rooms_max: 65, stage: "lead", score: 42 },
-  { name: "Orient Express Mayan Coast", city: "Akumal", state: "Quintana Roo", lat: 20.3931, lon: -87.3100, segment: "luxury", opening_type: "new_build", rooms_min: 50, rooms_max: 80, stage: "qualified", score: 66 },
+  // ─── ECONOMY — ibis / ibis Styles / ibis Budget / greet ───────────────────
+  { name: "ibis CDMX Reforma", city: "Ciudad de México", state: "Ciudad de México", lat: 19.4326, lon: -99.1680, segment: "economy", opening_type: "conversion", rooms_min: 110, rooms_max: 160, stage: "underwriting", score: 78 },
+  { name: "ibis Monterrey Centro", city: "Monterrey", state: "Nuevo León", lat: 25.6866, lon: -100.3161, segment: "economy", opening_type: "franchise_takeover", rooms_min: 90, rooms_max: 130, stage: "qualified", score: 72 },
+  { name: "ibis Styles Guadalajara Expo", city: "Guadalajara", state: "Jalisco", lat: 20.6597, lon: -103.3496, segment: "economy", opening_type: "conversion", rooms_min: 100, rooms_max: 150, stage: "loi", score: 81 },
+  { name: "ibis Budget Querétaro Aeropuerto", city: "Santiago de Querétaro", state: "Querétaro", lat: 20.5888, lon: -100.3899, segment: "economy", opening_type: "new_build", rooms_min: 120, rooms_max: 200, stage: "lead", score: 58 },
+  { name: "ibis Puebla Angelópolis", city: "Puebla", state: "Puebla", lat: 19.0432, lon: -98.1979, segment: "economy", opening_type: "conversion", rooms_min: 80, rooms_max: 120, stage: "qualified", score: 67 },
+  { name: "ibis Styles Cancún Aeropuerto", city: "Cancún", state: "Quintana Roo", lat: 21.1619, lon: -86.8515, segment: "economy", opening_type: "new_build", rooms_min: 150, rooms_max: 220, stage: "underwriting", score: 74 },
+  { name: "greet Mérida Centro", city: "Mérida", state: "Yucatán", lat: 20.9674, lon: -89.5926, segment: "economy", opening_type: "conversion", rooms_min: 65, rooms_max: 95, stage: "lead", score: 51 },
+  { name: "ibis Tijuana Via Rápida", city: "Tijuana", state: "Baja California", lat: 32.5149, lon: -117.0382, segment: "economy", opening_type: "franchise_takeover", rooms_min: 100, rooms_max: 160, stage: "qualified", score: 63 },
+  { name: "ibis Budget León Aeropuerto", city: "León", state: "Guanajuato", lat: 20.9144, lon: -101.7068, segment: "economy", opening_type: "new_build", rooms_min: 130, rooms_max: 190, stage: "lead", score: 55 },
+  { name: "ibis Styles Veracruz Puerto", city: "Veracruz", state: "Veracruz", lat: 19.1738, lon: -96.1342, segment: "economy", opening_type: "conversion", rooms_min: 75, rooms_max: 110, stage: "lead", score: 47 },
 
-  // BAJA CALIFORNIA SUR — Los Cabos
-  { name: "Raffles Los Cabos Trophy", city: "Cabo San Lucas", state: "Baja California Sur", lat: 22.8905, lon: -109.9167, segment: "luxury", opening_type: "conversion", rooms_min: 120, rooms_max: 200, stage: "loi", score: 84 },
-  { name: "Fairmont SJdC Oceanfront", city: "San José del Cabo", state: "Baja California Sur", lat: 23.0598, lon: -109.7006, segment: "luxury", opening_type: "new_build", rooms_min: 160, rooms_max: 240, stage: "underwriting", score: 77 },
-  { name: "Emblems Collection Pedregal", city: "Cabo San Lucas", state: "Baja California Sur", lat: 22.8780, lon: -109.9250, segment: "luxury", opening_type: "conversion", rooms_min: 55, rooms_max: 85, stage: "qualified", score: 69 },
-  { name: "Orient Express Palmilla", city: "San José del Cabo", state: "Baja California Sur", lat: 23.0350, lon: -109.7200, segment: "luxury", opening_type: "new_build", rooms_min: 65, rooms_max: 100, stage: "lead", score: 51 },
-  { name: "SLS Cabo Lifestyle Hub", city: "Cabo San Lucas", state: "Baja California Sur", lat: 22.9100, lon: -109.8850, segment: "luxury_lifestyle", opening_type: "new_build", rooms_min: 140, rooms_max: 220, stage: "underwriting", score: 72 },
-  { name: "Sofitel Todos Santos Baja", city: "Todos Santos", state: "Baja California Sur", lat: 23.4500, lon: -110.2270, segment: "luxury_lifestyle", opening_type: "conversion", rooms_min: 60, rooms_max: 90, stage: "lead", score: 44 },
+  // ─── MIDSCALE — Mercure / Novotel / Adagio ────────────────────────────────
+  { name: "Novotel Guadalajara Centro", city: "Guadalajara", state: "Jalisco", lat: 20.6700, lon: -103.3400, segment: "midscale", opening_type: "new_build", rooms_min: 180, rooms_max: 260, stage: "underwriting", score: 79 },
+  { name: "Mercure CDMX Pedregal", city: "Ciudad de México", state: "Ciudad de México", lat: 19.3600, lon: -99.1900, segment: "midscale", opening_type: "conversion", rooms_min: 130, rooms_max: 190, stage: "loi", score: 83 },
+  { name: "Novotel Monterrey Valle", city: "Monterrey", state: "Nuevo León", lat: 25.6700, lon: -100.4100, segment: "midscale", opening_type: "new_build", rooms_min: 200, rooms_max: 300, stage: "negotiation", score: 85 },
+  { name: "Mercure Querétaro Centro Histórico", city: "Santiago de Querétaro", state: "Querétaro", lat: 20.5930, lon: -100.3930, segment: "midscale", opening_type: "conversion", rooms_min: 90, rooms_max: 140, stage: "qualified", score: 69 },
+  { name: "Adagio CDMX Reforma Aparthotel", city: "Ciudad de México", state: "Ciudad de México", lat: 19.4280, lon: -99.1630, segment: "midscale", opening_type: "new_build", rooms_min: 100, rooms_max: 160, stage: "underwriting", score: 71 },
+  { name: "Novotel Cancún Zona Hotelera", city: "Cancún", state: "Quintana Roo", lat: 21.1750, lon: -86.8300, segment: "midscale", opening_type: "conversion", rooms_min: 200, rooms_max: 320, stage: "underwriting", score: 76 },
+  { name: "Mercure Puebla Historicc", city: "Puebla", state: "Puebla", lat: 19.0450, lon: -98.2020, segment: "midscale", opening_type: "rebranding", rooms_min: 80, rooms_max: 130, stage: "qualified", score: 62 },
+  { name: "Novotel Guadalajara Zapopan", city: "Zapopan", state: "Jalisco", lat: 20.7200, lon: -103.3900, segment: "midscale", opening_type: "new_build", rooms_min: 160, rooms_max: 240, stage: "lead", score: 54 },
+  { name: "Mercure San Luis Potosí", city: "San Luis Potosí", state: "San Luis Potosí", lat: 22.1565, lon: -100.9855, segment: "midscale", opening_type: "franchise_takeover", rooms_min: 100, rooms_max: 155, stage: "lead", score: 48 },
+  { name: "Adagio Monterrey Estudio", city: "Monterrey", state: "Nuevo León", lat: 25.6800, lon: -100.3200, segment: "midscale", opening_type: "new_build", rooms_min: 85, rooms_max: 130, stage: "lead", score: 44 },
 
-  // CDMX — Ciudad de México
-  { name: "Delano Polanco Urban", city: "Ciudad de México", state: "Ciudad de México", lat: 19.4326, lon: -99.1680, segment: "luxury", opening_type: "new_build", rooms_min: 180, rooms_max: 280, stage: "negotiation", score: 81 },
-  { name: "Mondrian Condesa Arte", city: "Ciudad de México", state: "Ciudad de México", lat: 19.4100, lon: -99.1750, segment: "luxury_lifestyle", opening_type: "conversion", rooms_min: 110, rooms_max: 160, stage: "loi", score: 74 },
-  { name: "Sofitel Legend Reforma", city: "Ciudad de México", state: "Ciudad de México", lat: 19.4270, lon: -99.1570, segment: "luxury", opening_type: "conversion", rooms_min: 200, rooms_max: 350, stage: "underwriting", score: 86 },
-  { name: "MGallery Coyoacán Heritage", city: "Ciudad de México", state: "Ciudad de México", lat: 19.3500, lon: -99.1614, segment: "luxury_lifestyle", opening_type: "conversion", rooms_min: 70, rooms_max: 110, stage: "qualified", score: 61 },
-  { name: "SLS Santa Fe Mixed-Use", city: "Ciudad de México", state: "Ciudad de México", lat: 19.3600, lon: -99.2600, segment: "upper_upscale", opening_type: "new_build", rooms_min: 220, rooms_max: 380, stage: "underwriting", score: 67 },
-  { name: "Raffles Paseo de la Reforma", city: "Ciudad de México", state: "Ciudad de México", lat: 19.4300, lon: -99.1520, segment: "luxury", opening_type: "new_build", rooms_min: 150, rooms_max: 250, stage: "loi", score: 88 },
-  { name: "Emblems Roma Norte", city: "Ciudad de México", state: "Ciudad de México", lat: 19.4200, lon: -99.1620, segment: "luxury", opening_type: "conversion", rooms_min: 40, rooms_max: 65, stage: "lead", score: 39 },
-
-  // NAYARIT — Riviera Nayarit / Punta Mita
-  { name: "Raffles Punta Mita Flagship", city: "Punta de Mita", state: "Nayarit", lat: 20.7700, lon: -105.5200, segment: "luxury", opening_type: "new_build", rooms_min: 100, rooms_max: 160, stage: "underwriting", score: 80 },
-  { name: "Fairmont Riviera Nayarit", city: "Nuevo Vallarta", state: "Nayarit", lat: 20.6976, lon: -105.2970, segment: "luxury", opening_type: "new_build", rooms_min: 200, rooms_max: 360, stage: "negotiation", score: 83 },
-  { name: "Emblems Sayulita Surf Lodge", city: "Sayulita", state: "Nayarit", lat: 20.8680, lon: -105.4000, segment: "luxury_lifestyle", opening_type: "new_build", rooms_min: 35, rooms_max: 55, stage: "qualified", score: 57 },
-  { name: "MGallery San Pancho", city: "San Francisco", state: "Nayarit", lat: 21.0100, lon: -105.2900, segment: "luxury_lifestyle", opening_type: "conversion", rooms_min: 50, rooms_max: 80, stage: "lead", score: 46 },
-
-  // JALISCO — Guadalajara / Puerto Vallarta
-  { name: "Sofitel Guadalajara Metropolitan", city: "Guadalajara", state: "Jalisco", lat: 20.6597, lon: -103.3496, segment: "upper_upscale", opening_type: "new_build", rooms_min: 250, rooms_max: 400, stage: "underwriting", score: 71 },
-  { name: "Mondrian Puerto Vallarta Lifestyle", city: "Puerto Vallarta", state: "Jalisco", lat: 20.6534, lon: -105.2253, segment: "luxury_lifestyle", opening_type: "new_build", rooms_min: 120, rooms_max: 200, stage: "qualified", score: 63 },
-  { name: "MGallery Tlaquepaque Heritage", city: "San Pedro Tlaquepaque", state: "Jalisco", lat: 20.6400, lon: -103.2900, segment: "luxury_lifestyle", opening_type: "conversion", rooms_min: 60, rooms_max: 95, stage: "lead", score: 41 },
-  { name: "Fairmont Puerto Vallarta Resort", city: "Puerto Vallarta", state: "Jalisco", lat: 20.6800, lon: -105.2500, segment: "luxury", opening_type: "new_build", rooms_min: 180, rooms_max: 300, stage: "loi", score: 75 },
-  { name: "SLS Guadalajara Zapopan", city: "Zapopan", state: "Jalisco", lat: 20.7200, lon: -103.3900, segment: "upper_upscale", opening_type: "new_build", rooms_min: 200, rooms_max: 320, stage: "lead", score: 52 },
-
-  // NUEVO LÉON — Monterrey
-  { name: "Sofitel Monterrey Valle", city: "Monterrey", state: "Nuevo León", lat: 25.6866, lon: -100.3161, segment: "upper_upscale", opening_type: "new_build", rooms_min: 220, rooms_max: 360, stage: "underwriting", score: 69 },
-  { name: "MGallery Centro Histórico MTY", city: "Monterrey", state: "Nuevo León", lat: 25.6700, lon: -100.3100, segment: "luxury_lifestyle", opening_type: "conversion", rooms_min: 80, rooms_max: 130, stage: "qualified", score: 58 },
-  { name: "Delano San Pedro Garza García", city: "San Pedro Garza García", state: "Nuevo León", lat: 25.6530, lon: -100.4000, segment: "luxury", opening_type: "new_build", rooms_min: 140, rooms_max: 220, stage: "lead", score: 47 },
-
-  // OAXACA
-  { name: "Emblems Oaxaca de Juárez", city: "Oaxaca de Juárez", state: "Oaxaca", lat: 17.0732, lon: -96.7266, segment: "luxury", opening_type: "conversion", rooms_min: 35, rooms_max: 55, stage: "qualified", score: 60 },
-  { name: "MGallery Monte Albán Heritage", city: "Oaxaca de Juárez", state: "Oaxaca", lat: 17.0900, lon: -96.7400, segment: "luxury_lifestyle", opening_type: "conversion", rooms_min: 50, rooms_max: 80, stage: "lead", score: 43 },
-  { name: "Fairmont Huatulco Resort", city: "Santa María Huatulco", state: "Oaxaca", lat: 15.7720, lon: -96.1360, segment: "luxury", opening_type: "new_build", rooms_min: 120, rooms_max: 200, stage: "underwriting", score: 70 },
-
-  // GUERRERO — Acapulco / Ixtapa
-  { name: "Sofitel Acapulco Diamante", city: "Acapulco", state: "Guerrero", lat: 16.8534, lon: -99.8237, segment: "upper_upscale", opening_type: "conversion", rooms_min: 200, rooms_max: 380, stage: "lead", score: 38 },
-  { name: "MGallery Ixtapa Boutique", city: "Ixtapa-Zihuatanejo", state: "Guerrero", lat: 17.6700, lon: -101.5500, segment: "luxury_lifestyle", opening_type: "new_build", rooms_min: 80, rooms_max: 130, stage: "qualified", score: 55 },
-
-  // YUCATÁN — Mérida
-  { name: "Mondrian Mérida Centro", city: "Mérida", state: "Yucatán", lat: 20.9674, lon: -89.5926, segment: "luxury_lifestyle", opening_type: "conversion", rooms_min: 100, rooms_max: 160, stage: "underwriting", score: 65 },
-  { name: "MGallery Progreso Yucatán", city: "Progreso", state: "Yucatán", lat: 21.2830, lon: -89.6620, segment: "luxury_lifestyle", opening_type: "new_build", rooms_min: 60, rooms_max: 100, stage: "lead", score: 40 },
-  { name: "Emblems Mérida Heritage", city: "Mérida", state: "Yucatán", lat: 20.9700, lon: -89.6100, segment: "luxury", opening_type: "conversion", rooms_min: 40, rooms_max: 65, stage: "qualified", score: 59 },
-
-  // SINALOA — Mazatlán
-  { name: "Fairmont Mazatlán Golden Zone", city: "Mazatlán", state: "Sinaloa", lat: 23.2494, lon: -106.4111, segment: "luxury", opening_type: "new_build", rooms_min: 160, rooms_max: 260, stage: "loi", score: 73 },
-  { name: "Sofitel Mazatlán Marina", city: "Mazatlán", state: "Sinaloa", lat: 23.2600, lon: -106.4300, segment: "upper_upscale", opening_type: "new_build", rooms_min: 180, rooms_max: 280, stage: "underwriting", score: 66 },
-
-  // SONORA — Puerto Peñasco / Sea of Cortez
-  { name: "MGallery Rocky Point Boutique", city: "Puerto Peñasco", state: "Sonora", lat: 31.3100, lon: -113.5400, segment: "luxury_lifestyle", opening_type: "new_build", rooms_min: 70, rooms_max: 120, stage: "lead", score: 37 },
-
-  // HIDALGO — Real del Monte
-  { name: "MGallery Real del Monte Heritage", city: "Mineral del Monte", state: "Hidalgo", lat: 20.1300, lon: -98.6700, segment: "luxury_lifestyle", opening_type: "conversion", rooms_min: 45, rooms_max: 70, stage: "lead", score: 36 },
-
-  // PUEBLA
-  { name: "MGallery Puebla Centro Histórico", city: "Puebla", state: "Puebla", lat: 19.0432, lon: -98.1979, segment: "luxury_lifestyle", opening_type: "conversion", rooms_min: 80, rooms_max: 130, stage: "qualified", score: 61 },
-  { name: "Sofitel Puebla Angelópolis", city: "Puebla", state: "Puebla", lat: 19.0300, lon: -98.2400, segment: "upper_upscale", opening_type: "new_build", rooms_min: 180, rooms_max: 300, stage: "underwriting", score: 64 },
-
-  // BAJÍO — Querétaro / Guanajuato / San Miguel de Allende
-  { name: "Emblems San Miguel de Allende", city: "San Miguel de Allende", state: "Guanajuato", lat: 20.9144, lon: -100.7452, segment: "luxury", opening_type: "conversion", rooms_min: 45, rooms_max: 75, stage: "loi", score: 78 },
-  { name: "MGallery Guanajuato Capital", city: "Guanajuato", state: "Guanajuato", lat: 21.0190, lon: -101.2574, segment: "luxury_lifestyle", opening_type: "conversion", rooms_min: 60, rooms_max: 100, stage: "underwriting", score: 67 },
-  { name: "Fairmont Querétaro Corporate", city: "Santiago de Querétaro", state: "Querétaro", lat: 20.5888, lon: -100.3899, segment: "upper_upscale", opening_type: "new_build", rooms_min: 200, rooms_max: 350, stage: "negotiation", score: 74 },
+  // ─── PREMIUM — Pullman / Swissôtel / Mövenpick ────────────────────────────
+  { name: "Pullman Cancún Zona Hotelera", city: "Cancún", state: "Quintana Roo", lat: 21.1200, lon: -86.7800, segment: "premium", opening_type: "conversion", rooms_min: 280, rooms_max: 400, stage: "loi", score: 86 },
+  { name: "Pullman CDMX Santa Fe", city: "Ciudad de México", state: "Ciudad de México", lat: 19.3600, lon: -99.2600, segment: "premium", opening_type: "new_build", rooms_min: 250, rooms_max: 380, stage: "underwriting", score: 80 },
+  { name: "Swissôtel Monterrey Corporativo", city: "Monterrey", state: "Nuevo León", lat: 25.6530, lon: -100.3900, segment: "premium", opening_type: "new_build", rooms_min: 200, rooms_max: 300, stage: "negotiation", score: 82 },
+  { name: "Mövenpick Cancún Beachfront", city: "Cancún", state: "Quintana Roo", lat: 21.1400, lon: -86.7900, segment: "premium", opening_type: "conversion", rooms_min: 220, rooms_max: 350, stage: "underwriting", score: 77 },
+  { name: "Pullman Guadalajara Forum", city: "Guadalajara", state: "Jalisco", lat: 20.6400, lon: -103.4200, segment: "premium", opening_type: "new_build", rooms_min: 220, rooms_max: 340, stage: "qualified", score: 68 },
+  { name: "Swissôtel CDMX Polanco", city: "Ciudad de México", state: "Ciudad de México", lat: 19.4326, lon: -99.2000, segment: "premium", opening_type: "conversion", rooms_min: 180, rooms_max: 260, stage: "loi", score: 84 },
+  { name: "Mövenpick Los Cabos Marina", city: "Cabo San Lucas", state: "Baja California Sur", lat: 22.8905, lon: -109.9167, segment: "premium", opening_type: "new_build", rooms_min: 160, rooms_max: 240, stage: "underwriting", score: 75 },
+  { name: "Pullman Querétaro Ejecutivo", city: "Santiago de Querétaro", state: "Querétaro", lat: 20.5888, lon: -100.3899, segment: "premium", opening_type: "new_build", rooms_min: 180, rooms_max: 280, stage: "lead", score: 58 },
+  { name: "Swissôtel Puerto Vallarta Bay", city: "Puerto Vallarta", state: "Jalisco", lat: 20.6534, lon: -105.2253, segment: "premium", opening_type: "new_build", rooms_min: 200, rooms_max: 300, stage: "lead", score: 52 },
+  { name: "Mövenpick Mazatlán Resort", city: "Mazatlán", state: "Sinaloa", lat: 23.2494, lon: -106.4111, segment: "premium", opening_type: "conversion", rooms_min: 180, rooms_max: 260, stage: "qualified", score: 65 },
 ];
 
 serve(async (req) => {
@@ -125,24 +82,30 @@ serve(async (req) => {
     const { data: inserted, error } = await supabase.from("deals").insert(inserts).select("id, name, stage");
     if (error) throw error;
 
-    // Seed some tasks
+    // Seed tasks
     const taskDeals = (inserted || []).slice(0, 10);
     const tasks = taskDeals.map((d: any) => ({
       org_id,
       deal_id: d.id,
-      title: ["Appel de qualification owner", "Envoi de la proposition de marque", "Analyse de faisabilité complète", "Réunion IC interne", "Draft LOI"][Math.floor(Math.random() * 5)],
+      title: [
+        "Owner qualification call",
+        "Send brand proposal",
+        "Complete feasibility analysis",
+        "Internal IC review",
+        "Draft LOI",
+      ][Math.floor(Math.random() * 5)],
       status: "pending",
       due_date: new Date(Date.now() + Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
     }));
     await supabase.from("tasks").insert(tasks);
 
-    // Seed benchmark cities
+    // Seed PMS&E city benchmarks
     const benchmarks = [
-      { org_id, city: "Cancún", state: "Quintana Roo", adr_low: 4500, adr_high: 9000, occ_low: 0.65, occ_high: 0.82, gop_low: 0.33, gop_high: 0.46, cap_rate_low: 0.07, cap_rate_high: 0.10, source_note: "Internal placeholder — replace with proprietary data" },
-      { org_id, city: "Ciudad de México", state: "Ciudad de México", adr_low: 3000, adr_high: 7500, occ_low: 0.60, occ_high: 0.78, gop_low: 0.30, gop_high: 0.44, cap_rate_low: 0.07, cap_rate_high: 0.10, source_note: "Internal placeholder — replace with proprietary data" },
-      { org_id, city: "Guadalajara", state: "Jalisco", adr_low: 2000, adr_high: 4500, occ_low: 0.58, occ_high: 0.75, gop_low: 0.28, gop_high: 0.40, cap_rate_low: 0.08, cap_rate_high: 0.11, source_note: "Internal placeholder — replace with proprietary data" },
-      { org_id, city: "Los Cabos", state: "Baja California Sur", adr_low: 5000, adr_high: 18000, occ_low: 0.62, occ_high: 0.80, gop_low: 0.35, gop_high: 0.50, cap_rate_low: 0.06, cap_rate_high: 0.09, source_note: "Internal placeholder — replace with proprietary data" },
-      { org_id, city: "Tulum", state: "Quintana Roo", adr_low: 4000, adr_high: 14000, occ_low: 0.60, occ_high: 0.78, gop_low: 0.30, gop_high: 0.45, cap_rate_low: 0.07, cap_rate_high: 0.10, source_note: "Internal placeholder — replace with proprietary data" },
+      { org_id, city: "Cancún", state: "Quintana Roo", adr_low: 1400, adr_high: 3500, occ_low: 0.65, occ_high: 0.82, gop_low: 0.33, gop_high: 0.46, cap_rate_low: 0.07, cap_rate_high: 0.10, source_note: "Internal placeholder — replace with proprietary data" },
+      { org_id, city: "Ciudad de México", state: "Ciudad de México", adr_low: 900, adr_high: 3000, occ_low: 0.62, occ_high: 0.78, gop_low: 0.32, gop_high: 0.44, cap_rate_low: 0.07, cap_rate_high: 0.10, source_note: "Internal placeholder — replace with proprietary data" },
+      { org_id, city: "Guadalajara", state: "Jalisco", adr_low: 800, adr_high: 2200, occ_low: 0.60, occ_high: 0.76, gop_low: 0.30, gop_high: 0.42, cap_rate_low: 0.08, cap_rate_high: 0.11, source_note: "Internal placeholder — replace with proprietary data" },
+      { org_id, city: "Monterrey", state: "Nuevo León", adr_low: 900, adr_high: 2500, occ_low: 0.62, occ_high: 0.78, gop_low: 0.32, gop_high: 0.44, cap_rate_low: 0.07, cap_rate_high: 0.10, source_note: "Internal placeholder — replace with proprietary data" },
+      { org_id, city: "Querétaro", state: "Querétaro", adr_low: 700, adr_high: 1800, occ_low: 0.60, occ_high: 0.75, gop_low: 0.30, gop_high: 0.42, cap_rate_low: 0.08, cap_rate_high: 0.11, source_note: "Internal placeholder — replace with proprietary data" },
     ];
     const { count: benchCount } = await supabase.from("city_benchmarks").select("*", { count: "exact", head: true }).eq("org_id", org_id);
     if ((benchCount || 0) === 0) {

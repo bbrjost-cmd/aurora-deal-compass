@@ -67,46 +67,6 @@ export const SEGMENT_PRESETS: Record<string, SegmentPreset> = {
     minYoC: 0.07,
     minRooms: 100,
   },
-  // Legacy fallbacks
-  upper_upscale: {
-    label: "Premium",
-    adrLow: 2000, adrHigh: 5000,
-    occLow: 0.58, occHigh: 0.78,
-    gopLow: 0.28, gopHigh: 0.40,
-    fnbCapture: 0.18, otherRevPct: 0.05,
-    capexPerKeyLow: 1800000, capexPerKeyHigh: 3500000,
-    ffePerKeyLow: 300000, ffePerKeyHigh: 600000,
-    baseFeeTypical: 0.030, incentiveFeeTypical: 0.08,
-    royaltyTypical: 0.04,
-    minYoC: 0.07,
-    minRooms: 100,
-  },
-  luxury: {
-    label: "Premium",
-    adrLow: 2000, adrHigh: 5000,
-    occLow: 0.58, occHigh: 0.78,
-    gopLow: 0.28, gopHigh: 0.40,
-    fnbCapture: 0.18, otherRevPct: 0.05,
-    capexPerKeyLow: 1800000, capexPerKeyHigh: 3500000,
-    ffePerKeyLow: 300000, ffePerKeyHigh: 600000,
-    baseFeeTypical: 0.030, incentiveFeeTypical: 0.08,
-    royaltyTypical: 0.04,
-    minYoC: 0.07,
-    minRooms: 100,
-  },
-  luxury_lifestyle: {
-    label: "Premium",
-    adrLow: 2000, adrHigh: 5000,
-    occLow: 0.58, occHigh: 0.78,
-    gopLow: 0.28, gopHigh: 0.40,
-    fnbCapture: 0.18, otherRevPct: 0.05,
-    capexPerKeyLow: 1800000, capexPerKeyHigh: 3500000,
-    ffePerKeyLow: 300000, ffePerKeyHigh: 600000,
-    baseFeeTypical: 0.030, incentiveFeeTypical: 0.08,
-    royaltyTypical: 0.04,
-    minYoC: 0.07,
-    minRooms: 100,
-  },
 };
 
 export function getPresetWarnings(inputs: FeasibilityInputs): Array<{ field: string; message: string; level: "amber" | "red" }> {
@@ -411,8 +371,12 @@ export function computeICDecision(
   const conditions: string[] = [];
 
   const segment = deal.segment || inputs.segment || 'midscale';
-  const preset = SEGMENT_PRESETS[segment] || SEGMENT_PRESETS.midscale;
-  const isPremium = segment === 'premium' || segment === 'upper_upscale' || segment === 'luxury' || segment === 'luxury_lifestyle';
+  // Normalise any legacy segment values to supported PMS&E segments
+  const normSegment = segment === 'premium' ? 'premium'
+    : segment === 'economy' ? 'economy'
+    : 'midscale';
+  const preset = SEGMENT_PRESETS[normSegment] || SEGMENT_PRESETS.midscale;
+  const isPremium = normSegment === 'premium';
   const isConversion = ['conversion', 'rebranding', 'franchise_takeover'].includes(deal.opening_type || inputs.openingType || '');
 
   // Min rooms threshold by segment

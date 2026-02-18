@@ -7,7 +7,7 @@ import { BRAND_STRATEGY_NOTES, DEVELOPMENT_PITCH_POINTS } from "@/lib/accor-bran
 // ─── Palette ────────────────────────────────────────────────────────────────
 const C = {
   black:   [17,  17,  17]  as [number, number, number],
-  gold:    [191, 155,  48]  as [number, number, number],
+  red:     [208,  2,  27]  as [number, number, number], // Accor Development Red
   white:   [255, 255, 255]  as [number, number, number],
   grey50:  [250, 250, 250]  as [number, number, number],
   grey100: [240, 240, 240]  as [number, number, number],
@@ -23,14 +23,14 @@ function setFont(doc: jsPDF, size: number, style: "normal"|"bold"|"italic" = "no
   doc.setTextColor(...color);
 }
 
-function hRule(doc: jsPDF, y: number, color = C.gold, lw = 0.3) {
+function hRule(doc: jsPDF, y: number, color = C.red, lw = 0.3) {
   doc.setDrawColor(...color);
   doc.setLineWidth(lw);
   doc.line(14, y, 196, y);
 }
 
 function sectionTitle(doc: jsPDF, text: string, y: number): number {
-  setFont(doc, 8, "bold", C.gold);
+  setFont(doc, 8, "bold", C.red);
   doc.text(text.toUpperCase(), 14, y);
   hRule(doc, y + 2);
   return y + 8;
@@ -56,7 +56,7 @@ function addPageFooter(doc: jsPDF, pageNum: number, pageCount: number) {
   const PW = 210;
   doc.setFillColor(...C.black);
   doc.rect(0, 285, PW, 12, "F");
-  doc.setFillColor(...C.gold);
+  doc.setFillColor(...C.red);
   doc.rect(0, 284.5, PW, 0.8, "F");
   setFont(doc, 6, "normal", C.grey300);
   doc.text("AURORA DevOS MX  ·  Accor Development", 14, 292);
@@ -77,16 +77,16 @@ export function generateFeasibilityPDF(
   // ── COVER HEADER ────────────────────────────────────────────────────────────
   doc.setFillColor(...C.black);
   doc.rect(0, 0, PW, 52, "F");
-  doc.setFillColor(...C.gold);
+  doc.setFillColor(...C.red);
   doc.rect(0, 52, PW, 1.5, "F");
 
   setFont(doc, 22, "bold", C.white);
   doc.text("AURORA", 14, 20);
-  setFont(doc, 7, "normal", C.gold);
+  setFont(doc, 7, "normal", C.red);
   doc.text("ACCOR DEVELOPMENT PLATFORM  ·  MEXICO", 14, 27);
 
   setFont(doc, 9, "bold", C.white);
-  doc.text("FEASIBILITY ANALYSIS MEMORANDUM", PW - 14, 20, { align: "right" });
+  doc.text("DEVELOPMENT SCREENING REPORT", PW - 14, 20, { align: "right" });
   setFont(doc, 6.5, "normal", C.grey300);
   doc.text(`Generated: ${now}`, PW - 14, 27, { align: "right" });
   doc.text("CONFIDENTIAL — For Internal Use Only", PW - 14, 33, { align: "right" });
@@ -291,13 +291,13 @@ export function generateDealPDF(deal: any, tasks: any[], feasibilityOutputs?: an
 
   doc.setFillColor(...C.black);
   doc.rect(0, 0, PW, 40, "F");
-  doc.setFillColor(...C.gold);
+  doc.setFillColor(...C.red);
   doc.rect(0, 40, PW, 1.2, "F");
 
   setFont(doc, 18, "bold", C.white);
   doc.text("AURORA DevOS MX", 14, 15);
-  setFont(doc, 7, "normal", C.gold);
-  doc.text("INVESTMENT MEMO  ·  CONFIDENTIAL", 14, 22);
+  setFont(doc, 7, "normal", C.red);
+  doc.text("DEVELOPMENT SCREENING REPORT  ·  CONFIDENTIAL", 14, 22);
   setFont(doc, 11, "bold", C.white);
   doc.text(deal.name || "Deal", 14, 33);
   setFont(doc, 7, "normal", C.grey300);
@@ -381,7 +381,7 @@ export function generateDealPDF(deal: any, tasks: any[], feasibilityOutputs?: an
 
   doc.setFillColor(...C.black);
   doc.rect(0, 285, PW, 12, "F");
-  doc.setFillColor(...C.gold);
+  doc.setFillColor(...C.red);
   doc.rect(0, 284.5, PW, 0.8, "F");
   setFont(doc, 6, "normal", C.grey300);
   doc.text("AURORA DevOS MX  ·  Accor Development  ·  Confidential", 14, 292);
@@ -431,12 +431,12 @@ export function generateICDecisionMemoPDF(decision: any) {
   // ── HEADER ──────────────────────────────────────────────────────────────────
   doc.setFillColor(...C.black);
   doc.rect(0, 0, PW, 58, "F");
-  doc.setFillColor(...C.gold);
+  doc.setFillColor(...C.red);
   doc.rect(0, 58, PW, 1.5, "F");
 
   setFont(doc, 20, "bold", C.white);
   doc.text("AURORA", 14, 17);
-  setFont(doc, 6.5, "normal", C.gold);
+  setFont(doc, 6.5, "normal", C.red);
   doc.text("ACCOR DEVELOPMENT PLATFORM  ·  IC DECISION MEMORANDUM", 14, 24);
 
   // Decision badge
@@ -469,7 +469,7 @@ export function generateICDecisionMemoPDF(decision: any) {
 
   // Score segments (proportional breakdown 35/25/20/20)
   const scoreSegs = [
-    { label: "Brand Écon. (35%)", value: Math.round(icScore * 0.35), max: 35, color: C.gold },
+    { label: "Brand Écon. (35%)", value: Math.round(icScore * 0.35), max: 35, color: C.red },
     { label: "Owner Écon. (25%)", value: Math.round(icScore * 0.25), max: 25, color: [59, 130, 246] as [number,number,number] },
     { label: "Localisation (20%)", value: Math.round(icScore * 0.20), max: 20, color: [16, 185, 129] as [number,number,number] },
     { label: "Exécution (20%)", value: Math.round(icScore * 0.20), max: 20, color: [168, 85, 247] as [number,number,number] },
@@ -593,7 +593,7 @@ export function generateICDecisionMemoPDF(decision: any) {
     doc.setLineWidth(0.2);
     doc.rect(14, y, 182, narrativeH, "S");
     // Gold left accent bar
-    doc.setFillColor(...C.gold);
+    doc.setFillColor(...C.red);
     doc.rect(14, y, 1.5, narrativeH, "F");
     setFont(doc, 7.5, "normal", C.black);
     doc.text(narrativeLines, 19, y + 5);
@@ -660,13 +660,13 @@ export function generateICMemo(
   // ── HEADER ──────────────────────────────────────────────────────────────────
   doc.setFillColor(...C.black);
   doc.rect(0, 0, PW, 58, "F");
-  doc.setFillColor(...C.gold);
+  doc.setFillColor(...C.red);
   doc.rect(0, 58, PW, 1.5, "F");
 
   setFont(doc, 20, "bold", C.white);
   doc.text("AURORA", 14, 17);
-  setFont(doc, 6.5, "normal", C.gold);
-  doc.text("ACCOR DEVELOPMENT PLATFORM  ·  INVESTMENT COMMITTEE MEMORANDUM", 14, 24);
+  setFont(doc, 6.5, "normal", C.red);
+  doc.text("ACCOR DEVELOPMENT PLATFORM  ·  DEVELOPMENT SCREENING MEMO", 14, 24);
 
   // Decision badge (right)
   doc.setFillColor(...decisionColor);
@@ -699,7 +699,7 @@ export function generateICMemo(
       `NOI Année 5 estimé: ${formatMXN(outputs.years[4]?.noi || 0)} — Payback: ${outputs.simplePayback} ans — YoC: ${((outputs.years[4]?.noi || 0) / outputs.totalCapex * 100).toFixed(1)}%.`,
     ];
     thesis.forEach((line, i) => {
-      if (i === 0) doc.setFillColor(...C.gold); else doc.setFillColor(...C.grey300);
+      if (i === 0) doc.setFillColor(...C.red); else doc.setFillColor(...C.grey300);
       doc.circle(17, y - 1, 1, "F");
       setFont(doc, 7.5, "normal", C.black);
       const split = doc.splitTextToSize(line, 170);

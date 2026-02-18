@@ -70,7 +70,7 @@ export function HotelIntelligenceDrawer({ hotel, nearbyHotels, cityCenter, onClo
   const [contactName, setContactName] = useState("");
   const [outreachRoute, setOutreachRoute] = useState("");
   const [showApproachScript, setShowApproachScript] = useState(false);
-  const [selectedBrand, setSelectedBrand] = useState<string>(ACCOR_BRANDS[5] || "Sofitel");
+  const [selectedBrand, setSelectedBrand] = useState<string>(ACCOR_BRANDS[4] || "Mercure");
 
   if (!hotel) return null;
 
@@ -105,7 +105,7 @@ export function HotelIntelligenceDrawer({ hotel, nearbyHotels, cityCenter, onClo
         city: hotel.tags["addr:city"] || "Ciudad de México",
         state: hotel.tags["addr:state"] || "Ciudad de México",
         address: hotel.address || null,
-        segment: "upper_upscale",
+        segment: "midscale",
         opening_type: "conversion",
         stage: "lead",
         score_breakdown: {
@@ -129,9 +129,9 @@ export function HotelIntelligenceDrawer({ hotel, nearbyHotels, cityCenter, onClo
   };
 
   const approachScript = showApproachScript ? [
-    `Value angle: Repositioning to ${selectedBrand} would unlock ADR premium of 25–40% and global distribution (ALL network). Branded Residences economics add significant upside.`,
+    `Value angle: Repositioning to ${selectedBrand} would unlock RevPAR uplift of 20–35% and global distribution via ALL — Accor's 100M+ member loyalty network.`,
     `Ask: Request a 15-min intro call + confidential NDA to share preliminary feasibility study.`,
-    `Why Accor (${selectedBrand}): Strongest luxury/lifestyle pipeline in Mexico; no competing brand in this micro-market; full revenue stack (F&B, Spa, Residences) integrated from day one.`,
+    `Why Accor (${selectedBrand}): Strongest PMS&E expansion pipeline in Mexico; no competing Accor brand in this micro-market; proven conversion and franchise model with efficient CAPEX.`,
     `Next step: Propose 2 specific dates, offer to present at owner's offices or virtually. Request current occupancy + ADR data for sharper underwriting.`,
   ] : [];
 
