@@ -33,20 +33,21 @@ export const SEGMENT_LABELS: Record<string, string> = {
   premium: 'Premium',
 };
 
-// ─── Brands by segment ───────────────────────────────────────────────────────
+// ─── Posadas brands by segment ────────────────────────────────────────────────
 export const BRANDS_BY_SEGMENT: Record<string, string[]> = {
-  economy: ['ibis', 'ibis Styles', 'ibis Budget', 'greet'],
-  midscale: ['Mercure', 'Novotel', 'Adagio'],
-  premium: ['Pullman', 'Swissôtel', 'Mövenpick'],
+  economy: ['one', 'Gamma'],
+  midscale: ['Gamma', 'Fiesta Inn', 'Fiesta Americana'],
+  premium: ['Fiesta Americana', 'Grand Fiesta Americana', 'Live Aqua', 'The Explorean'],
 };
 
 export const ALL_BRANDS = [
-  'ibis', 'ibis Styles', 'ibis Budget', 'greet',
-  'Mercure', 'Novotel', 'Adagio',
-  'Pullman', 'Swissôtel', 'Mövenpick',
+  'one', 'Gamma',
+  'Fiesta Inn', 'Fiesta Americana',
+  'Grand Fiesta Americana', 'Live Aqua', 'The Explorean',
 ] as const;
 
-export type AccorBrand = typeof ALL_BRANDS[number];
+export type PosadasBrand = typeof ALL_BRANDS[number];
+export type AccorBrand = PosadasBrand;
 
 // ─── Opening Types (Conversion as default/primary) ───────────────────────────
 export const OPENING_TYPES = ['conversion', 'new_build', 'franchise_takeover', 'rebranding'] as const;

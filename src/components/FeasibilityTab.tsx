@@ -373,10 +373,10 @@ export function FeasibilityTab({ dealId, deal, onInputsChange }: Props) {
             <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Why Management vs Franchise?</p>
             {[
               brandMgmt.netFees >= brandFran.netFees
-                ? "Management generates higher net fees for Accor due to operational control and incentive fee upside."
+                ? "Management generates higher net fees for Posadas thanks to operational control and incentive fee upside."
                 : "Franchise generates competitive net income with lower support costs and complexity.",
-              "Management provides full brand standard enforcement, suited for Premium segment positioning.",
-              "Franchise offers owner more operational flexibility and typically faster deal closure.",
+              "Management provides tighter brand standard execution, especially for premium positioning.",
+              "Franchise offers owners more operating flexibility and typically faster deal closure.",
             ].map((b, i) => (
               <div key={i} className="flex gap-2 text-xs">
                 <span className="text-aurora-gold shrink-0">•</span>

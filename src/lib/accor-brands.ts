@@ -1,38 +1,34 @@
-// Accor PMS&E Brands for Mexico / LATAM expansion
+// Posadas brand catalog for Mexico / LATAM expansion
 import { BRANDS_BY_SEGMENT, ALL_BRANDS } from './constants';
-import type { AccorBrand } from './constants';
+import type { PosadasBrand } from './constants';
 
-export type { AccorBrand };
-export { ALL_BRANDS as ACCOR_BRANDS };
+export type { PosadasBrand };
+export { ALL_BRANDS as ACCOR_BRANDS, ALL_BRANDS as POSADAS_BRANDS };
 
 export const BRAND_STRATEGY_NOTES: Record<string, string> = {
   // Economy
-  'ibis': 'High-volume economy flag. Conversion-friendly, strong RCP distribution.',
-  'ibis Styles': 'Design-led economy, distinctive aesthetic, franchise model.',
-  'ibis Budget': 'Budget flag for high-demand urban/suburban corridors.',
-  'greet': 'Eco-responsible economy soft brand. Conversion-first.',
+  'one': 'Lean economy brand with strong domestic mobility demand and efficient conversion profile.',
+  'Gamma': 'Conversion-friendly soft brand for independent assets needing commercial uplift without heavy CAPEX.',
   // Midscale
-  'Mercure': 'Local character midscale. Conversion priority, franchise-ready.',
-  'Novotel': 'Global midscale standard. Business & family. New build or conversion.',
-  'Adagio': 'Aparthotel / extended stay. Urban locations. Hybrid model.',
+  'Fiesta Inn': 'Business-led midscale flag with strong corporate recognition across Mexico.',
+  'Fiesta Americana': 'Full-service upper-upscale brand for urban and resort repositioning with broad owner appeal.',
   // Premium
-  'Pullman': 'Business premium. Meeting-driven. Tier-1 cities.',
-  'Swissôtel': 'International premium. Corporate & leisure blend.',
-  'Mövenpick': 'LATAM premium with food & beverage heritage.',
+  'Grand Fiesta Americana': 'Flagship premium brand for landmark assets in gateway cities and resorts.',
+  'Live Aqua': 'High-ADR lifestyle luxury play for resort or trophy urban assets with strong experience positioning.',
+  'The Explorean': 'Experiential premium resort concept suited to destination-led nature and leisure assets.',
 };
 
 export const DESTINATION_BRANDS: Record<string, string[]> = {
-  'Mexico City': ['Pullman', 'Novotel', 'Mercure', 'ibis Styles', 'ibis'],
-  'Monterrey': ['Pullman', 'Novotel', 'Mercure', 'ibis'],
-  'Guadalajara': ['Novotel', 'Mercure', 'ibis Styles', 'ibis'],
-  'Cancún': ['Novotel', 'Mercure', 'ibis Styles', 'Swissôtel'],
-  'Riviera Maya': ['Mövenpick', 'Novotel', 'Mercure'],
-  'Los Cabos': ['Swissôtel', 'Mövenpick', 'Pullman'],
-  'Puebla': ['Novotel', 'Mercure', 'ibis'],
-  'Querétaro': ['Mercure', 'ibis Styles', 'Novotel'],
+  'Mexico City': ['Grand Fiesta Americana', 'Fiesta Americana', 'Fiesta Inn', 'Gamma'],
+  'Monterrey': ['Grand Fiesta Americana', 'Fiesta Inn', 'Gamma'],
+  'Guadalajara': ['Fiesta Americana', 'Fiesta Inn', 'Gamma', 'one'],
+  'Cancún': ['Live Aqua', 'Grand Fiesta Americana', 'Fiesta Americana', 'one'],
+  'Riviera Maya': ['Live Aqua', 'Grand Fiesta Americana', 'The Explorean'],
+  'Los Cabos': ['Grand Fiesta Americana', 'Live Aqua', 'Fiesta Americana'],
+  'Puebla': ['Fiesta Americana', 'Fiesta Inn', 'one'],
+  'Querétaro': ['Fiesta Inn', 'Gamma', 'one'],
 };
 
-// Brand fit criteria for scoring
 interface BrandCriteria {
   segments: Record<string, number>;
   roomsRange: [number, number, number, number];
@@ -42,75 +38,54 @@ interface BrandCriteria {
 }
 
 const BRAND_CRITERIA: Record<string, BrandCriteria> = {
-  'ibis': {
-    segments: { economy: 40, midscale: 10 },
-    roomsRange: [60, 80, 250, 400],
-    openingTypes: { conversion: 35, franchise_takeover: 35, new_build: 20, rebranding: 30 },
+  'one': {
+    segments: { economy: 42, midscale: 10 },
+    roomsRange: [60, 80, 220, 320],
+    openingTypes: { conversion: 38, franchise_takeover: 36, new_build: 22, rebranding: 30 },
     contractPreference: 'franchise',
-    baseSuccessRate: 88,
+    baseSuccessRate: 87,
   },
-  'ibis Styles': {
-    segments: { economy: 40, midscale: 15 },
-    roomsRange: [50, 70, 200, 350],
-    openingTypes: { conversion: 38, franchise_takeover: 32, new_build: 22, rebranding: 35 },
-    contractPreference: 'franchise',
-    baseSuccessRate: 85,
-  },
-  'ibis Budget': {
-    segments: { economy: 40, midscale: 5 },
-    roomsRange: [80, 100, 300, 500],
-    openingTypes: { new_build: 30, conversion: 30, franchise_takeover: 30, rebranding: 20 },
-    contractPreference: 'franchise',
-    baseSuccessRate: 82,
-  },
-  'greet': {
-    segments: { economy: 38, midscale: 18 },
-    roomsRange: [40, 55, 150, 250],
-    openingTypes: { conversion: 40, rebranding: 35, franchise_takeover: 28, new_build: 15 },
-    contractPreference: 'franchise',
-    baseSuccessRate: 75,
-  },
-  'Mercure': {
-    segments: { midscale: 40, economy: 15, premium: 15 },
-    roomsRange: [60, 80, 220, 400],
-    openingTypes: { conversion: 38, rebranding: 35, franchise_takeover: 30, new_build: 22 },
+  'Gamma': {
+    segments: { economy: 20, midscale: 36, premium: 10 },
+    roomsRange: [50, 70, 180, 300],
+    openingTypes: { conversion: 40, franchise_takeover: 34, new_build: 18, rebranding: 38 },
     contractPreference: 'franchise',
     baseSuccessRate: 84,
   },
-  'Novotel': {
-    segments: { midscale: 38, premium: 18, economy: 8 },
-    roomsRange: [80, 120, 300, 500],
-    openingTypes: { new_build: 32, conversion: 28, franchise_takeover: 22, rebranding: 25 },
+  'Fiesta Inn': {
+    segments: { midscale: 42, economy: 15, premium: 10 },
+    roomsRange: [80, 110, 260, 380],
+    openingTypes: { conversion: 34, franchise_takeover: 32, new_build: 24, rebranding: 30 },
+    contractPreference: 'both',
+    baseSuccessRate: 86,
+  },
+  'Fiesta Americana': {
+    segments: { premium: 24, midscale: 30 },
+    roomsRange: [110, 140, 320, 480],
+    openingTypes: { conversion: 30, franchise_takeover: 24, new_build: 30, rebranding: 28 },
     contractPreference: 'both',
     baseSuccessRate: 80,
   },
-  'Adagio': {
-    segments: { midscale: 40, premium: 15, economy: 10 },
-    roomsRange: [50, 70, 180, 300],
-    openingTypes: { new_build: 35, conversion: 30, rebranding: 28, franchise_takeover: 20 },
-    contractPreference: 'management',
-    baseSuccessRate: 72,
-  },
-  'Pullman': {
-    segments: { premium: 40, midscale: 15 },
-    roomsRange: [120, 180, 400, 600],
-    openingTypes: { new_build: 32, conversion: 28, franchise_takeover: 20, rebranding: 22 },
+  'Grand Fiesta Americana': {
+    segments: { premium: 40, midscale: 10 },
+    roomsRange: [150, 180, 420, 620],
+    openingTypes: { conversion: 26, franchise_takeover: 20, new_build: 32, rebranding: 22 },
     contractPreference: 'management',
     baseSuccessRate: 76,
   },
-  'Swissôtel': {
-    segments: { premium: 40, midscale: 10 },
-    roomsRange: [100, 150, 350, 550],
-    openingTypes: { new_build: 30, conversion: 28, franchise_takeover: 18, rebranding: 20 },
+  'Live Aqua': {
+    segments: { premium: 42, midscale: 6 },
+    roomsRange: [120, 160, 350, 520],
+    openingTypes: { conversion: 24, franchise_takeover: 18, new_build: 34, rebranding: 20 },
     contractPreference: 'management',
-    baseSuccessRate: 70,
+    baseSuccessRate: 72,
   },
-  'Mövenpick': {
-    segments: { premium: 38, midscale: 20 },
-    roomsRange: [100, 140, 320, 500],
-    openingTypes: { new_build: 28, conversion: 30, franchise_takeover: 20, rebranding: 25 },
-    contractPreference: 'both',
-    baseSuccessRate: 74,
+  'The Explorean': {
+    segments: { premium: 32, midscale: 12 },
+    roomsRange: [40, 60, 140, 220],
+    openingTypes: { conversion: 20, franchise_takeover: 15, new_build: 28, rebranding: 18 },
+    contractPreference: 'management',
+    baseSuccessRate: 68,
   },
 };
 
@@ -135,13 +110,11 @@ function scoreBrand(brand: string, deal: any): { fitScore: number; successRate: 
   const reasons: string[] = [];
   let score = 0;
 
-  // Segment fit (0–40)
   const segPts = criteria.segments[segment] ?? 0;
   score += segPts;
   if (segPts >= 35) reasons.push(`Ideal segment match (${segment})`);
-  else if (segPts >= 20) reasons.push(`Compatible segment`);
+  else if (segPts >= 20) reasons.push('Compatible segment');
 
-  // Rooms fit (0–20)
   const [rMin, rIdealMin, rIdealMax, rMax] = criteria.roomsRange;
   let roomsPts = 0;
   if (rooms >= rIdealMin && rooms <= rIdealMax) {
@@ -154,13 +127,11 @@ function scoreBrand(brand: string, deal: any): { fitScore: number; successRate: 
   }
   score += roomsPts;
 
-  // Opening type fit (0–30)
   const typePts = criteria.openingTypes[openingType] ?? 10;
   score += typePts;
   if (typePts >= 32) reasons.push(`${openingType.replace(/_/g, ' ')} strongly preferred`);
   else if (typePts >= 22) reasons.push(`${openingType.replace(/_/g, ' ')} compatible`);
 
-  // IC score bonus (0–10)
   const icBonus = Math.round((icScore / 100) * 10);
   score += icBonus;
 
@@ -193,9 +164,8 @@ export function recommendBrands(deal: any): BrandRecommendation[] {
     .slice(0, 5);
 }
 
-// Conversion suitability factors
 export interface ConversionScore {
-  score: number; // 0–100
+  score: number;
   label: 'Excellent' | 'Good' | 'Fair' | 'Poor';
   factors: string[];
 }
@@ -204,13 +174,11 @@ export function assessConversionSuitability(deal: any): ConversionScore {
   let score = 0;
   const factors: string[] = [];
 
-  // Is it already a hotel?
   if (['conversion', 'rebranding', 'franchise_takeover'].includes(deal.opening_type)) {
     score += 30;
     factors.push('Existing hotel structure — conversion viable');
   }
 
-  // Room count compatibility
   const rooms = ((deal.rooms_min || 0) + (deal.rooms_max || 0)) / 2;
   if (rooms >= 60 && rooms <= 300) {
     score += 25;
@@ -219,12 +187,10 @@ export function assessConversionSuitability(deal: any): ConversionScore {
     score += 12;
   }
 
-  // Segment fit for conversion
   if (deal.segment === 'economy') { score += 25; factors.push('Economy segment — highest conversion velocity'); }
   else if (deal.segment === 'midscale') { score += 20; factors.push('Midscale segment — strong conversion potential'); }
   else if (deal.segment === 'premium') { score += 12; factors.push('Premium segment — selective conversion'); }
 
-  // Score bonus
   if ((deal.score_total || 0) >= 70) { score += 20; factors.push('High qualification score'); }
   else if ((deal.score_total || 0) >= 50) { score += 10; }
 
@@ -237,11 +203,10 @@ export function assessConversionSuitability(deal: any): ConversionScore {
   return { score: capped, label, factors };
 }
 
-// Development pitch points for PMS&E context
 export const DEVELOPMENT_PITCH_POINTS = [
-  'Fast conversion to Accor network — immediate distribution uplift',
-  'Franchise model: low Accor overhead, high owner ROI',
-  'RCP loyalty programme — 100M+ members driving occupancy',
-  'Brand recognition reducing OTA dependency',
-  'Proven CAPEX efficiency in Midscale/Economy conversions',
+  'Fast conversion into Posadas commercial platform — immediate domestic distribution uplift',
+  'Flexible franchise and management structures aligned with owner return targets',
+  'Fiesta Rewards ecosystem supports repeat demand and direct channel share',
+  'Strong brand recognition in Mexico helps reduce OTA dependency',
+  'Brand ladder from one to Grand Fiesta Americana enables tailored repositioning',
 ];

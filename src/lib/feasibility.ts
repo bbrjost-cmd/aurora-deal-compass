@@ -6,7 +6,7 @@
 export interface FeasibilityInputs {
   rooms: number;
   segment: string;          // economy | midscale | premium
-  brand: string;            // specific brand (ibis, Novotel, Pullman…)
+  brand: string;            // specific brand (one, Fiesta Inn, Grand Fiesta Americana…)
   openingType: string;      // conversion | new_build | franchise_takeover | rebranding
   contractType: string;     // franchise | management
   adr: number;              // MXN
@@ -117,7 +117,7 @@ export function getSegmentDefaults(segment: string): Partial<FeasibilityInputs> 
 export const DEFAULT_INPUTS: FeasibilityInputs = {
   rooms: 120,
   segment: 'midscale',
-  brand: 'Novotel',
+  brand: 'Fiesta Inn',
   openingType: 'conversion',
   contractType: 'franchise',
   adr: 1600,

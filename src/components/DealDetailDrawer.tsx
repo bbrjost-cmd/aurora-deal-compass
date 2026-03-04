@@ -189,7 +189,7 @@ export function DealDetailDrawer({ deal, onClose, onUpdate, initialTab }: Props)
                 <TabsContent value="brands" className="space-y-4 mt-0">
                   <div>
                     <h3 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-1.5 mb-3">
-                      <Star className="h-3.5 w-3.5 text-aurora-gold" /> Recommended Accor Brands
+                      <Star className="h-3.5 w-3.5 text-aurora-gold" /> Recommended Posadas Brands
                     </h3>
                     <div className="space-y-2">
                       {brandRecs.map((rec, idx) => {

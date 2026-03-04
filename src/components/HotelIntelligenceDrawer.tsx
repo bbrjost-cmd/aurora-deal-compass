@@ -70,7 +70,7 @@ export function HotelIntelligenceDrawer({ hotel, nearbyHotels, cityCenter, onClo
   const [contactName, setContactName] = useState("");
   const [outreachRoute, setOutreachRoute] = useState("");
   const [showApproachScript, setShowApproachScript] = useState(false);
-  const [selectedBrand, setSelectedBrand] = useState<string>(ACCOR_BRANDS[4] || "Mercure");
+  const [selectedBrand, setSelectedBrand] = useState<string>(ACCOR_BRANDS[2] || "Fiesta Inn");
 
   if (!hotel) return null;
 
@@ -129,10 +129,10 @@ export function HotelIntelligenceDrawer({ hotel, nearbyHotels, cityCenter, onClo
   };
 
   const approachScript = showApproachScript ? [
-    `Value angle: Repositioning to ${selectedBrand} would unlock RevPAR uplift of 20–35% and global distribution via ALL — Accor's 100M+ member loyalty network.`,
+    `Value angle: Repositioning to ${selectedBrand} would unlock RevPAR uplift of 15–30% and stronger domestic distribution via Fiesta Rewards and Posadas direct channels.`,
     `Ask: Request a 15-min intro call + confidential NDA to share preliminary feasibility study.`,
-    `Why Accor (${selectedBrand}): Strongest PMS&E expansion pipeline in Mexico; no competing Accor brand in this micro-market; proven conversion and franchise model with efficient CAPEX.`,
-    `Next step: Propose 2 specific dates, offer to present at owner's offices or virtually. Request current occupancy + ADR data for sharper underwriting.`,
+    `Why Posadas (${selectedBrand}): Strong recognition in Mexico, flexible franchise/management structures, and a brand ladder adapted to this micro-market.`,
+    `Next step: Propose 2 specific dates, offer an in-person or virtual review, and request occupancy + ADR history for sharper underwriting.`,
   ] : [];
 
   const knownOwnerTags = [
