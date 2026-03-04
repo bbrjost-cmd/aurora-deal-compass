@@ -204,7 +204,7 @@ export function ICDecisionPanel({ deal, feasInputs, contactCount = 0, onSave }: 
       {/* KPI Grid */}
       <div className="grid grid-cols-2 gap-2">
         {[
-          { label: "Net Fees (Accor)", value: `$${brandEcon.netFeesUSD.toLocaleString()} USD`, ok: brandEcon.netFeesUSD >= DEFAULT_THRESHOLDS.minNetFeesUSD },
+          { label: "Net Fees (Posadas)", value: `$${brandEcon.netFeesUSD.toLocaleString()} USD`, ok: brandEcon.netFeesUSD >= DEFAULT_THRESHOLDS.minNetFeesUSD },
           { label: "Yield on Cost", value: `${(ownerEcon.yieldOnCost * 100).toFixed(1)}%`, ok: ownerEcon.yieldOnCost >= 0.07 },
           { label: "Simple Payback", value: `${outputs.simplePayback} yrs`, ok: outputs.simplePayback <= 12 },
           { label: "DSCR", value: debtEnabled ? `${ownerEcon.dscr.toFixed(2)}x` : "N/A", ok: !debtEnabled || ownerEcon.dscr >= DEFAULT_THRESHOLDS.minDSCR },

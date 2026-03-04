@@ -93,7 +93,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
         {/* Footer */}
         <div className="px-6 py-5 border-t border-border">
-          <p className="text-[10px] text-muted-foreground tracking-widest uppercase">Accor Development</p>
+          <p className="text-[10px] text-muted-foreground tracking-widest uppercase">Posadas Development</p>
         </div>
       </aside>
 

@@ -7,7 +7,7 @@ import { BRAND_STRATEGY_NOTES, DEVELOPMENT_PITCH_POINTS } from "@/lib/accor-bran
 // ─── Palette ────────────────────────────────────────────────────────────────
 const C = {
   black:   [17,  17,  17]  as [number, number, number],
-  red:     [208,  2,  27]  as [number, number, number], // Accor Development Red
+  red:     [208,  2,  27]  as [number, number, number], // Posadas signature red
   white:   [255, 255, 255]  as [number, number, number],
   grey50:  [250, 250, 250]  as [number, number, number],
   grey100: [240, 240, 240]  as [number, number, number],
@@ -59,7 +59,7 @@ function addPageFooter(doc: jsPDF, pageNum: number, pageCount: number) {
   doc.setFillColor(...C.red);
   doc.rect(0, 284.5, PW, 0.8, "F");
   setFont(doc, 6, "normal", C.grey300);
-  doc.text("AURORA DevOS MX  ·  Accor Development", 14, 292);
+  doc.text("AURORA DevOS MX  ·  Posadas Development", 14, 292);
   doc.text(`Page ${pageNum} / ${pageCount}`, PW - 14, 292, { align: "right" });
 }
 
@@ -83,7 +83,7 @@ export function generateFeasibilityPDF(
   setFont(doc, 22, "bold", C.white);
   doc.text("AURORA", 14, 20);
   setFont(doc, 7, "normal", C.red);
-  doc.text("ACCOR DEVELOPMENT PLATFORM  ·  MEXICO", 14, 27);
+  doc.text("POSADAS DEVELOPMENT PLATFORM  ·  MEXICO", 14, 27);
 
   setFont(doc, 9, "bold", C.white);
   doc.text("DEVELOPMENT SCREENING REPORT", PW - 14, 20, { align: "right" });
@@ -226,10 +226,10 @@ export function generateFeasibilityPDF(
   });
   y = (doc as any).lastAutoTable.finalY + 10;
 
-  // ── ACCOR BRAND STRATEGY ────────────────────────────────────────────────────
+  // ── POSADAS BRAND STRATEGY ─────────────────────────────────────────────────
   if (brands && brands.length > 0) {
     if (y > 210) { doc.addPage(); y = 20; }
-    y = sectionTitle(doc, "Accor Brand Strategy & Recommendations", y);
+    y = sectionTitle(doc, "Posadas Brand Strategy & Recommendations", y);
     autoTable(doc, {
       startY: y,
       head: [["Brand", "Strategic Rationale", "Status"]],
@@ -265,7 +265,7 @@ export function generateFeasibilityPDF(
   doc.rect(14, y, 182, 18, "F");
   setFont(doc, 5.5, "normal", C.grey500);
   const disc = doc.splitTextToSize(
-    "This document is prepared by Accor Development and contains forward-looking financial projections based on market assumptions. " +
+    "This document is prepared by Posadas Development and contains forward-looking financial projections based on market assumptions. " +
     "All figures are estimates and subject to change. This memorandum is strictly confidential and intended solely for internal use " +
     "and authorized counterparties. Not for public distribution.",
     176
@@ -326,7 +326,7 @@ export function generateDealPDF(deal: any, tasks: any[], feasibilityOutputs?: an
   y = (doc as any).lastAutoTable.finalY + 8;
 
   if (brands && brands.length > 0) {
-    y = sectionTitle(doc, "Recommended Accor Brands", y);
+    y = sectionTitle(doc, "Recommended Posadas Brands", y);
     autoTable(doc, {
       startY: y,
       head: [["Brand", "Positioning"]],
@@ -384,7 +384,7 @@ export function generateDealPDF(deal: any, tasks: any[], feasibilityOutputs?: an
   doc.setFillColor(...C.red);
   doc.rect(0, 284.5, PW, 0.8, "F");
   setFont(doc, 6, "normal", C.grey300);
-  doc.text("AURORA DevOS MX  ·  Accor Development  ·  Confidential", 14, 292);
+  doc.text("AURORA DevOS MX  ·  Posadas Development  ·  Confidential", 14, 292);
   doc.text(now, PW - 14, 292, { align: "right" });
 
   const safeName = (deal.name || "Deal").replace(/[^a-zA-Z0-9]/g, "_");
@@ -437,7 +437,7 @@ export function generateICDecisionMemoPDF(decision: any) {
   setFont(doc, 20, "bold", C.white);
   doc.text("AURORA", 14, 17);
   setFont(doc, 6.5, "normal", C.red);
-  doc.text("ACCOR DEVELOPMENT PLATFORM  ·  IC DECISION MEMORANDUM", 14, 24);
+  doc.text("POSADAS DEVELOPMENT PLATFORM  ·  IC DECISION MEMORANDUM", 14, 24);
 
   // Decision badge
   doc.setFillColor(...decisionColor);
@@ -618,7 +618,7 @@ export function generateICDecisionMemoPDF(decision: any) {
   doc.rect(14, y, 182, 16, "F");
   setFont(doc, 5.5, "normal", C.grey500);
   const disc = doc.splitTextToSize(
-    "This memorandum is prepared by Accor Development and contains a preliminary analysis based on available data. " +
+    "This memorandum is prepared by Posadas Development and contains a preliminary analysis based on available data. " +
     "All projections are estimates subject to revision. Strictly confidential — for internal use by the Investment Committee only.",
     176,
   );
@@ -666,7 +666,7 @@ export function generateICMemo(
   setFont(doc, 20, "bold", C.white);
   doc.text("AURORA", 14, 17);
   setFont(doc, 6.5, "normal", C.red);
-  doc.text("ACCOR DEVELOPMENT PLATFORM  ·  DEVELOPMENT SCREENING MEMO", 14, 24);
+  doc.text("POSADAS DEVELOPMENT PLATFORM  ·  DEVELOPMENT SCREENING MEMO", 14, 24);
 
   // Decision badge (right)
   doc.setFillColor(...decisionColor);
@@ -843,7 +843,7 @@ export function generateICMemo(
   doc.rect(14, y, 182, 16, "F");
   setFont(doc, 5.5, "normal", C.grey500);
   const disc = doc.splitTextToSize(
-    "This memorandum is prepared by Accor Development and contains forward-looking financial projections based on market assumptions. " +
+    "This memorandum is prepared by Posadas Development and contains forward-looking financial projections based on market assumptions. " +
     "All data are estimates subject to revision. Confidential — for internal use only.",
     176
   );
