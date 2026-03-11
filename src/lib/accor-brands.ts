@@ -1,32 +1,34 @@
-// Posadas brand catalog for Mexico / LATAM expansion
+// Choice Hotels brand catalog for Mexico expansion
 import { BRANDS_BY_SEGMENT, ALL_BRANDS } from './constants';
-import type { PosadasBrand } from './constants';
+import type { ChoiceBrand } from './constants';
 
-export type { PosadasBrand };
-export { ALL_BRANDS as ACCOR_BRANDS, ALL_BRANDS as POSADAS_BRANDS };
+export type PosadasBrand = ChoiceBrand;
+export { ALL_BRANDS as ACCOR_BRANDS, ALL_BRANDS as POSADAS_BRANDS, ALL_BRANDS as CHOICE_BRANDS };
 
 export const BRAND_STRATEGY_NOTES: Record<string, string> = {
   // Economy
-  'one': 'Lean economy brand with strong domestic mobility demand and efficient conversion profile.',
-  'Gamma': 'Conversion-friendly soft brand for independent assets needing commercial uplift without heavy CAPEX.',
+  'Sleep Inn': 'Efficient new-build economy brand with strong Choice Privileges loyalty integration and lean operating model.',
+  'Econo Lodge': 'High-conversion economy brand ideal for existing independent hotels seeking immediate distribution uplift.',
+  'Rodeway Inn': 'Value-tier brand for budget-conscious markets with flexible conversion standards and low CAPEX requirements.',
   // Midscale
-  'Fiesta Inn': 'Business-led midscale flag with strong corporate recognition across Mexico.',
-  'Fiesta Americana': 'Full-service upper-upscale brand for urban and resort repositioning with broad owner appeal.',
-  // Premium
-  'Grand Fiesta Americana': 'Flagship premium brand for landmark assets in gateway cities and resorts.',
-  'Live Aqua': 'High-ADR lifestyle luxury play for resort or trophy urban assets with strong experience positioning.',
-  'The Explorean': 'Experiential premium resort concept suited to destination-led nature and leisure assets.',
+  'Comfort Inn': 'Flagship midscale brand with strong domestic and international recognition — high franchise demand.',
+  'Comfort Suites': 'Extended-stay midscale brand with suite-only configuration and strong corporate demand profile.',
+  'Quality Inn': 'Flexible midscale brand for conversion-friendly assets needing commercial uplift without heavy renovation.',
+  // Upscale
+  'Cambria Hotels': 'Upscale lifestyle brand for urban gateway markets with design-led positioning and premium ADR.',
+  'Ascend Hotel Collection': 'Soft brand collection for unique independent hotels seeking global distribution while retaining identity.',
+  'Clarion Pointe': 'Upper-midscale brand bridging midscale and upscale with streamlined services and modern design standards.',
 };
 
 export const DESTINATION_BRANDS: Record<string, string[]> = {
-  'Mexico City': ['Grand Fiesta Americana', 'Fiesta Americana', 'Fiesta Inn', 'Gamma'],
-  'Monterrey': ['Grand Fiesta Americana', 'Fiesta Inn', 'Gamma'],
-  'Guadalajara': ['Fiesta Americana', 'Fiesta Inn', 'Gamma', 'one'],
-  'Cancún': ['Live Aqua', 'Grand Fiesta Americana', 'Fiesta Americana', 'one'],
-  'Riviera Maya': ['Live Aqua', 'Grand Fiesta Americana', 'The Explorean'],
-  'Los Cabos': ['Grand Fiesta Americana', 'Live Aqua', 'Fiesta Americana'],
-  'Puebla': ['Fiesta Americana', 'Fiesta Inn', 'one'],
-  'Querétaro': ['Fiesta Inn', 'Gamma', 'one'],
+  'Mexico City': ['Cambria Hotels', 'Comfort Inn', 'Comfort Suites', 'Quality Inn'],
+  'Monterrey': ['Cambria Hotels', 'Comfort Inn', 'Quality Inn'],
+  'Guadalajara': ['Comfort Inn', 'Quality Inn', 'Sleep Inn'],
+  'Cancún': ['Ascend Hotel Collection', 'Cambria Hotels', 'Comfort Inn'],
+  'Riviera Maya': ['Ascend Hotel Collection', 'Cambria Hotels'],
+  'Los Cabos': ['Ascend Hotel Collection', 'Cambria Hotels', 'Comfort Suites'],
+  'Puebla': ['Comfort Inn', 'Quality Inn', 'Econo Lodge'],
+  'Querétaro': ['Comfort Inn', 'Quality Inn', 'Sleep Inn'],
 };
 
 interface BrandCriteria {
@@ -38,54 +40,68 @@ interface BrandCriteria {
 }
 
 const BRAND_CRITERIA: Record<string, BrandCriteria> = {
-  'one': {
+  'Sleep Inn': {
     segments: { economy: 42, midscale: 10 },
-    roomsRange: [60, 80, 220, 320],
-    openingTypes: { conversion: 38, franchise_takeover: 36, new_build: 22, rebranding: 30 },
+    roomsRange: [60, 80, 180, 280],
+    openingTypes: { conversion: 30, franchise_takeover: 28, new_build: 40, rebranding: 25 },
     contractPreference: 'franchise',
     baseSuccessRate: 87,
   },
-  'Gamma': {
-    segments: { economy: 20, midscale: 36, premium: 10 },
-    roomsRange: [50, 70, 180, 300],
-    openingTypes: { conversion: 40, franchise_takeover: 34, new_build: 18, rebranding: 38 },
+  'Econo Lodge': {
+    segments: { economy: 44, midscale: 8 },
+    roomsRange: [40, 60, 160, 250],
+    openingTypes: { conversion: 42, franchise_takeover: 38, new_build: 18, rebranding: 36 },
+    contractPreference: 'franchise',
+    baseSuccessRate: 85,
+  },
+  'Rodeway Inn': {
+    segments: { economy: 40, midscale: 6 },
+    roomsRange: [30, 50, 140, 220],
+    openingTypes: { conversion: 44, franchise_takeover: 36, new_build: 14, rebranding: 38 },
+    contractPreference: 'franchise',
+    baseSuccessRate: 82,
+  },
+  'Comfort Inn': {
+    segments: { midscale: 44, economy: 12, premium: 10 },
+    roomsRange: [80, 110, 260, 380],
+    openingTypes: { conversion: 36, franchise_takeover: 32, new_build: 28, rebranding: 30 },
+    contractPreference: 'franchise',
+    baseSuccessRate: 88,
+  },
+  'Comfort Suites': {
+    segments: { midscale: 40, premium: 14 },
+    roomsRange: [80, 100, 220, 340],
+    openingTypes: { conversion: 30, franchise_takeover: 28, new_build: 34, rebranding: 26 },
     contractPreference: 'franchise',
     baseSuccessRate: 84,
   },
-  'Fiesta Inn': {
-    segments: { midscale: 42, economy: 15, premium: 10 },
-    roomsRange: [80, 110, 260, 380],
-    openingTypes: { conversion: 34, franchise_takeover: 32, new_build: 24, rebranding: 30 },
-    contractPreference: 'both',
+  'Quality Inn': {
+    segments: { midscale: 42, economy: 16, premium: 8 },
+    roomsRange: [60, 80, 220, 350],
+    openingTypes: { conversion: 40, franchise_takeover: 36, new_build: 20, rebranding: 34 },
+    contractPreference: 'franchise',
     baseSuccessRate: 86,
   },
-  'Fiesta Americana': {
-    segments: { premium: 24, midscale: 30 },
-    roomsRange: [110, 140, 320, 480],
-    openingTypes: { conversion: 30, franchise_takeover: 24, new_build: 30, rebranding: 28 },
-    contractPreference: 'both',
-    baseSuccessRate: 80,
-  },
-  'Grand Fiesta Americana': {
-    segments: { premium: 40, midscale: 10 },
-    roomsRange: [150, 180, 420, 620],
-    openingTypes: { conversion: 26, franchise_takeover: 20, new_build: 32, rebranding: 22 },
-    contractPreference: 'management',
+  'Cambria Hotels': {
+    segments: { premium: 44, midscale: 10 },
+    roomsRange: [120, 150, 350, 500],
+    openingTypes: { conversion: 26, franchise_takeover: 20, new_build: 36, rebranding: 22 },
+    contractPreference: 'franchise',
     baseSuccessRate: 76,
   },
-  'Live Aqua': {
-    segments: { premium: 42, midscale: 6 },
-    roomsRange: [120, 160, 350, 520],
-    openingTypes: { conversion: 24, franchise_takeover: 18, new_build: 34, rebranding: 20 },
-    contractPreference: 'management',
-    baseSuccessRate: 72,
+  'Ascend Hotel Collection': {
+    segments: { premium: 40, midscale: 12 },
+    roomsRange: [40, 60, 250, 400],
+    openingTypes: { conversion: 38, franchise_takeover: 30, new_build: 20, rebranding: 36 },
+    contractPreference: 'franchise',
+    baseSuccessRate: 74,
   },
-  'The Explorean': {
-    segments: { premium: 32, midscale: 12 },
-    roomsRange: [40, 60, 140, 220],
-    openingTypes: { conversion: 20, franchise_takeover: 15, new_build: 28, rebranding: 18 },
-    contractPreference: 'management',
-    baseSuccessRate: 68,
+  'Clarion Pointe': {
+    segments: { premium: 30, midscale: 22 },
+    roomsRange: [70, 90, 220, 340],
+    openingTypes: { conversion: 34, franchise_takeover: 28, new_build: 28, rebranding: 32 },
+    contractPreference: 'franchise',
+    baseSuccessRate: 80,
   },
 };
 
@@ -156,7 +172,7 @@ export function recommendBrands(deal: any): BrandRecommendation[] {
         successRate,
         note: BRAND_STRATEGY_NOTES[brand] || '',
         reasons,
-        contractPreference: criteria?.contractPreference || 'both',
+        contractPreference: criteria?.contractPreference || 'franchise',
       };
     })
     .filter(r => r.fitScore > 10)
@@ -189,7 +205,7 @@ export function assessConversionSuitability(deal: any): ConversionScore {
 
   if (deal.segment === 'economy') { score += 25; factors.push('Economy segment — highest conversion velocity'); }
   else if (deal.segment === 'midscale') { score += 20; factors.push('Midscale segment — strong conversion potential'); }
-  else if (deal.segment === 'premium') { score += 12; factors.push('Premium segment — selective conversion'); }
+  else if (deal.segment === 'premium') { score += 12; factors.push('Upscale segment — selective conversion'); }
 
   if ((deal.score_total || 0) >= 70) { score += 20; factors.push('High qualification score'); }
   else if ((deal.score_total || 0) >= 50) { score += 10; }
@@ -204,9 +220,9 @@ export function assessConversionSuitability(deal: any): ConversionScore {
 }
 
 export const DEVELOPMENT_PITCH_POINTS = [
-  'Fast conversion into Posadas commercial platform — immediate domestic distribution uplift',
-  'Flexible franchise and management structures aligned with owner return targets',
-  'Fiesta Rewards ecosystem supports repeat demand and direct channel share',
-  'Strong brand recognition in Mexico helps reduce OTA dependency',
-  'Brand ladder from one to Grand Fiesta Americana enables tailored repositioning',
+  'Fast conversion into Choice Hotels commercial platform — immediate global distribution uplift via choicehotels.com',
+  'Franchise-first model with predictable fee structure and lower operational overhead for owners',
+  'Choice Privileges loyalty program drives repeat demand and direct channel share',
+  'Strong brand recognition in US and growing presence in Mexico reduces OTA dependency',
+  'Brand ladder from Econo Lodge to Cambria Hotels enables tailored repositioning by market',
 ];

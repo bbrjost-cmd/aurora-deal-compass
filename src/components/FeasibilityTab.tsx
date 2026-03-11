@@ -373,8 +373,8 @@ export function FeasibilityTab({ dealId, deal, onInputsChange }: Props) {
             <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Why Management vs Franchise?</p>
             {[
               brandMgmt.netFees >= brandFran.netFees
-                ? "Management generates higher net fees for Posadas thanks to operational control and incentive fee upside."
-                : "Franchise generates competitive net income with lower support costs and complexity.",
+                ? "Management generates higher net fees for Choice Hotels thanks to operational control and incentive fee upside."
+                : "Franchise generates competitive net income with lower support costs and complexity — Choice Hotels' preferred model.",
               "Management provides tighter brand standard execution, especially for premium positioning.",
               "Franchise offers owners more operating flexibility and typically faster deal closure.",
             ].map((b, i) => (

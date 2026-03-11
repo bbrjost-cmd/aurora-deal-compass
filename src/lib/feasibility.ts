@@ -1,12 +1,12 @@
 /**
- * AURORA DevOS MX — Feasibility Model (PMS&E Edition)
- * Economy / Midscale / Premium — Franchise & Management contracts
+ * AURORA DevOS MX — Feasibility Model (Choice Hotels Edition)
+ * Economy / Midscale / Upscale — Franchise & Management contracts
  */
 
 export interface FeasibilityInputs {
   rooms: number;
   segment: string;          // economy | midscale | premium
-  brand: string;            // specific brand (one, Fiesta Inn, Grand Fiesta Americana…)
+  brand: string;            // specific brand (Sleep Inn, Comfort Inn, Cambria Hotels…)
   openingType: string;      // conversion | new_build | franchise_takeover | rebranding
   contractType: string;     // franchise | management
   adr: number;              // MXN
@@ -117,7 +117,7 @@ export function getSegmentDefaults(segment: string): Partial<FeasibilityInputs> 
 export const DEFAULT_INPUTS: FeasibilityInputs = {
   rooms: 120,
   segment: 'midscale',
-  brand: 'Fiesta Inn',
+  brand: 'Comfort Inn',
   openingType: 'conversion',
   contractType: 'franchise',
   adr: 1600,

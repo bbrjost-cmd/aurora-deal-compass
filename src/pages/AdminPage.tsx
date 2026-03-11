@@ -9,14 +9,14 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
 import { Upload, FileJson, Database, Building2, Plus, Trash2, Users, Search, X } from "lucide-react";
 
-// Demo owner library for PMS&E development pipeline
+// Demo owner library for Choice Hotels Mexico development pipeline
 const DEMO_OWNERS: OwnerEntity[] = [
-  { id: 'demo-0', company: 'Grupo Husa / Camino Real', knownAssets: ['Camino Real Polanco', 'Camino Real Aeropuerto'], city: 'Ciudad de México', state: 'Ciudad de México', segment: 'premium', notes: 'Strong conversion candidate — Fiesta Americana / Grand Fiesta Americana repositioning. Existing management infrastructure.', destination: 'Mexico City' },
-  { id: 'demo-1', company: 'Hoteles Misión', knownAssets: ['Misión Monterrey', 'Misión Guadalajara'], city: 'Monterrey', state: 'Nuevo León', segment: 'midscale', notes: 'National chain with broad regional coverage. Gamma or Fiesta Inn conversion priority.', destination: 'Monterrey' },
-  { id: 'demo-2', company: 'City Express (MARRIOTT-acquired)', knownAssets: ['City Express Plus CDMX', 'City Express Cancún'], city: 'Ciudad de México', state: 'Ciudad de México', segment: 'economy', notes: 'Post-acquisition rebranding opportunity. one or Gamma conversion feasible.', destination: 'Mexico City' },
-  { id: 'demo-3', company: 'Grupo Diestra', knownAssets: ['Hilton Garden Inn Guadalajara', 'Holiday Inn Express León'], city: 'Guadalajara', state: 'Jalisco', segment: 'midscale', notes: 'Urban portfolio with strong business demand. Fiesta Inn or Fiesta Americana franchise takeover viable.', destination: 'Guadalajara' },
-  { id: 'demo-4', company: 'Inversiones Hoteleras del Bajío', knownAssets: ['Hotel Galería Querétaro'], city: 'Querétaro', state: 'Querétaro', segment: 'midscale', notes: 'Independent hotel, Gamma conversion candidate. Business demand corridor.', destination: 'Querétaro' },
-  { id: 'demo-5', company: 'Real Turismo', knownAssets: ['Camino Real Monterrey', 'Camino Real Puebla'], city: 'Monterrey', state: 'Nuevo León', segment: 'midscale', notes: 'Business-oriented assets. Fiesta Inn or Fiesta Americana repositioning opportunity.', destination: 'Monterrey' },
+  { id: 'demo-0', company: 'Grupo Husa / Camino Real', knownAssets: ['Camino Real Polanco', 'Camino Real Aeropuerto'], city: 'Ciudad de México', state: 'Ciudad de México', segment: 'premium', notes: 'Strong conversion candidate — Cambria Hotels or Ascend Hotel Collection repositioning. Existing management infrastructure.', destination: 'Mexico City' },
+  { id: 'demo-1', company: 'Hoteles Misión', knownAssets: ['Misión Monterrey', 'Misión Guadalajara'], city: 'Monterrey', state: 'Nuevo León', segment: 'midscale', notes: 'National chain with broad regional coverage. Quality Inn or Comfort Inn conversion priority.', destination: 'Monterrey' },
+  { id: 'demo-2', company: 'City Express (MARRIOTT-acquired)', knownAssets: ['City Express Plus CDMX', 'City Express Cancún'], city: 'Ciudad de México', state: 'Ciudad de México', segment: 'economy', notes: 'Post-acquisition rebranding opportunity. Sleep Inn or Econo Lodge conversion feasible.', destination: 'Mexico City' },
+  { id: 'demo-3', company: 'Grupo Diestra', knownAssets: ['Hilton Garden Inn Guadalajara', 'Holiday Inn Express León'], city: 'Guadalajara', state: 'Jalisco', segment: 'midscale', notes: 'Urban portfolio with strong business demand. Comfort Inn or Comfort Suites franchise takeover viable.', destination: 'Guadalajara' },
+  { id: 'demo-4', company: 'Inversiones Hoteleras del Bajío', knownAssets: ['Hotel Galería Querétaro'], city: 'Querétaro', state: 'Querétaro', segment: 'midscale', notes: 'Independent hotel, Quality Inn conversion candidate. Business demand corridor.', destination: 'Querétaro' },
+  { id: 'demo-5', company: 'Real Turismo', knownAssets: ['Camino Real Monterrey', 'Camino Real Puebla'], city: 'Monterrey', state: 'Nuevo León', segment: 'midscale', notes: 'Business-oriented assets. Comfort Inn or Comfort Suites repositioning opportunity.', destination: 'Monterrey' },
 ];
 
 interface OwnerEntity {
@@ -90,7 +90,7 @@ function OwnerIntelligencePanel() {
           <Users className="h-4 w-4" /> Owner Intelligence Library
         </CardTitle>
         <CardDescription>
-          Target owner entities for the Posadas Premium/Midscale/Economy conversion pipeline. Demo data pre-loaded from internal prospect list.
+          Target owner entities for the Choice Hotels Upscale/Midscale/Economy conversion pipeline. Demo data pre-loaded from internal prospect list.
           <span className="block mt-1 text-xs text-muted-foreground/70 italic">
             ⚠ Demo data only — replace with proprietary research. Do not share externally.
           </span>
