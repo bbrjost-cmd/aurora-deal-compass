@@ -618,7 +618,7 @@ export function generateICDecisionMemoPDF(decision: any) {
   doc.rect(14, y, 182, 16, "F");
   setFont(doc, 5.5, "normal", C.grey500);
   const disc = doc.splitTextToSize(
-    "This memorandum is prepared by Posadas Development and contains a preliminary analysis based on available data. " +
+    "This memorandum is prepared by Choice Hotels Development and contains a preliminary analysis based on available data. " +
     "All projections are estimates subject to revision. Strictly confidential — for internal use by the Investment Committee only.",
     176,
   );
