@@ -83,7 +83,7 @@ export function generateFeasibilityPDF(
   setFont(doc, 22, "bold", C.white);
   doc.text("AURORA", 14, 20);
   setFont(doc, 7, "normal", C.red);
-  doc.text("POSADAS DEVELOPMENT PLATFORM  ·  MEXICO", 14, 27);
+  doc.text("CHOICE HOTELS DEVELOPMENT PLATFORM  ·  MEXICO", 14, 27);
 
   setFont(doc, 9, "bold", C.white);
   doc.text("DEVELOPMENT SCREENING REPORT", PW - 14, 20, { align: "right" });
