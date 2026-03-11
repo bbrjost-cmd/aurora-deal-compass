@@ -59,7 +59,7 @@ function addPageFooter(doc: jsPDF, pageNum: number, pageCount: number) {
   doc.setFillColor(...C.red);
   doc.rect(0, 284.5, PW, 0.8, "F");
   setFont(doc, 6, "normal", C.grey300);
-  doc.text("AURORA DevOS MX  ·  Posadas Development", 14, 292);
+  doc.text("AURORA DevOS MX  ·  Choice Hotels Development", 14, 292);
   doc.text(`Page ${pageNum} / ${pageCount}`, PW - 14, 292, { align: "right" });
 }
 
