@@ -7,7 +7,7 @@ import { BRAND_STRATEGY_NOTES, DEVELOPMENT_PITCH_POINTS } from "@/lib/accor-bran
 // ─── Palette ────────────────────────────────────────────────────────────────
 const C = {
   black:   [17,  17,  17]  as [number, number, number],
-  red:     [208,  2,  27]  as [number, number, number], // Posadas signature red
+  red:     [0,   103, 177]  as [number, number, number], // Choice Hotels blue
   white:   [255, 255, 255]  as [number, number, number],
   grey50:  [250, 250, 250]  as [number, number, number],
   grey100: [240, 240, 240]  as [number, number, number],
