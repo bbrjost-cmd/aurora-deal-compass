@@ -129,9 +129,9 @@ export function HotelIntelligenceDrawer({ hotel, nearbyHotels, cityCenter, onClo
   };
 
   const approachScript = showApproachScript ? [
-    `Value angle: Repositioning to ${selectedBrand} would unlock RevPAR uplift of 15–30% and stronger domestic distribution via Fiesta Rewards and Posadas direct channels.`,
+    `Value angle: Repositioning to ${selectedBrand} would unlock RevPAR uplift of 15–30% and stronger global distribution via choicehotels.com and Choice Privileges loyalty program.`,
     `Ask: Request a 15-min intro call + confidential NDA to share preliminary feasibility study.`,
-    `Why Posadas (${selectedBrand}): Strong recognition in Mexico, flexible franchise/management structures, and a brand ladder adapted to this micro-market.`,
+    `Why Choice Hotels (${selectedBrand}): Growing presence in Mexico, franchise-first model with predictable fees, and a brand ladder adapted to this micro-market.`,
     `Next step: Propose 2 specific dates, offer an in-person or virtual review, and request occupancy + ADR history for sharper underwriting.`,
   ] : [];
 
