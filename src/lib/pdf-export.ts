@@ -384,7 +384,7 @@ export function generateDealPDF(deal: any, tasks: any[], feasibilityOutputs?: an
   doc.setFillColor(...C.red);
   doc.rect(0, 284.5, PW, 0.8, "F");
   setFont(doc, 6, "normal", C.grey300);
-  doc.text("AURORA DevOS MX  ·  Posadas Development  ·  Confidential", 14, 292);
+  doc.text("AURORA DevOS MX  ·  Choice Hotels Development  ·  Confidential", 14, 292);
   doc.text(now, PW - 14, 292, { align: "right" });
 
   const safeName = (deal.name || "Deal").replace(/[^a-zA-Z0-9]/g, "_");
