@@ -843,7 +843,7 @@ export function generateICMemo(
   doc.rect(14, y, 182, 16, "F");
   setFont(doc, 5.5, "normal", C.grey500);
   const disc = doc.splitTextToSize(
-    "This memorandum is prepared by Posadas Development and contains forward-looking financial projections based on market assumptions. " +
+    "This memorandum is prepared by Choice Hotels Development and contains forward-looking financial projections based on market assumptions. " +
     "All data are estimates subject to revision. Confidential — for internal use only.",
     176
   );
