@@ -265,7 +265,7 @@ export function generateFeasibilityPDF(
   doc.rect(14, y, 182, 18, "F");
   setFont(doc, 5.5, "normal", C.grey500);
   const disc = doc.splitTextToSize(
-    "This document is prepared by Posadas Development and contains forward-looking financial projections based on market assumptions. " +
+    "This document is prepared by Choice Hotels Development and contains forward-looking financial projections based on market assumptions. " +
     "All figures are estimates and subject to change. This memorandum is strictly confidential and intended solely for internal use " +
     "and authorized counterparties. Not for public distribution.",
     176
