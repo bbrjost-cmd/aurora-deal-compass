@@ -326,7 +326,7 @@ export function generateDealPDF(deal: any, tasks: any[], feasibilityOutputs?: an
   y = (doc as any).lastAutoTable.finalY + 8;
 
   if (brands && brands.length > 0) {
-    y = sectionTitle(doc, "Recommended Posadas Brands", y);
+    y = sectionTitle(doc, "Recommended Choice Hotels Brands", y);
     autoTable(doc, {
       startY: y,
       head: [["Brand", "Positioning"]],
