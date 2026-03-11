@@ -666,7 +666,7 @@ export function generateICMemo(
   setFont(doc, 20, "bold", C.white);
   doc.text("AURORA", 14, 17);
   setFont(doc, 6.5, "normal", C.red);
-  doc.text("POSADAS DEVELOPMENT PLATFORM  ·  DEVELOPMENT SCREENING MEMO", 14, 24);
+  doc.text("CHOICE HOTELS DEVELOPMENT PLATFORM  ·  DEVELOPMENT SCREENING MEMO", 14, 24);
 
   // Decision badge (right)
   doc.setFillColor(...decisionColor);
