@@ -30,7 +30,7 @@ const LOI_ITEMS_BY_STAGE: Record<string, string[]> = {
     "Confirm room count and program",
     "Validate CAPEX estimates with QS",
     "IC internal pre-screening",
-    "Confirm Posadas brand recommendation",
+    "Confirm Choice Hotels brand recommendation",
   ],
   loi: [
     "Draft LOI / term sheet",

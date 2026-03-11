@@ -70,7 +70,7 @@ export function HotelIntelligenceDrawer({ hotel, nearbyHotels, cityCenter, onClo
   const [contactName, setContactName] = useState("");
   const [outreachRoute, setOutreachRoute] = useState("");
   const [showApproachScript, setShowApproachScript] = useState(false);
-  const [selectedBrand, setSelectedBrand] = useState<string>(ACCOR_BRANDS[2] || "Fiesta Inn");
+  const [selectedBrand, setSelectedBrand] = useState<string>(ACCOR_BRANDS[3] || "Comfort Inn");
 
   if (!hotel) return null;
 

@@ -24,30 +24,31 @@ export const STAGE_COLORS: Record<string, string> = {
   lost: 'bg-red-100 text-red-800',
 };
 
-// ─── Segments (Economy / Midscale / Premium only) ────────────────────────────
+// ─── Segments (Economy / Midscale / Upscale only) ────────────────────────────
 export const SEGMENTS = ['economy', 'midscale', 'premium'] as const;
 
 export const SEGMENT_LABELS: Record<string, string> = {
   economy: 'Economy',
   midscale: 'Midscale',
-  premium: 'Premium',
+  premium: 'Upscale',
 };
 
-// ─── Posadas brands by segment ────────────────────────────────────────────────
+// ─── Choice Hotels brands by segment ──────────────────────────────────────────
 export const BRANDS_BY_SEGMENT: Record<string, string[]> = {
-  economy: ['one', 'Gamma'],
-  midscale: ['Gamma', 'Fiesta Inn', 'Fiesta Americana'],
-  premium: ['Fiesta Americana', 'Grand Fiesta Americana', 'Live Aqua', 'The Explorean'],
+  economy: ['Sleep Inn', 'Econo Lodge', 'Rodeway Inn'],
+  midscale: ['Comfort Inn', 'Comfort Suites', 'Quality Inn'],
+  premium: ['Cambria Hotels', 'Ascend Hotel Collection', 'Clarion Pointe'],
 };
 
 export const ALL_BRANDS = [
-  'one', 'Gamma',
-  'Fiesta Inn', 'Fiesta Americana',
-  'Grand Fiesta Americana', 'Live Aqua', 'The Explorean',
+  'Sleep Inn', 'Econo Lodge', 'Rodeway Inn',
+  'Comfort Inn', 'Comfort Suites', 'Quality Inn',
+  'Cambria Hotels', 'Ascend Hotel Collection', 'Clarion Pointe',
 ] as const;
 
-export type PosadasBrand = typeof ALL_BRANDS[number];
-export type AccorBrand = PosadasBrand;
+export type ChoiceBrand = typeof ALL_BRANDS[number];
+export type AccorBrand = ChoiceBrand;
+export type PosadasBrand = ChoiceBrand;
 
 // ─── Opening Types (Conversion as default/primary) ───────────────────────────
 export const OPENING_TYPES = ['conversion', 'new_build', 'franchise_takeover', 'rebranding'] as const;

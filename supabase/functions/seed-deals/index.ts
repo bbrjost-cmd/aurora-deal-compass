@@ -6,43 +6,43 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// PMS&E only — Economy / Midscale / Premium
+// Choice Hotels Mexico — Economy / Midscale / Upscale
 const MEXICO_DEALS = [
-  // ─── ECONOMY — one / Gamma ─────────────────────────────────────────────────
-  { name: "one CDMX Reforma", city: "Ciudad de México", state: "Ciudad de México", lat: 19.4326, lon: -99.1680, segment: "economy", opening_type: "conversion", rooms_min: 110, rooms_max: 160, stage: "underwriting", score: 78 },
-  { name: "one Monterrey Centro", city: "Monterrey", state: "Nuevo León", lat: 25.6866, lon: -100.3161, segment: "economy", opening_type: "franchise_takeover", rooms_min: 90, rooms_max: 130, stage: "qualified", score: 72 },
-  { name: "one Guadalajara Expo", city: "Guadalajara", state: "Jalisco", lat: 20.6597, lon: -103.3496, segment: "economy", opening_type: "conversion", rooms_min: 100, rooms_max: 150, stage: "loi", score: 81 },
-  { name: "one Querétaro Aeropuerto", city: "Santiago de Querétaro", state: "Querétaro", lat: 20.5888, lon: -100.3899, segment: "economy", opening_type: "new_build", rooms_min: 120, rooms_max: 200, stage: "lead", score: 58 },
-  { name: "one Puebla Angelópolis", city: "Puebla", state: "Puebla", lat: 19.0432, lon: -98.1979, segment: "economy", opening_type: "conversion", rooms_min: 80, rooms_max: 120, stage: "qualified", score: 67 },
-  { name: "one Cancún Aeropuerto", city: "Cancún", state: "Quintana Roo", lat: 21.1619, lon: -86.8515, segment: "economy", opening_type: "new_build", rooms_min: 150, rooms_max: 220, stage: "underwriting", score: 74 },
-  { name: "Gamma Mérida Centro", city: "Mérida", state: "Yucatán", lat: 20.9674, lon: -89.5926, segment: "economy", opening_type: "conversion", rooms_min: 65, rooms_max: 95, stage: "lead", score: 51 },
-  { name: "one Tijuana Vía Rápida", city: "Tijuana", state: "Baja California", lat: 32.5149, lon: -117.0382, segment: "economy", opening_type: "franchise_takeover", rooms_min: 100, rooms_max: 160, stage: "qualified", score: 63 },
-  { name: "one León Aeropuerto", city: "León", state: "Guanajuato", lat: 20.9144, lon: -101.7068, segment: "economy", opening_type: "new_build", rooms_min: 130, rooms_max: 190, stage: "lead", score: 55 },
-  { name: "Gamma Veracruz Puerto", city: "Veracruz", state: "Veracruz", lat: 19.1738, lon: -96.1342, segment: "economy", opening_type: "conversion", rooms_min: 75, rooms_max: 110, stage: "lead", score: 47 },
+  // ─── ECONOMY — Sleep Inn / Econo Lodge / Rodeway Inn ──────────────────────
+  { name: "Sleep Inn CDMX Reforma", city: "Ciudad de México", state: "Ciudad de México", lat: 19.4326, lon: -99.1680, segment: "economy", opening_type: "new_build", rooms_min: 110, rooms_max: 160, stage: "underwriting", score: 78 },
+  { name: "Econo Lodge Monterrey Centro", city: "Monterrey", state: "Nuevo León", lat: 25.6866, lon: -100.3161, segment: "economy", opening_type: "conversion", rooms_min: 90, rooms_max: 130, stage: "qualified", score: 72 },
+  { name: "Sleep Inn Guadalajara Expo", city: "Guadalajara", state: "Jalisco", lat: 20.6597, lon: -103.3496, segment: "economy", opening_type: "new_build", rooms_min: 100, rooms_max: 150, stage: "loi", score: 81 },
+  { name: "Econo Lodge Querétaro Aeropuerto", city: "Santiago de Querétaro", state: "Querétaro", lat: 20.5888, lon: -100.3899, segment: "economy", opening_type: "conversion", rooms_min: 80, rooms_max: 120, stage: "lead", score: 58 },
+  { name: "Rodeway Inn Puebla Angelópolis", city: "Puebla", state: "Puebla", lat: 19.0432, lon: -98.1979, segment: "economy", opening_type: "conversion", rooms_min: 60, rooms_max: 95, stage: "qualified", score: 67 },
+  { name: "Sleep Inn Cancún Aeropuerto", city: "Cancún", state: "Quintana Roo", lat: 21.1619, lon: -86.8515, segment: "economy", opening_type: "new_build", rooms_min: 130, rooms_max: 200, stage: "underwriting", score: 74 },
+  { name: "Econo Lodge Mérida Centro", city: "Mérida", state: "Yucatán", lat: 20.9674, lon: -89.5926, segment: "economy", opening_type: "conversion", rooms_min: 55, rooms_max: 85, stage: "lead", score: 51 },
+  { name: "Rodeway Inn Tijuana Vía Rápida", city: "Tijuana", state: "Baja California", lat: 32.5149, lon: -117.0382, segment: "economy", opening_type: "franchise_takeover", rooms_min: 70, rooms_max: 110, stage: "qualified", score: 63 },
+  { name: "Sleep Inn León Aeropuerto", city: "León", state: "Guanajuato", lat: 20.9144, lon: -101.7068, segment: "economy", opening_type: "new_build", rooms_min: 100, rooms_max: 160, stage: "lead", score: 55 },
+  { name: "Econo Lodge Veracruz Puerto", city: "Veracruz", state: "Veracruz", lat: 19.1738, lon: -96.1342, segment: "economy", opening_type: "conversion", rooms_min: 60, rooms_max: 90, stage: "lead", score: 47 },
 
-  // ─── MIDSCALE — Fiesta Inn / Gamma / Fiesta Americana ─────────────────────
-  { name: "Fiesta Inn Guadalajara Centro", city: "Guadalajara", state: "Jalisco", lat: 20.6700, lon: -103.3400, segment: "midscale", opening_type: "new_build", rooms_min: 180, rooms_max: 260, stage: "underwriting", score: 79 },
-  { name: "Gamma CDMX Pedregal", city: "Ciudad de México", state: "Ciudad de México", lat: 19.3600, lon: -99.1900, segment: "midscale", opening_type: "conversion", rooms_min: 130, rooms_max: 190, stage: "loi", score: 83 },
-  { name: "Fiesta Inn Monterrey Valle", city: "Monterrey", state: "Nuevo León", lat: 25.6700, lon: -100.4100, segment: "midscale", opening_type: "new_build", rooms_min: 200, rooms_max: 300, stage: "negotiation", score: 85 },
-  { name: "Gamma Querétaro Centro Histórico", city: "Santiago de Querétaro", state: "Querétaro", lat: 20.5930, lon: -100.3930, segment: "midscale", opening_type: "conversion", rooms_min: 90, rooms_max: 140, stage: "qualified", score: 69 },
-  { name: "Fiesta Americana CDMX Reforma", city: "Ciudad de México", state: "Ciudad de México", lat: 19.4280, lon: -99.1630, segment: "midscale", opening_type: "new_build", rooms_min: 100, rooms_max: 160, stage: "underwriting", score: 71 },
-  { name: "Fiesta Americana Cancún Zona Hotelera", city: "Cancún", state: "Quintana Roo", lat: 21.1750, lon: -86.8300, segment: "midscale", opening_type: "conversion", rooms_min: 200, rooms_max: 320, stage: "underwriting", score: 76 },
-  { name: "Gamma Puebla Histórico", city: "Puebla", state: "Puebla", lat: 19.0450, lon: -98.2020, segment: "midscale", opening_type: "rebranding", rooms_min: 80, rooms_max: 130, stage: "qualified", score: 62 },
-  { name: "Fiesta Inn Guadalajara Zapopan", city: "Zapopan", state: "Jalisco", lat: 20.7200, lon: -103.3900, segment: "midscale", opening_type: "new_build", rooms_min: 160, rooms_max: 240, stage: "lead", score: 54 },
-  { name: "Fiesta Inn San Luis Potosí", city: "San Luis Potosí", state: "San Luis Potosí", lat: 22.1565, lon: -100.9855, segment: "midscale", opening_type: "franchise_takeover", rooms_min: 100, rooms_max: 155, stage: "lead", score: 48 },
-  { name: "Gamma Monterrey Estancia", city: "Monterrey", state: "Nuevo León", lat: 25.6800, lon: -100.3200, segment: "midscale", opening_type: "new_build", rooms_min: 85, rooms_max: 130, stage: "lead", score: 44 },
+  // ─── MIDSCALE — Comfort Inn / Comfort Suites / Quality Inn ────────────────
+  { name: "Comfort Inn Guadalajara Centro", city: "Guadalajara", state: "Jalisco", lat: 20.6700, lon: -103.3400, segment: "midscale", opening_type: "new_build", rooms_min: 150, rooms_max: 230, stage: "underwriting", score: 79 },
+  { name: "Quality Inn CDMX Pedregal", city: "Ciudad de México", state: "Ciudad de México", lat: 19.3600, lon: -99.1900, segment: "midscale", opening_type: "conversion", rooms_min: 100, rooms_max: 160, stage: "loi", score: 83 },
+  { name: "Comfort Inn Monterrey Valle", city: "Monterrey", state: "Nuevo León", lat: 25.6700, lon: -100.4100, segment: "midscale", opening_type: "new_build", rooms_min: 170, rooms_max: 260, stage: "negotiation", score: 85 },
+  { name: "Quality Inn Querétaro Centro Histórico", city: "Santiago de Querétaro", state: "Querétaro", lat: 20.5930, lon: -100.3930, segment: "midscale", opening_type: "conversion", rooms_min: 80, rooms_max: 130, stage: "qualified", score: 69 },
+  { name: "Comfort Suites CDMX Reforma", city: "Ciudad de México", state: "Ciudad de México", lat: 19.4280, lon: -99.1630, segment: "midscale", opening_type: "new_build", rooms_min: 100, rooms_max: 160, stage: "underwriting", score: 71 },
+  { name: "Comfort Inn Cancún Zona Hotelera", city: "Cancún", state: "Quintana Roo", lat: 21.1750, lon: -86.8300, segment: "midscale", opening_type: "conversion", rooms_min: 160, rooms_max: 260, stage: "underwriting", score: 76 },
+  { name: "Quality Inn Puebla Histórico", city: "Puebla", state: "Puebla", lat: 19.0450, lon: -98.2020, segment: "midscale", opening_type: "rebranding", rooms_min: 80, rooms_max: 130, stage: "qualified", score: 62 },
+  { name: "Comfort Inn Guadalajara Zapopan", city: "Zapopan", state: "Jalisco", lat: 20.7200, lon: -103.3900, segment: "midscale", opening_type: "new_build", rooms_min: 130, rooms_max: 200, stage: "lead", score: 54 },
+  { name: "Comfort Suites San Luis Potosí", city: "San Luis Potosí", state: "San Luis Potosí", lat: 22.1565, lon: -100.9855, segment: "midscale", opening_type: "franchise_takeover", rooms_min: 90, rooms_max: 140, stage: "lead", score: 48 },
+  { name: "Quality Inn Monterrey Estancia", city: "Monterrey", state: "Nuevo León", lat: 25.6800, lon: -100.3200, segment: "midscale", opening_type: "conversion", rooms_min: 75, rooms_max: 120, stage: "lead", score: 44 },
 
-  // ─── PREMIUM — Grand Fiesta Americana / Live Aqua / The Explorean ─────────
-  { name: "Grand Fiesta Americana Cancún Zona Hotelera", city: "Cancún", state: "Quintana Roo", lat: 21.1200, lon: -86.7800, segment: "premium", opening_type: "conversion", rooms_min: 280, rooms_max: 400, stage: "loi", score: 86 },
-  { name: "Grand Fiesta Americana CDMX Santa Fe", city: "Ciudad de México", state: "Ciudad de México", lat: 19.3600, lon: -99.2600, segment: "premium", opening_type: "new_build", rooms_min: 250, rooms_max: 380, stage: "underwriting", score: 80 },
-  { name: "Live Aqua Monterrey Corporativo", city: "Monterrey", state: "Nuevo León", lat: 25.6530, lon: -100.3900, segment: "premium", opening_type: "new_build", rooms_min: 200, rooms_max: 300, stage: "negotiation", score: 82 },
-  { name: "Live Aqua Cancún Beachfront", city: "Cancún", state: "Quintana Roo", lat: 21.1400, lon: -86.7900, segment: "premium", opening_type: "conversion", rooms_min: 220, rooms_max: 350, stage: "underwriting", score: 77 },
-  { name: "Fiesta Americana Guadalajara Forum", city: "Guadalajara", state: "Jalisco", lat: 20.6400, lon: -103.4200, segment: "premium", opening_type: "new_build", rooms_min: 220, rooms_max: 340, stage: "qualified", score: 68 },
-  { name: "Grand Fiesta Americana CDMX Polanco", city: "Ciudad de México", state: "Ciudad de México", lat: 19.4326, lon: -99.2000, segment: "premium", opening_type: "conversion", rooms_min: 180, rooms_max: 260, stage: "loi", score: 84 },
-  { name: "The Explorean Los Cabos Marina", city: "Cabo San Lucas", state: "Baja California Sur", lat: 22.8905, lon: -109.9167, segment: "premium", opening_type: "new_build", rooms_min: 160, rooms_max: 240, stage: "underwriting", score: 75 },
-  { name: "Fiesta Americana Querétaro Ejecutivo", city: "Santiago de Querétaro", state: "Querétaro", lat: 20.5888, lon: -100.3899, segment: "premium", opening_type: "new_build", rooms_min: 180, rooms_max: 280, stage: "lead", score: 58 },
-  { name: "Live Aqua Puerto Vallarta Bay", city: "Puerto Vallarta", state: "Jalisco", lat: 20.6534, lon: -105.2253, segment: "premium", opening_type: "new_build", rooms_min: 200, rooms_max: 300, stage: "lead", score: 52 },
-  { name: "The Explorean Mazatlán Resort", city: "Mazatlán", state: "Sinaloa", lat: 23.2494, lon: -106.4111, segment: "premium", opening_type: "conversion", rooms_min: 180, rooms_max: 260, stage: "qualified", score: 65 },
+  // ─── UPSCALE — Cambria Hotels / Ascend Hotel Collection / Clarion Pointe ──
+  { name: "Cambria Hotels Cancún Zona Hotelera", city: "Cancún", state: "Quintana Roo", lat: 21.1200, lon: -86.7800, segment: "premium", opening_type: "new_build", rooms_min: 200, rooms_max: 320, stage: "loi", score: 86 },
+  { name: "Cambria Hotels CDMX Santa Fe", city: "Ciudad de México", state: "Ciudad de México", lat: 19.3600, lon: -99.2600, segment: "premium", opening_type: "new_build", rooms_min: 180, rooms_max: 300, stage: "underwriting", score: 80 },
+  { name: "Ascend Hotel Collection Monterrey", city: "Monterrey", state: "Nuevo León", lat: 25.6530, lon: -100.3900, segment: "premium", opening_type: "conversion", rooms_min: 150, rooms_max: 240, stage: "negotiation", score: 82 },
+  { name: "Ascend Hotel Collection Cancún Beachfront", city: "Cancún", state: "Quintana Roo", lat: 21.1400, lon: -86.7900, segment: "premium", opening_type: "conversion", rooms_min: 160, rooms_max: 280, stage: "underwriting", score: 77 },
+  { name: "Clarion Pointe Guadalajara Forum", city: "Guadalajara", state: "Jalisco", lat: 20.6400, lon: -103.4200, segment: "premium", opening_type: "new_build", rooms_min: 150, rooms_max: 250, stage: "qualified", score: 68 },
+  { name: "Cambria Hotels CDMX Polanco", city: "Ciudad de México", state: "Ciudad de México", lat: 19.4326, lon: -99.2000, segment: "premium", opening_type: "conversion", rooms_min: 140, rooms_max: 220, stage: "loi", score: 84 },
+  { name: "Ascend Hotel Collection Los Cabos", city: "Cabo San Lucas", state: "Baja California Sur", lat: 22.8905, lon: -109.9167, segment: "premium", opening_type: "conversion", rooms_min: 120, rooms_max: 200, stage: "underwriting", score: 75 },
+  { name: "Clarion Pointe Querétaro Ejecutivo", city: "Santiago de Querétaro", state: "Querétaro", lat: 20.5888, lon: -100.3899, segment: "premium", opening_type: "new_build", rooms_min: 130, rooms_max: 210, stage: "lead", score: 58 },
+  { name: "Cambria Hotels Puerto Vallarta Bay", city: "Puerto Vallarta", state: "Jalisco", lat: 20.6534, lon: -105.2253, segment: "premium", opening_type: "new_build", rooms_min: 160, rooms_max: 260, stage: "lead", score: 52 },
+  { name: "Ascend Hotel Collection Mazatlán Resort", city: "Mazatlán", state: "Sinaloa", lat: 23.2494, lon: -106.4111, segment: "premium", opening_type: "conversion", rooms_min: 130, rooms_max: 200, stage: "qualified", score: 65 },
 ];
 
 serve(async (req) => {
@@ -87,7 +87,7 @@ serve(async (req) => {
       deal_id: d.id,
       title: [
         "Owner qualification call",
-        "Send brand proposal",
+        "Send Choice Hotels brand proposal",
         "Complete feasibility analysis",
         "Internal IC review",
         "Draft LOI",
