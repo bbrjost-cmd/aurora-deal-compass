@@ -437,7 +437,7 @@ export function generateICDecisionMemoPDF(decision: any) {
   setFont(doc, 20, "bold", C.white);
   doc.text("AURORA", 14, 17);
   setFont(doc, 6.5, "normal", C.red);
-  doc.text("POSADAS DEVELOPMENT PLATFORM  ·  IC DECISION MEMORANDUM", 14, 24);
+  doc.text("CHOICE HOTELS DEVELOPMENT PLATFORM  ·  IC DECISION MEMORANDUM", 14, 24);
 
   // Decision badge
   doc.setFillColor(...decisionColor);
