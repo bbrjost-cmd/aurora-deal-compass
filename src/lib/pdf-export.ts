@@ -226,10 +226,10 @@ export function generateFeasibilityPDF(
   });
   y = (doc as any).lastAutoTable.finalY + 10;
 
-  // ── POSADAS BRAND STRATEGY ─────────────────────────────────────────────────
+  // ── CHOICE HOTELS BRAND STRATEGY ──────────────────────────────────────────
   if (brands && brands.length > 0) {
     if (y > 210) { doc.addPage(); y = 20; }
-    y = sectionTitle(doc, "Posadas Brand Strategy & Recommendations", y);
+    y = sectionTitle(doc, "Choice Hotels Brand Strategy & Recommendations", y);
     autoTable(doc, {
       startY: y,
       head: [["Brand", "Strategic Rationale", "Status"]],
